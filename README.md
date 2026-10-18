@@ -11,3 +11,6 @@ Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper
   in a world are sleeping.
 - [craftablebottleofenchanting](craftablebottleofenchanting/README.md): bottle XP
   at enchanting tables without lapis and recover empty bottles after use.
+- [mobbanner](mobbanner/README.md): earn mob-themed banners from kill milestones
+  and place them to suppress that mob's natural spawning in their chunk, or
+  attract it with a valuable-block pyramid.

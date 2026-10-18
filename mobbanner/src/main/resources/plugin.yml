@@ -1,0 +1,14 @@
+name: mobbanner
+version: '${version}'
+main: io.github.ihormel.mobbanner.MobBannerPlugin
+api-version: '26.3'
+description: Earn mob banners to suppress chunk spawning or attract mobs with valuable-block pyramids.
+commands:
+  mobbanner:
+    description: Give a player a mob ward banner.
+    usage: /mobbanner give <player> <mob>
+    permission: mobbanner.give
+permissions:
+  mobbanner.give:
+    description: Give mob ward banners without earning kill milestones.
+    default: op

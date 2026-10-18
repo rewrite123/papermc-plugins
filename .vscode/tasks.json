@@ -60,6 +60,21 @@
 				"$javac"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Build mobbanner",
+			"type": "shell",
+			"command": "./mobbanner/gradlew",
+			"args": [
+				"-p",
+				"mobbanner",
+				"build",
+				"--console=plain"
+			],
+			"problemMatcher": [
+				"$javac"
+			],
+			"group": "build"
 		}
 	]
 }
