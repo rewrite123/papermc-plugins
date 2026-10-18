@@ -1,0 +1,10 @@
+name: soulgem
+version: '${version}'
+main: io.github.ihormel.soulgem.SoulGemPlugin
+api-version: '26.3'
+description: Charge crafted soul gems with XP to enchant and upgrade gear.
+softdepend: [craftablebottleofenchanting]
+permissions:
+  soulgem.use:
+    description: Charge soul gems and enchant gear with them.
+    default: true
