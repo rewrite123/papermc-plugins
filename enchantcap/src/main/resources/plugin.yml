@@ -1,0 +1,5 @@
+name: enchantcap
+version: '${version}'
+main: io.github.ihormel.enchantcap.EnchantCapPlugin
+api-version: '26.3'
+description: Remove the anvil Too Expensive restriction with a maximum charge of 39 levels.

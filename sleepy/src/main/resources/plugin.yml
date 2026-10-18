@@ -1,0 +1,5 @@
+name: sleepy
+version: '${version}'
+main: io.github.ihormel.sleepy.SleepyPlugin
+api-version: '26.3'
+description: Skip the night when at least half of eligible players are sleeping.

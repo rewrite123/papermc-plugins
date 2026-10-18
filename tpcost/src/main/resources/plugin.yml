@@ -1,0 +1,30 @@
+name: tpcost
+version: '${version}'
+main: io.github.ihormel.tpcost.TpCostPlugin
+api-version: '26.3'
+description: Player-approved teleportation paid for with experience levels.
+commands:
+  tpa:
+    description: Request to teleport to another player.
+    usage: /tpa <player>
+    permission: tpcost.use
+  tpaccept:
+    description: Accept an incoming teleport request.
+    usage: /tpaccept [player]
+    permission: tpcost.use
+  tpdeny:
+    description: Deny an incoming teleport request.
+    usage: /tpdeny [player]
+    permission: tpcost.use
+  tpcancel:
+    description: Cancel your outgoing teleport request.
+    usage: /tpcancel
+    permission: tpcost.use
+  tpcost:
+    description: Check the current level cost of teleporting to a player.
+    usage: /tpcost <player>
+    permission: tpcost.use
+permissions:
+  tpcost.use:
+    description: Request, approve, deny, cancel, and quote paid teleports.
+    default: true

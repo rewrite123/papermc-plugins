@@ -1,0 +1,65 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build tpcost",
+			"type": "shell",
+			"command": "./tpcost/gradlew",
+			"args": [
+				"-p",
+				"tpcost",
+				"build",
+				"--console=plain"
+			],
+			"problemMatcher": [
+				"$javac"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build inventorysorter",
+			"type": "shell",
+			"command": "./inventorysorter/gradlew",
+			"args": [
+				"-p",
+				"inventorysorter",
+				"build",
+				"--console=plain"
+			],
+			"problemMatcher": [
+				"$javac"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build sleepy",
+			"type": "shell",
+			"command": "./sleepy/gradlew",
+			"args": [
+				"-p",
+				"sleepy",
+				"build",
+				"--console=plain"
+			],
+			"problemMatcher": [
+				"$javac"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build craftablebottleofenchanting",
+			"type": "shell",
+			"command": "./craftablebottleofenchanting/gradlew",
+			"args": [
+				"-p",
+				"craftablebottleofenchanting",
+				"build",
+				"--console=plain"
+			],
+			"problemMatcher": [
+				"$javac"
+			],
+			"group": "build"
+		}
+	]
+}

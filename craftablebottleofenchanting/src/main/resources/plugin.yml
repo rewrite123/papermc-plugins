@@ -1,0 +1,9 @@
+name: craftablebottleofenchanting
+version: '${version}'
+main: io.github.ihormel.craftablebottleofenchanting.BottlePlugin
+api-version: '26.3'
+description: Bottle experience at enchanting tables without lapis and recover empty bottles.
+permissions:
+  craftablebottleofenchanting.use:
+    description: Convert glass bottles into Bottles o' Enchanting at an enchanting table.
+    default: true
