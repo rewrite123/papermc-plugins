@@ -1,5 +1,7 @@
 # FlipDisc
 
+![Two music discs with flipping arrows](assets/icon.png)
+
 Flip a music disc over to play its other song! For **Paper 26.3 / Java 25**.
 No resource pack, client mod, or bundled audio is needed.
 
@@ -76,3 +78,7 @@ Never commit credentials.
 
 For later releases, set an unused version in `gradle.properties` and supply
 release notes with `-PhangarChangelog="..."`. Normal builds do not publish.
+
+The public overview is maintained in [assets/hangar-description.md](assets/hangar-description.md).
+Regenerate the original 512 x 512 icon from the repository root with
+`python3 tools/generate-project-icons.py --project flipdisc`. This does not upload it.

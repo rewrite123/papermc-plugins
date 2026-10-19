@@ -317,11 +317,33 @@ def reduceendermanblockdmg():
     return c
 
 
+def flipdisc():
+    c = Canvas("#64e2d2", "FLIP DISC")
+    for x, y, label in [(44, 48, "#69d8bd"), (83, 74, "#c18aff")]:
+        c.poly([(x - 24, y - 12), (x - 12, y - 24), (x + 12, y - 24),
+                (x + 24, y - 12), (x + 24, y + 12), (x + 12, y + 24),
+                (x - 12, y + 24), (x - 24, y + 12)], INK)
+        c.poly([(x - 21, y - 10), (x - 10, y - 21), (x + 10, y - 21),
+                (x + 21, y - 10), (x + 21, y + 10), (x + 10, y + 21),
+                (x - 10, y + 21), (x - 21, y + 10)], "#30394d")
+        c.rect(x - 17, y - 7, x - 15, y + 7, "#55627b")
+        c.rect(x - 9, y - 17, x + 7, y - 15, "#55627b")
+        c.rect(x + 15, y - 5, x + 17, y + 8, "#192335")
+        c.rect(x - 8, y - 8, x + 8, y + 8, label)
+        c.rect(x - 4, y - 4, x + 4, y + 4, "#eaf6ff")
+        c.rect(x - 1, y - 1, x + 1, y + 1, INK)
+    c.poly([(69, 17), (97, 17), (97, 24), (103, 24), (92, 35),
+            (81, 24), (88, 24), (88, 23), (69, 23)], "#e0ffa3")
+    c.poly([(58, 98), (29, 98), (29, 91), (23, 91), (34, 80),
+            (45, 91), (38, 91), (38, 92), (58, 92)], "#e0ffa3")
+    return c
+
+
 def main():
     factories = (
         tpcost, inventorysorter, enchantcap, sleepy,
         craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
-        reduceendermanblockdmg,
+        reduceendermanblockdmg, flipdisc,
     )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", choices=[factory.__name__ for factory in factories])
