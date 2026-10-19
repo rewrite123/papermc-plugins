@@ -20,6 +20,8 @@ Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper
   and fast travel along automatically tracked lodestone-to-lodestone rail lines.
 - [reduceendermanblockdmg](reduceendermanblockdmg/README.md): Endermen attempt
   to return stolen blocks to their original positions after 10-45 seconds.
+- [flipdisc](flipdisc/README.md): flip ordinary music discs between permanent
+  two-song pairs using the crafting grid, preserving single-sided special discs.
 
 ## Project icons
 

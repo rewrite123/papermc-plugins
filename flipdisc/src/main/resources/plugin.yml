@@ -1,0 +1,5 @@
+name: flipdisc
+version: '${version}'
+main: io.github.ihormel.flipdisc.FlipDiscPlugin
+api-version: '26.3'
+description: Flip ordinary music discs between fixed two-song pairs in the crafting grid.
