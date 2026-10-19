@@ -2,6 +2,7 @@
 """Render original Hangar project icons with ImageMagick (no external textures)."""
 
 from pathlib import Path
+import argparse
 import shutil
 import subprocess
 
@@ -290,14 +291,46 @@ def minecarttravel():
     return c
 
 
+def reduceendermanblockdmg():
+    c = Canvas("#c38bff", "ENDERMAN RETURN")
+    c.poly([(22, 91), (68, 81), (108, 91), (64, 101)], "#0b1326")
+    c.rect(38, 18, 88, 55, INK)
+    c.rect(41, 21, 85, 52, "#242331")
+    c.rect(45, 24, 81, 33, "#2e2b3d")
+    c.rect(43, 37, 59, 42, "#be77ed")
+    c.rect(68, 37, 83, 42, "#be77ed")
+    c.rect(49, 37, 54, 42, "#f5c8ff")
+    c.rect(72, 37, 77, 42, "#f5c8ff")
+    c.rect(51, 54, 75, 78, "#1c1c28")
+    c.rect(29, 55, 37, 82, "#242331")
+    c.rect(88, 55, 96, 82, "#242331")
+    c.poly([(43, 67), (67, 60), (86, 70), (62, 78)], "#9be270")
+    c.poly([(43, 67), (62, 78), (62, 95), (43, 84)], "#875534")
+    c.poly([(62, 78), (86, 70), (86, 86), (62, 95)], "#af7341")
+    c.poly([(43, 67), (62, 78), (62, 83), (43, 73)], "#4b9d4c")
+    c.poly([(62, 78), (86, 70), (86, 75), (62, 83)], "#68b858")
+    c.rect(49, 78, 53, 82, "#b88656")
+    c.rect(72, 84, 77, 87, "#d19659")
+    c.poly([(104, 56), (111, 56), (111, 89), (96, 89),
+            (96, 95), (86, 85), (96, 75), (96, 81), (104, 81)], "#e0ffa3")
+    c.spark(22, 48, "#c38bff")
+    return c
+
+
 def main():
-    if shutil.which("convert") is None:
-        raise SystemExit("ImageMagick's convert command is required.")
-    for factory in (
+    factories = (
         tpcost, inventorysorter, enchantcap, sleepy,
         craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
-    ):
-        factory().render(factory.__name__)
+        reduceendermanblockdmg,
+    )
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--project", choices=[factory.__name__ for factory in factories])
+    args = parser.parse_args()
+    if shutil.which("convert") is None:
+        raise SystemExit("ImageMagick's convert command is required.")
+    for factory in factories:
+        if args.project is None or factory.__name__ == args.project:
+            factory().render(factory.__name__)
 
 
 if __name__ == "__main__":

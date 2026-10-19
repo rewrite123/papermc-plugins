@@ -1,5 +1,7 @@
 # Reduce Enderman Block Damage
 
+![Enderman returning a grass block](assets/icon.png)
+
 A standalone plugin for **Paper 26.3** and **Java 25**.
 
 Endermen still pick up blocks normally. After each successful pickup, the plugin
@@ -62,3 +64,8 @@ permission through `HANGAR_API_TOKEN`. Never commit credentials.
 
 For later releases, set an unused version in `gradle.properties` and supply
 release notes with `-PhangarChangelog="..."`. Normal builds do not publish.
+
+The public overview text is maintained in [assets/hangar-description.md](assets/hangar-description.md).
+Regenerate the original 512 x 512 project icon from the repository root with
+`python3 tools/generate-project-icons.py --project reduceendermanblockdmg`.
+Generating the icon does not upload it.
