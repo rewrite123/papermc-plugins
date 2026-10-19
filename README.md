@@ -16,6 +16,8 @@ Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper
   attract it with a valuable-block pyramid.
 - [soulgem](soulgem/README.md): craft and charge amethyst/echo soul gems with XP,
   then use them instead of lapis to enchant and upgrade gear.
+- [minecarttravel](minecarttravel/README.md): earn timed minecart speed boosts
+  and fast travel along automatically tracked lodestone-to-lodestone rail lines.
 
 ## Project icons
 

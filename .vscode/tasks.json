@@ -62,6 +62,21 @@
 			"group": "build"
 		},
 		{
+			"label": "Build minecarttravel",
+			"type": "shell",
+			"command": "./minecarttravel/gradlew",
+			"args": [
+				"-p",
+				"minecarttravel",
+				"build",
+				"--console=plain"
+			],
+			"problemMatcher": [
+				"$javac"
+			],
+			"group": "build"
+		},
+		{
 			"label": "Build soulgem",
 			"type": "shell",
 			"command": "./soulgem/gradlew",
