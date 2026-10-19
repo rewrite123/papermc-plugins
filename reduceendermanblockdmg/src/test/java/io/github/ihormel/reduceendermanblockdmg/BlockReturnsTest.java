@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import com.destroystokyo.paper.entity.Pathfinder;
 import java.util.UUID;
+import org.mockito.ArgumentMatchers;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -19,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.BoundingBox;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -57,7 +59,16 @@ class BlockReturnsTest {
         when(entity.isValid()).thenReturn(true);
         when(entity.hasAI()).thenReturn(true);
         when(entity.getLocation()).thenReturn(new Location(world, 5, 70, 8));
-        when(entity.hasLineOfSight(any(Location.class))).thenReturn(true);
+        when(entity.getBoundingBox()).thenAnswer(i -> {
+            Location at = entity.getLocation();
+            return new BoundingBox(at.getX() - 0.3, at.getY(), at.getZ() - 0.3,
+                    at.getX() + 0.3, at.getY() + 2.9, at.getZ() + 0.3);
+        });
+        // Mirrors vanilla ray clipping: a ray ending on the gap's floor hits the block beneath it.
+        when(entity.hasLineOfSight(any(Location.class))).thenAnswer(i -> {
+            Location target = i.getArgument(0);
+            return target.getY() > 70 && target.getY() < 71;
+        });
         when(entity.getPathfinder()).thenReturn(path);
         when(entity.getPersistentDataContainer()).thenReturn(pdc);
         carried.set(data);
@@ -116,6 +127,29 @@ class BlockReturnsTest {
         verify(path).moveTo(any(Location.class), eq(1.0));
         verify(block, never()).setBlockData(any(), anyBoolean());
         assertTrue(returns.tracked(entity));
+    }
+
+    @Test
+    void checksLineOfSightToBlockCenterAndStopsWalkingWhenInRange() {
+        time.set(11_000);
+        when(entity.getLocation()).thenReturn(new Location(world, 5.5, 71, 8.5));
+        returns.tick();
+        verify(entity).hasLineOfSight(ArgumentMatchers.<Location>argThat(l -> l.getX() == 4.5 && l.getY() == 70.5 && l.getZ() == 8.5));
+        verify(path).stopPathfinding();
+        verify(path, never()).moveTo(any(Location.class), anyDouble());
+        verify(block).setBlockData(data, true);
+    }
+
+    @Test
+    void waitsWhileStandingInsideTheGap() {
+        time.set(11_000);
+        when(entity.getLocation()).thenReturn(new Location(world, 4.5, 70, 8.5));
+        returns.tick();
+        verify(block, never()).setBlockData(any(), anyBoolean());
+        assertTrue(returns.tracked(entity));
+        when(entity.getLocation()).thenReturn(new Location(world, 5.3, 70, 8.5));
+        returns.tick();
+        verify(block).setBlockData(data, true);
     }
 
     @Test

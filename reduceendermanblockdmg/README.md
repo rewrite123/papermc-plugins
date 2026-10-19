@@ -14,8 +14,10 @@ the Enderman attempts to walk back and replace its block at the original positio
   blocks elsewhere while waiting or walking back.
 - The original space must be empty air. Existing blocks and liquids are never
   overwritten. If occupied, the Enderman waits and retries.
-- The Enderman must be nearby and have line of sight before restoring the
-  original block state. Successful placement consumes its carried block.
+- The Enderman must be within 2.5 blocks and have line of sight to the center
+  of the original space before restoring the original block state. It stops
+  walking once in range and waits if it is standing inside the space.
+  Successful placement consumes its carried block.
 - Killing the Enderman cancels the return. Death drops are unchanged; the
   plugin does not recreate a block after death.
 - Combat, disabled AI, unreachable terrain, unloaded chunks, and traveling to
@@ -42,7 +44,7 @@ There are no commands, permissions, or configuration files.
 ./gradlew build
 ```
 
-Copy `build/libs/reduceendermanblockdmg-0.1.0.jar` into the server's `plugins/`
+Copy `build/libs/reduceendermanblockdmg-0.1.1.jar` into the server's `plugins/`
 directory and restart Paper. Back up your world before installing new plugins.
 
 Unit tests cover return deadlines, movement, empty-only placement, protection

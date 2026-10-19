@@ -16,6 +16,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Enderman;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.BoundingBox;
 
 final class BlockReturns {
     static final NamespacedKey ORIGIN = new NamespacedKey("reduceendermanblockdmg", "origin");
@@ -114,7 +115,11 @@ final class BlockReturns {
                 entity.getPathfinder().moveTo(destination, 1.0);
                 continue;
             }
-            if (!entity.hasLineOfSight(destination)) continue;
+            entity.getPathfinder().stopPathfinding();
+            BoundingBox space = BoundingBox.of(original).expand(-0.3, 0, -0.3);
+            if (entity.getBoundingBox().overlaps(space)) continue;
+            // Aim at the block's center: a ray ending on the floor of the gap clips the block beneath it.
+            if (!entity.hasLineOfSight(original.getLocation().add(0.5, 0.5, 0.5))) continue;
             EntityChangeBlockEvent placement = new EntityChangeBlockEvent(entity, original, entry.data());
             placements.put(entity.getUniqueId(), placement);
             try {
@@ -131,7 +136,6 @@ final class BlockReturns {
                     || !griefing.test(world)) continue;
             original.setBlockData(entry.data(), true);
             entity.setCarriedBlock(null);
-            entity.getPathfinder().stopPathfinding();
             forget(entity);
         }
     }
