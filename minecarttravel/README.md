@@ -3,7 +3,14 @@
 Automatic minecart speed boosts and lodestone-to-lodestone fast travel for
 **Paper 26.3 / Java 25**, with no runtime dependencies.
 
-**Latest release:** [MinecartTravel 0.1.0 on Hangar](https://hangar.papermc.io/rewrite123/minecarttravel/versions/0.1.0).
+**Latest release:** [MinecartTravel 0.1.1 on Hangar](https://hangar.papermc.io/rewrite123/minecarttravel/versions/0.1.1).
+
+**What's new in 0.1.1:** speed boosts and endpoint arrivals now support two-block-tall
+tunnels: the rail occupies the lower block, and only the block immediately above
+it must be passable. A stone ceiling two blocks above the rail is allowed.
+Normal and redstone torches in the passable block are allowed; solid blocks,
+liquids, and hazardous headroom are still rejected. This is a clearance rule,
+not a full cart-and-rider collision simulation.
 
 ## Riding
 
@@ -42,7 +49,7 @@ It is not an unconditional average-speed guarantee.
 
 Boosting sets the cart's maximum speed and velocity using Paper's minecart API.
 At least 12 straight, level rail blocks ahead must already be loaded, supported,
-and have two passable blocks of headroom. Curves, slopes, endpoints, gaps,
+and have one passable block of headroom directly above the rail. Curves, slopes, endpoints, gaps,
 unloaded track, nearby entities, unpowered powered rails, and powered activator rails return
 boosted carts to their original maximum speed and clamp their boosted velocity
 to at most vanilla speed. Normal powered-rail braking is never overridden.
@@ -158,7 +165,7 @@ below ice-boat speed naturally removes its straight-line speed advantage.
 ./gradlew build
 ```
 
-Copy `build/libs/minecarttravel-0.1.0.jar` into the Paper server's `plugins/`
+Copy `build/libs/minecarttravel-0.1.1.jar` into the Paper server's `plugins/`
 directory and restart on Java 25. Gradle provisions Java 25 if needed;
 Windows users can use `gradlew.bat`.
 

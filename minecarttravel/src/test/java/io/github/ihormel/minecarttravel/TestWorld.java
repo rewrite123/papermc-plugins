@@ -29,7 +29,7 @@ final class TestWorld {
                 // MockBukkit has no collision shapes; the fixtures use full cubes,
                 // air, and the explicit passable hazards tested here.
                 doAnswer(ignored -> block.getType().isAir() || switch (block.getType()) {
-                    case WATER, LAVA, FIRE, SOUL_FIRE, POWDER_SNOW -> true;
+                    case WATER, LAVA, FIRE, SOUL_FIRE, POWDER_SNOW, TORCH, REDSTONE_TORCH -> true;
                     default -> false;
                 }).when(block).isPassable();
                 doAnswer(ignored -> block.getType() == Material.WATER || block.getType() == Material.LAVA)

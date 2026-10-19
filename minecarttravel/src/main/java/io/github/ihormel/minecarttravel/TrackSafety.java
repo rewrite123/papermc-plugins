@@ -49,8 +49,7 @@ final class TrackSafety {
                 return false;
             }
             if (!world.getBlockAt(check.x(), check.y() - 1, check.z()).getType().isSolid()
-                    || !safeHeadroom(world.getBlockAt(check.x(), check.y() + 1, check.z()))
-                    || !safeHeadroom(world.getBlockAt(check.x(), check.y() + 2, check.z()))) return false;
+                    || !safeHeadroom(world.getBlockAt(check.x(), check.y() + 1, check.z()))) return false;
         }
         return true;
     }
@@ -88,8 +87,7 @@ final class TrackSafety {
         if (!(block.getBlockData() instanceof Rail rail) || !RailShape.of(rail).flatStraight()
                 || world.getBlockAt(stop.x(), stop.y(), stop.z()).getType() != Material.LODESTONE
                 || !world.getBlockAt(pos.x(), pos.y() - 1, pos.z()).getType().isSolid()
-                || !safeHeadroom(world.getBlockAt(pos.x(), pos.y() + 1, pos.z()))
-                || !safeHeadroom(world.getBlockAt(pos.x(), pos.y() + 2, pos.z()))) return false;
+                || !safeHeadroom(world.getBlockAt(pos.x(), pos.y() + 1, pos.z()))) return false;
         if (block.getType() == Material.ACTIVATOR_RAIL && rail instanceof Powerable power && power.isPowered()) {
             return false;
         }

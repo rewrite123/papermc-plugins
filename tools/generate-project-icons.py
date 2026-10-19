@@ -252,12 +252,50 @@ def soulgem():
     return c
 
 
+def minecarttravel():
+    c = Canvas("#ffca70", "MINECART TRAVEL")
+    c.poly([(15, 92), (85, 76), (114, 88), (43, 102)], "#0b1326")
+    for x, y in [(28, 87), (45, 83), (62, 79), (79, 75), (96, 71)]:
+        c.poly([(x - 4, y), (x + 13, y + 7), (x + 13, y + 11),
+                (x - 4, y + 4)], "#89552f")
+        c.poly([(x - 3, y), (x + 13, y + 7), (x + 16, y + 5),
+                (x, y - 2)], "#c38d51")
+    c.poly([(22, 86), (100, 68), (104, 70), (26, 90)], "#d6e5ec")
+    c.poly([(35, 94), (113, 76), (116, 79), (38, 98)], "#91abbc")
+    c.poly([(86, 27), (103, 23), (115, 29), (115, 51),
+            (98, 56), (86, 49)], INK)
+    c.poly([(89, 29), (103, 26), (111, 30), (98, 34)], "#d4e2e5")
+    c.poly([(89, 30), (98, 35), (98, 51), (89, 47)], "#6a8197")
+    c.poly([(99, 35), (112, 31), (112, 49), (99, 53)], "#91a9b8")
+    c.rect(102, 38, 108, 45, "#4f667e")
+    c.rect(104, 39, 106, 43, "#b3f9ef")
+    c.rect(35, 77, 43, 86, INK)
+    c.rect(38, 79, 41, 83, "#69849b")
+    c.rect(73, 69, 81, 78, INK)
+    c.rect(76, 71, 79, 75, "#69849b")
+    c.poly([(26, 46), (72, 35), (96, 47), (89, 72),
+            (49, 83), (31, 70)], INK)
+    c.poly([(30, 47), (71, 39), (91, 48), (50, 60)], "#dcebf1")
+    c.poly([(36, 47), (71, 42), (83, 48), (50, 56)], "#45576e")
+    c.poly([(41, 48), (70, 44), (77, 48), (50, 53)], "#22344a")
+    c.poly([(31, 50), (49, 62), (49, 78), (34, 68)], "#7993a8")
+    c.poly([(51, 62), (90, 51), (85, 69), (51, 79)], "#aec7d5")
+    c.poly([(55, 64), (84, 56), (82, 60), (55, 68)], "#e9f7fa")
+    c.poly([(54, 74), (84, 66), (83, 69), (54, 77)], "#6b899e")
+    for x, y, length in [(14, 42, 13), (9, 53, 16), (13, 64, 13)]:
+        c.rect(x, y, x + length, y + 2, "#ffcb72")
+    c.poly([(58, 20), (69, 20), (64, 28), (72, 28),
+            (57, 43), (61, 31), (54, 31)], "#e4ffa4")
+    c.spark(80, 21, "#fff1b9")
+    return c
+
+
 def main():
     if shutil.which("convert") is None:
         raise SystemExit("ImageMagick's convert command is required.")
     for factory in (
         tpcost, inventorysorter, enchantcap, sleepy,
-        craftablebottleofenchanting, mobbanner, soulgem,
+        craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
     ):
         factory().render(factory.__name__)
 

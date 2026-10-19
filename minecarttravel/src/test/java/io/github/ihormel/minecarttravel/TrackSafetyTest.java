@@ -43,6 +43,40 @@ class TrackSafetyTest extends PaperTest {
     }
 
     @Test
+    void twoBlockTallTunnelAllowsBoostWithAirOrTorchesAboveRails() {
+        for (int x = 0; x <= 15; x++) {
+            world.getBlockAt(x, 66, 8).setType(Material.STONE);
+        }
+        for (var headroom : List.of(Material.AIR, Material.TORCH, Material.REDSTONE_TORCH)) {
+            for (int x = 0; x <= 15; x++) {
+                world.getBlockAt(x, 65, 8).setType(headroom);
+            }
+            assertTrue(clear(), headroom.toString());
+        }
+        world.getBlockAt(9, 65, 8).setType(Material.STONE);
+        assertFalse(clear());
+    }
+
+    @Test
+    void twoBlockTallArrivalAllowsAirOrTorchesButRejectsBlockedOrHazardousHeadroom() {
+        var cart = mock(Minecart.class);
+        when(cart.getWorld()).thenReturn(world);
+        when(cart.getPassengers()).thenReturn(List.of());
+        var end = new RouteTrace.End(new TrackPos(world.getUID(), 14, 64, 8),
+                new RailShape.Port(1, 0, 0), new TrackPos(world.getUID(), 15, 64, 8));
+        world.getBlockAt(15, 64, 8).setType(Material.LODESTONE);
+        world.getBlockAt(14, 66, 8).setType(Material.STONE);
+        for (var headroom : List.of(Material.AIR, Material.TORCH, Material.REDSTONE_TORCH)) {
+            world.getBlockAt(14, 65, 8).setType(headroom);
+            assertTrue(TrackSafety.arrivalClear(cart, end), headroom.toString());
+        }
+        for (var headroom : List.of(Material.STONE, Material.WATER, Material.LAVA, Material.FIRE)) {
+            world.getBlockAt(14, 65, 8).setType(headroom);
+            assertFalse(TrackSafety.arrivalClear(cart, end), headroom.toString());
+        }
+    }
+
+    @Test
     void gapCurveSlopeAndSolidHeadroomDisableBoost() {
         var block = world.getBlockAt(9, 64, 8);
         block.setType(Material.AIR);
