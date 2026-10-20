@@ -2,17 +2,20 @@ name: minecarttravel
 version: '${version}'
 main: io.github.ihormel.minecarttravel.MinecartTravelPlugin
 api-version: '26.3'
-description: Timed minecart boosts and automatic lodestone rail fast travel.
+description: Timed minecart boosts and fast travel along registered lodestone rail routes.
 commands:
   minecarttravel:
-    description: Choose normal or accelerated minecart travel.
-    usage: /minecarttravel [normal|fast|status|rescan]
+    description: Choose minecart mode, register fast-travel routes, and view or change settings.
+    usage: /minecarttravel [normal|fast|status|register [cancel]|settings|set <setting> <value>|rescan]
     aliases: [minecartfasttravel]
     permission: minecarttravel.use
 permissions:
   minecarttravel.admin:
-    description: Reconcile the rail graph with loaded chunks after external world edits.
+    description: Change boost and fast-travel settings and recheck registered routes.
     default: op
+  minecarttravel.register:
+    description: Register rail lines for fast travel by riding them.
+    default: true
   minecarttravel.use:
     description: Use accelerated minecart travel and endpoint fast travel.
     default: true

@@ -1,13 +1,15 @@
 # Times are game ticks (20 ticks = one second at normal server speed).
+# Admins can change the first four settings in-game with /minecarttravel set.
 boost-after-ticks: 600
 fast-travel-after-ticks: 2400
 minimum-blocks-per-second: 6.0
 boost-blocks-per-second: 90.0
 # Straight, level, unobstructed, loaded track needed ahead at full speed.
 safety-lookahead-blocks: 12
+# Limits for routes registered with /minecarttravel register.
 max-route-rails: 65536
 max-route-turns: 32
-# Global budgets shared across all carts/chunks, not per player.
-scan-blocks-per-tick: 4096
-route-steps-per-tick: 512
+# Global budgets shared across all carts and routes, not per player.
+verify-blocks-per-tick: 4096
+record-steps-per-tick: 512
 save-interval-ticks: 600

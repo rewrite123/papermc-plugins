@@ -62,7 +62,7 @@ class TrackSafetyTest extends PaperTest {
         var cart = mock(Minecart.class);
         when(cart.getWorld()).thenReturn(world);
         when(cart.getPassengers()).thenReturn(List.of());
-        var end = new RouteTrace.End(new TrackPos(world.getUID(), 14, 64, 8),
+        var end = new RouteRegistry.End(new TrackPos(world.getUID(), 14, 64, 8),
                 new RailShape.Port(1, 0, 0), new TrackPos(world.getUID(), 15, 64, 8));
         world.getBlockAt(15, 64, 8).setType(Material.LODESTONE);
         world.getBlockAt(14, 66, 8).setType(Material.STONE);
@@ -131,7 +131,7 @@ class TrackSafetyTest extends PaperTest {
         var cart = mock(Minecart.class);
         when(cart.getWorld()).thenReturn(world);
         when(cart.getPassengers()).thenReturn(List.of());
-        var end = new RouteTrace.End(new TrackPos(world.getUID(), 14, 64, 8),
+        var end = new RouteRegistry.End(new TrackPos(world.getUID(), 14, 64, 8),
                 new RailShape.Port(1, 0, 0), new TrackPos(world.getUID(), 15, 64, 8));
         world.getBlockAt(15, 64, 8).setType(Material.LODESTONE);
         assertTrue(TrackSafety.arrivalClear(cart, end));
@@ -161,7 +161,7 @@ class TrackSafetyTest extends PaperTest {
         var cart = mock(Minecart.class);
         when(cart.getWorld()).thenReturn(world);
         when(cart.getPassengers()).thenReturn(List.of());
-        var end = new RouteTrace.End(new TrackPos(world.getUID(), 14, 64, 8),
+        var end = new RouteRegistry.End(new TrackPos(world.getUID(), 14, 64, 8),
                 new RailShape.Port(1, 0, 0), new TrackPos(world.getUID(), 15, 64, 8));
         world.getBlockAt(15, 64, 8).setType(Material.LODESTONE);
         when(world.getWorldBorder().isInside(any(Location.class))).thenReturn(false);

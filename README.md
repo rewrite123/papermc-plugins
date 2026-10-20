@@ -17,7 +17,7 @@ Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper
 - [soulgem](soulgem/README.md): craft and charge amethyst/echo soul gems with XP,
   then use them instead of lapis to enchant and upgrade gear.
 - [minecarttravel](minecarttravel/README.md): earn timed minecart speed boosts
-  and fast travel along automatically tracked lodestone-to-lodestone rail lines.
+  and fast travel along ride-registered lodestone-to-lodestone rail lines.
 - [reduceendermanblockdmg](reduceendermanblockdmg/README.md): Endermen attempt
   to return stolen blocks to their original positions after 10-45 seconds.
 - [flipdisc](flipdisc/README.md): flip ordinary music discs between permanent

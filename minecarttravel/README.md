@@ -3,14 +3,20 @@
 Automatic minecart speed boosts and lodestone-to-lodestone fast travel for
 **Paper 26.3 / Java 25**, with no runtime dependencies.
 
-**Latest release:** [MinecartTravel 0.1.1 on Hangar](https://hangar.papermc.io/rewrite123/minecarttravel/versions/0.1.1).
+**Latest release:** [MinecartTravel 0.2.0 on Hangar](https://hangar.papermc.io/rewrite123/minecarttravel/versions/0.2.0).
 
-**What's new in 0.1.1:** speed boosts and endpoint arrivals now support two-block-tall
-tunnels: the rail occupies the lower block, and only the block immediately above
-it must be passable. A stone ceiling two blocks above the rail is allowed.
-Normal and redstone torches in the passable block are allowed; solid blocks,
-liquids, and hazardous headroom are still rejected. This is a clearance rule,
-not a full cart-and-rider collision simulation.
+**What's new in 0.2.0:**
+
+- **Ride to register.** Fast-travel lines are now registered by riding them with
+  `/minecarttravel register`, replacing background track scanning. Only
+  registered lines fast travel. **Lines from 0.1.x must be registered again**;
+  the old `rail-graph.txt` is ignored and can be deleted.
+- **In-game admin settings.** `/minecarttravel set <setting> <value>` changes the
+  boost delay, fast-travel delay, minimum speed, and boost speed live and saves
+  them to `config.yml`. Anyone can view them with `/minecarttravel settings`.
+
+Speed boosts and arrivals work in two-block-tall tunnels: only the block directly
+above the rail must be passable (air, torches, and redstone torches are fine).
 
 ## Riding
 
@@ -20,9 +26,10 @@ Fast mode is enabled by default. Travel continuously **above 6 blocks/second**:
 |---|---|
 | First 30 seconds | Normal minecart movement |
 | After 30 seconds | Target **90 blocks/second** on safe straight track |
-| After 120 seconds total | Automatically travel to the far lodestone endpoint |
+| After 120 seconds total | On a registered line, automatically travel to the far lodestone endpoint |
 
-The 120 seconds include the initial 30 seconds. Timings use game ticks:
+These are the defaults; admins can change them in-game (see
+[Admin settings](#admin-settings)). The 120 seconds include the initial 30 seconds. Timings use game ticks:
 600 ticks for boost, 2400 for endpoint travel, at 20 TPS. Server lag lengthens
 the real-world wait and lowers real-world movement speed.
 The timer measures actual displacement, not just commanded velocity. Stopping,
@@ -31,7 +38,8 @@ unloading, or external teleporting resets it. The first sample initializes the
 timer, so a new ride needs a full 600 qualifying movement samples.
 
 `/minecarttravel normal` opts out. `/minecarttravel fast` opts back in.
-`/minecarttravel status` reports mode and qualifying time.
+`/minecarttravel status` reports mode, qualifying time, and whether the current
+rail is on a registered route.
 `/minecartfasttravel` is an alias. Modes persist across restarts and reconnects.
 `minecarttravel.use` is granted to everyone by default. Players without it do
 not get boosts or endpoint travel. There are no fees.
@@ -62,132 +70,177 @@ Original maximum speeds are restored on opt-out, dismount, unload, destruction,
 and plugin shutdown. A persistent recovery marker restores the original speed
 on the next cart update after an interrupted boosted ride.
 
-## Building a fast-travel line
+## Commands
 
-Use real **lodestone** blocks as stoppers, horizontally adjacent to the outward
-ends of **flat, straight endpoint rails**, at the same height as the rails:
+| Command | Who | Effect |
+|---|---|---|
+| `/minecarttravel` or `/minecarttravel status` | everyone | Mode, qualifying time, and whether you are on a registered line |
+| `/minecarttravel normal` / `fast` | everyone | Opt out of / back in to boosts and fast travel |
+| `/minecarttravel register` | `minecarttravel.register` (everyone by default) | Register the line you ride next |
+| `/minecarttravel register cancel` | same | Stop a pending or active registration |
+| `/minecarttravel settings` | everyone | Show the current timing and speed settings |
+| `/minecarttravel set <setting> <value>` | `minecarttravel.admin` (operators) | Change a setting live |
+| `/minecarttravel rescan` | `minecarttravel.admin` | Recheck registered routes in loaded chunks |
 
-```text
-lodestone | rail = rail = rail = ... = rail | lodestone
-```
+`/minecartfasttravel` is an alias.
 
-No registration command or names are needed. Place rails first or lodestones
-first; the graph connects automatically as blocks are added. Extending a
-straight line moves its stored tail instead of adding a node for every rail.
-Joining unfinished tracks combines their connected path. Removing any required
-rail, removing a stopper, or changing a connection immediately invalidates
-in-flight route checks; after the edit is reconciled the disconnected line
-cannot fast travel. Rebuilding it re-enables travel automatically.
+### Admin settings
 
-A valid route has exactly two different lodestone stoppers, reciprocal rail
-connections, no branches/junctions or loops, at most **65,536 rails**, and at
-most **32 bends/slope transitions**. Each curved rail counts as one bend;
-changing between straight/sloped shapes also counts as a transition.
-Parallel tracks without a connecting rail are independent. A third rail aimed
-into the side of a track counts as a junction even if a switch points elsewhere.
-All vanilla rail types and ascending shapes are tracked.
+| Setting | Unit | Default | Allowed |
+|---|---|---|---|
+| `boost-delay` | seconds | 30 | 0.05-3600, below `fast-travel-delay` |
+| `fast-travel-delay` | seconds | 120 | 0.05-7200, above `boost-delay` |
+| `min-speed` | blocks/second | 6 | 0.1-8 (vanilla top speed), at most `boost-speed` |
+| `boost-speed` | blocks/second | 90 | `min-speed` to 120 |
 
-At the two-minute threshold the plugin walks the in-memory graph, incrementally,
-and chooses the endpoint in the cart's current direction. The occupied cart
-pauses while the arrival area is prepared. Only the destination's **3 x 3 chunk
-area** may be loaded, asynchronously, without generating new terrain. Temporary
-plugin chunk tickets keep that area loaded during preparation. The normal
-chunk-load reconciliation finishes, then the graph is checked again.
-The rest of the line is never loaded for route verification.
+Example: `/minecarttravel set fast-travel-delay 60`. Changes apply to rides in
+progress on their next update and are written to `config.yml`, so they survive
+restarts. Invalid values are rejected with an explanation and nothing changes.
+Raising `boost-speed` automatically raises `safety-lookahead-blocks` when needed
+so the safety check still covers a full tick of travel plus margin.
+
+## Registering a fast-travel line
+
+1. Build a line with a real **lodestone** at each end. Each end rail must be
+   **flat and straight** and run directly into the lodestone at the same height:
+
+   ```text
+   lodestone | rail = rail = rail = ... = rail | lodestone
+   ```
+
+2. Run `/minecarttravel register`. If you are not already in a minecart, you
+   have 60 seconds to get into one.
+3. Your cart must be within **16 rails** of one of the lodestone ends. Recording
+   starts from the nearer end.
+4. Ride to the lodestone at the other end. The action bar shows the rails and
+   turns recorded so far. Boosts keep working while you register, but fast
+   travel is paused for that cart.
+5. When the cart reaches the far end rail, the route is registered and you get a
+   confirmation. From then on, riding that line for the fast-travel delay
+   teleports you to the end you are heading toward.
+
+Registration records the rails your cart actually travels over, in the switch
+positions it actually takes, so junctions and side branches are allowed.
+Registration fails if the cart leaves the rails, goes backward, stops for 60
+seconds, loops back on itself, ends without running straight into a lodestone,
+returns to its starting lodestone, has more than **32 turns or slope changes**,
+or is longer than **65,536 rails**. Leaving the minecart, changing worlds, or
+logging out cancels registration. Registering track that overlaps an existing
+route replaces the older route.
+
+### When a route stops working
+
+A registered route is unregistered, and logged in the console, when any of its
+rails is removed or changes shape (for example a junction is switched or a
+curve is reshaped by a new rail) or either lodestone is removed. Register it
+again after fixing the track. Changes are detected from normal block events
+(placement, breaking, physics, redstone, fluids, burning, fading, explosions,
+entity block changes, and pistons) and verified on the next tick.
+
+Whenever a chunk containing part of a route loads, the route's rails and
+lodestones in that chunk are rechecked, which catches offline or world-editor
+edits. Fast travel never starts from or arrives in a chunk that is still being
+rechecked. After edits that bypass block events in loaded chunks, operators can
+run `/minecarttravel rescan`.
+
+## Fast travel
+
+Once a cart on a registered route reaches the fast-travel delay, the plugin
+chooses the end in the cart's current direction. The occupied cart pauses while
+the arrival area is prepared. Only the destination's **3 x 3 chunk area** is
+loaded, asynchronously and without generating terrain, using temporary plugin
+chunk tickets. The rest of the line is never loaded.
 
 The same cart and passenger are teleported together, using Paper 26.3's native
-passenger-retaining teleport behavior. No cart is destroyed/recreated, no inventory is copied,
-and the rider is not deliberately ejected. The cart stops centered on the final
-rail before the lodestone. The destination must still have its rail, support,
-headroom, stopper, an in-border position, and no nearby obstructing entities.
-If the graph changes, the rider leaves, the cart moves during preparation,
-loading fails, the destination is blocked, or another plugin rejects the
-teleport, travel fails explicitly without charging anything.
-Preparation has a 60-game-second timeout; all tickets are released on success,
-failure, or shutdown. A successful trip resets the timer, preventing ping-pong.
-If a moving cart's line is incomplete, checks retry at most every five seconds.
+passenger-retaining teleport behavior. The cart stops centered on the final rail
+before the lodestone. The destination must still have its rail, support,
+headroom, lodestone, an in-border position, and no nearby obstructing entities.
+If the route is unregistered, the rider leaves, the cart moves during
+preparation, loading fails, the destination is blocked, or another plugin
+rejects the teleport, travel is cancelled with a message. Preparation times out
+after 60 game seconds, and tickets are always released. A successful trip
+resets the timer. Riding an unregistered line tells you once how to register it.
 
-## Graph model and persistence
+## Route storage and performance
 
-The graph is separate from world blocks and chunks. Straight collinear rails
-with the same shape are stored as an interval with two endpoints; an arbitrarily
-long straight line needs one rail-run record rather than one record per block.
-Slope runs are compressed too. Curves remain individual nodes.
-Inserting/removing a rail splits or merges those intervals. Route direction
-metadata is stored per run during a check, not per rail.
+Routes are stored compactly: a straight run of same-shape rails is one segment
+however long it is, and curves are single cells. Position lookups are interval
+searches, so there are no per-rail objects. Routes are saved to `routes.txt`
+every 30 game seconds when they changed and on graceful shutdown, using
+replace-on-success writes. A corrupt route file or invalid configuration
+disables the plugin with a clear server error.
 
-Newly encountered chunks use a cheap block-palette check to skip terrain with
-no rail or lodestone states. Chunks containing existing tracks are seeded under
-a global **4096-block-per-tick** scan budget. Once a chunk is known, subsequent
-loads only recheck its recorded rails and stoppers, not its entire terrain.
-Known-empty chunks need no scan. Known-chunk markers persist across restarts.
-A chunk being reconciled is not eligible for fast travel.
-Normal block placement, breaking, physics, redstone,
-fluids, burning, fading, support destruction, explosions, entity block changes,
-and pistons update nearby graph observations on subsequent ticks, under that
-same global budget. Cancelled edits are ignored.
-Track scans never force-load a chunk. Clean saved graph data remains usable
-when track chunks unload.
-
-Route walks have a global round-robin **512-steps-per-tick** budget across all
-carts. The length and bend limits prevent unbounded searches, including loops.
-Each actual graph edit invalidates in-flight checks, including unrelated edits
-(conservative global revision tracking). Editing constantly can postpone fast
-travel, but does not disable the physical boost.
-
-The compressed graph and pending-chunk markers are saved to `rail-graph.txt`
-every 30 game seconds and on graceful shutdown, using replace-on-success file
-writes. Invalid configuration or corrupt graph data disables the plugin with
-a clear server error rather than silently trusting an empty graph.
-After a crash, recorded rails reconcile when next loaded. No event-based plugin
-can reliably discover newly added branches placed offline or by a world editor
-that bypasses Bukkit events; these require a full rescan of affected chunks.
-Recorded rail/stopper removals are detected on their next chunk load, but not
-while the altered chunk remains unloaded.
-
-After edits that bypass normal events, use `/minecarttravel rescan` (operator
-permission `minecarttravel.admin`) to reconcile **loaded chunks**, or unload and
-reload affected chunks before trusting the route. The console's status command
-shows compressed-run, stopper, and pending-chunk counts.
-There is no permanent chunk ticket, global every-tick world scan, or per-rail
-task.
+Recording rides has a global **512-steps-per-tick** budget shared by all
+registering players. Route verification has a global **4096-blocks-per-tick**
+budget. Block events far from any route are rejected with a chunk lookup. There
+is no world scanning, permanent chunk ticket, or per-rail task.
 
 ## Configuration
 
-The generated `config.yml` exposes speed/time thresholds, lookahead, maximum
-route length, maximum bends, global work budgets, and save interval.
-Restart after editing. Bounds are validated on startup. Lowering the boost
-below ice-boat speed naturally removes its straight-line speed advantage.
+The generated `config.yml` contains the four admin settings (as ticks and
+blocks/second), the safety lookahead, route length and turn limits, work
+budgets, and the save interval. Edit it and restart to change the non-admin
+settings; startup validates every bound. Lowering the boost below ice-boat speed
+naturally removes its straight-line speed advantage.
 
 ## Build and install
+
+Download the compiled plugin from
+[Hangar](https://hangar.papermc.io/rewrite123/minecarttravel/versions/0.2.0), or build it:
 
 ```sh
 ./gradlew build
 ```
 
-Copy `build/libs/minecarttravel-0.1.1.jar` into the Paper server's `plugins/`
-directory and restart on Java 25. Gradle provisions Java 25 if needed;
-Windows users can use `gradlew.bat`.
+Copy `build/libs/minecarttravel-0.2.0.jar` into your Paper server's `plugins/`
+directory and restart using Java 25. Gradle runs on Java 17+ and provisions
+Java 25 when needed; Windows users can use `gradlew.bat`. No configuration is
+required.
 
-Tests cover compression/splitting, graph connectivity, tails, break/rebuild,
-junctions, curves, slopes, limits, persistence, event reconciliation, timing,
-mode preferences, and travel safety. MockBukkit uses Paper 26.2 registry data;
-production compiles against 26.3.
-Before production use, smoke-test actual 90-block/second straight-line movement,
-curves, slopes, braking, chunk boundaries, disconnects during preparation,
-occupied-cart passenger retention, and protection-plugin teleport cancellation
-on a real Paper 26.3 server. High-speed physics and experimental minecart
-settings can vary by server version/configuration.
-The target speed is configured and tested mathematically; a live-server
-movement benchmark is not claimed by the unit tests.
+`./gradlew test` covers ride recording (straight, curves, slopes, boosted carts,
+junctions, limits, failures, unloaded track), route storage and lookup,
+invalidation from block changes and chunk loads, admin settings, commands,
+timing, mode preferences, and travel safety. MockBukkit uses Paper 26.2 registry
+data; production compiles against 26.3. Before production use, smoke-test
+registration, junction switching on a registered line, 90-block/second
+straight-line movement, curves, slopes, braking, chunk boundaries, disconnects
+during preparation, passenger retention, and protection-plugin teleport
+cancellation on a real Paper 26.3 server. The target speed is configured and
+tested mathematically; a live-server movement benchmark is not claimed.
 
-## Hangar publication
+### Upgrading from 0.1.x
 
-The official Hangar publishing Gradle plugin is configured for `minecarttravel`:
+1. Stop the server.
+2. Remove the old `minecarttravel-0.1.x.jar` from `plugins/` and replace it with
+   `minecarttravel-0.2.0.jar`. Do not keep both versions installed.
+3. Start the server. Your `config.yml` keeps working: the two renamed work-budget
+   keys (`verify-blocks-per-tick`, `record-steps-per-tick`) fall back to their
+   defaults, and the old `scan-blocks-per-tick` / `route-steps-per-tick` keys are
+   ignored. Player modes are preserved.
+4. Register each fast-travel line once with `/minecarttravel register`. Lines
+   tracked by 0.1.x are not migrated; `plugins/minecarttravel/rail-graph.txt` is
+   no longer used and can be deleted.
+
+## Hangar
+
+Published project: [rewrite123/minecarttravel](https://hangar.papermc.io/rewrite123/minecarttravel).
+Version **0.2.0** is available on the **Release** channel for Paper **26.3**.
+
+Publishing uses [HangarMC's official plugin](https://github.com/HangarMC/hangar-publish-plugin).
+For a future release, set a new, unique version in `gradle.properties`, set
+`HANGAR_API_TOKEN` to a key with `create_version` permission, and use:
 
 ```sh
-export HANGAR_API_TOKEN='your-token'
-./gradlew build publishPluginPublicationToHangar syncAllPluginPublicationPagesToHangar
+./gradlew build publishPluginPublicationToHangar \
+  -PhangarChangelog="Describe the changes in this release."
 ```
 
-Create the Hangar project first. Never commit credentials.
+Defaults: `Release` channel, Paper `26.3`. Never commit API keys. Normal builds
+do not publish.
+
+To update the Hangar project's main page from this README without publishing a
+new version, supply `HANGAR_API_TOKEN` with page-editing permission and run:
+
+```sh
+./gradlew syncAllPluginPublicationPagesToHangar
+```

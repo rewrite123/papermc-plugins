@@ -54,7 +54,7 @@ final class TrackSafety {
         return true;
     }
 
-    static Location arrival(World world, RouteTrace.End end) {
+    static Location arrival(World world, RouteRegistry.End end) {
         var pos = end.rail();
         return new Location(world, pos.x() + 0.5, pos.y() + 0.1, pos.z() + 0.5);
     }
@@ -77,7 +77,7 @@ final class TrackSafety {
         };
     }
 
-    static boolean arrivalClear(Minecart cart, RouteTrace.End end) {
+    static boolean arrivalClear(Minecart cart, RouteRegistry.End end) {
         var world = cart.getWorld();
         var pos = end.rail();
         var stop = end.lodestone();

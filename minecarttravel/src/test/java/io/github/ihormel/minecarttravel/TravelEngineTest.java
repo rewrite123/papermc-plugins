@@ -29,7 +29,9 @@ import org.mockbukkit.mockbukkit.persistence.PersistentDataContainerMock;
 
 class TravelEngineTest extends PaperTest {
     private JavaPlugin plugin;
-    private RailGraph graph;
+    private RouteRegistry registry;
+    private RouteRegistry.Route route;
+    private boolean recording;
     private TravelEngine engine;
     private World world;
     private RideableMinecart cart;
@@ -43,7 +45,7 @@ class TravelEngineTest extends PaperTest {
     @BeforeEach
     void setUpRide() {
         plugin = MockBukkit.createMockPlugin("minecarttravel");
-        graph = new RailGraph();
+        registry = new RouteRegistry();
         var real = server.addSimpleWorld("world");
         for (int x = 0; x < 64; x++) {
             real.getBlockAt(x, 63, 8).setType(Material.STONE);
@@ -52,12 +54,17 @@ class TravelEngineTest extends PaperTest {
             var rail = (Rail) block.getBlockData();
             rail.setShape(Rail.Shape.EAST_WEST);
             block.setBlockData(rail);
-            graph.observe(new TrackPos(real.getUID(), x, 64, 8), RailShape.EAST_WEST, false);
         }
         real.getBlockAt(-1, 64, 8).setType(Material.LODESTONE);
         real.getBlockAt(64, 64, 8).setType(Material.LODESTONE);
-        graph.observe(new TrackPos(real.getUID(), -1, 64, 8), null, true);
-        graph.observe(new TrackPos(real.getUID(), 64, 64, 8), null, true);
+        var id = real.getUID();
+        var west = new RailShape.Port(-1, 0, 0);
+        route = new RouteRegistry.Route(UUID.randomUUID(),
+                new RouteRegistry.End(new TrackPos(id, 0, 64, 8), west, new TrackPos(id, -1, 64, 8)),
+                new RouteRegistry.End(new TrackPos(id, 63, 64, 8), new RailShape.Port(1, 0, 0), new TrackPos(id, 64, 64, 8)),
+                List.of(new RouteRegistry.Segment(Lane.at(new TrackPos(id, 0, 64, 8), RailShape.EAST_WEST), 0, 63, west)),
+                64, 0);
+        registry.add(route);
         world = TestWorld.withCollisionStubs(real);
         doReturn(true).when(world).isChunkLoaded(anyInt(), anyInt());
         doReturn(List.of()).when(world).getNearbyEntities(any(Location.class), anyDouble(), anyDouble(), anyDouble());
@@ -69,7 +76,7 @@ class TravelEngineTest extends PaperTest {
             tickets.add(chunk);
             return CompletableFuture.completedFuture(chunk);
         }).when(world).getChunkAtAsync(anyInt(), anyInt(), eq(false));
-        engine = new TravelEngine(plugin, graph, settings(3, 8));
+        engine = new TravelEngine(plugin, registry, settings(3, 8), unused -> recording);
         player = mock(Player.class);
         when(player.getUniqueId()).thenReturn(UUID.randomUUID());
         when(player.getPersistentDataContainer()).thenReturn(new PersistentDataContainerMock());
@@ -129,7 +136,7 @@ class TravelEngineTest extends PaperTest {
         assertEquals(0.4, maxSpeed);
         ride(10);
         assertEquals(0.4, maxSpeed);
-        var restarted = new TravelEngine(plugin, graph, settings(3, 8));
+        var restarted = new TravelEngine(plugin, registry, settings(3, 8), unused -> recording);
         assertTrue(restarted.normal(player));
         restarted.mode(player, false);
         assertFalse(engine.normal(player));
@@ -154,7 +161,7 @@ class TravelEngineTest extends PaperTest {
         var rail = (Rail) world.getBlockAt(15, 64, 8).getBlockData();
         rail.setShape(Rail.Shape.EAST_WEST);
         world.getBlockAt(15, 64, 8).setBlockData(rail);
-        graph.observe(new TrackPos(world.getUID(), -1, 64, 8), null, false);
+        registry.remove(route);
         ride(1);
         assertEquals(4.5, maxSpeed);
     }
@@ -190,8 +197,14 @@ class TravelEngineTest extends PaperTest {
 
     @Test
     void reversedTravelSelectsTheOppositeEndpoint() {
-        ride(9);
+        ride(7);
         velocity = new Vector(-4.5, 0, 0);
+        for (int tick = 0; tick < 2; tick++) {
+            engine.tick();
+            location.add(-0.4, 0, 0);
+            velocity = new Vector(-4.5, 0, 0);
+            engine.update(update);
+        }
         engine.tick();
         server.getScheduler().performOneTick();
         engine.tick();
@@ -201,8 +214,9 @@ class TravelEngineTest extends PaperTest {
     @Test
     void brokenRailDuringPreparationCancelsTeleportAndReleasesTickets() {
         prepareArrival();
-        graph.observe(new TrackPos(world.getUID(), 40, 64, 8), null, false);
+        registry.remove(route);
         engine.tick();
+        verify(player).sendMessage("Fast travel cancelled: this route was unregistered because a rail or lodestone changed.");
         verify(cart, never()).teleport(any(Location.class), eq(PlayerTeleportEvent.TeleportCause.PLUGIN));
         for (var chunk : tickets) verify(chunk).removePluginChunkTicket(plugin);
     }
@@ -276,10 +290,10 @@ class TravelEngineTest extends PaperTest {
     void reconciliationKeepsTheCartStoppedUntilTheArrivalAreaIsReady() {
         prepareArrival();
         var key = new TrackPos.ChunkKey(world.getUID(), 3, 0);
-        graph.dirty.add(key);
+        registry.unverified.add(key);
         engine.tick();
         verify(cart, never()).teleport(any(Location.class), eq(PlayerTeleportEvent.TeleportCause.PLUGIN));
-        graph.dirty.remove(key);
+        registry.unverified.remove(key);
         engine.tick();
         verify(cart).teleport(any(Location.class), eq(PlayerTeleportEvent.TeleportCause.PLUGIN));
     }
@@ -349,11 +363,30 @@ class TravelEngineTest extends PaperTest {
     }
 
     @Test
-    void ridingAnIncompleteLineStillAllowsPhysicalSpeedBoost() {
-        graph.observe(new TrackPos(world.getUID(), 64, 64, 8), null, false);
+    void ridingAnUnregisteredLineStillAllowsPhysicalSpeedBoostAndExplainsRegistrationOnce() {
+        registry.remove(route);
         ride(15);
+        verify(player, times(1)).sendMessage(contains("/minecarttravel register"));
         assertEquals(4.5, maxSpeed);
         assertTrue(tickets.isEmpty());
         verify(cart, never()).teleport(any(Location.class), eq(PlayerTeleportEvent.TeleportCause.PLUGIN));
+    }
+
+    @Test
+    void cartsBeingRegisteredBoostButNeverFastTravel() {
+        recording = true;
+        ride(15);
+        assertEquals(4.5, maxSpeed);
+        assertTrue(tickets.isEmpty());
+    }
+
+    @Test
+    void changedSettingsApplyToTheNextUpdate() {
+        engine.settings(new TravelSettings(6, 20, 6, 60, 12, 65536, 32, 4096, 512, 600));
+        ride(4);
+        assertEquals(0.4, maxSpeed);
+        ride(3);
+        assertEquals(3.0, maxSpeed);
+        assertEquals(60, velocity.length() * 20, 1e-9);
     }
 }

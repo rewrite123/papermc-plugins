@@ -29,13 +29,13 @@ import org.bukkit.util.Vector;
 
 final class TravelEngine implements Listener {
     private final JavaPlugin plugin;
-    private final RailGraph graph;
-    private final TravelSettings settings;
+    private final RouteRegistry registry;
+    private final java.util.function.Predicate<Minecart> recording;
+    private TravelSettings settings;
     private final NamespacedKey normalKey;
     private final NamespacedKey originalSpeedKey;
     private final Map<UUID, Ride> rides = new HashMap<>();
     private long tick;
-    private int roundRobin;
 
     private static final class Ride {
         final Minecart cart;
@@ -43,12 +43,12 @@ final class TravelEngine implements Listener {
         final RideClock clock = new RideClock();
         Location previous;
         long lastTick = -2;
-        long retryAt;
         boolean boosted;
         boolean transferring;
-        RouteTrace trace;
+        boolean hinted;
         Player rider;
-        RouteTrace.End destination;
+        RouteRegistry.Route route;
+        RouteRegistry.End destination;
         Location origin;
         long deadline;
         boolean loaded;
@@ -60,12 +60,22 @@ final class TravelEngine implements Listener {
         }
     }
 
-    TravelEngine(JavaPlugin plugin, RailGraph graph, TravelSettings settings) {
+    TravelEngine(JavaPlugin plugin, RouteRegistry registry, TravelSettings settings,
+                 java.util.function.Predicate<Minecart> recording) {
         this.plugin = plugin;
-        this.graph = graph;
+        this.registry = registry;
         this.settings = settings;
+        this.recording = recording;
         normalKey = new NamespacedKey(plugin, "normal_mode");
         originalSpeedKey = new NamespacedKey(plugin, "original_speed");
+    }
+
+    TravelSettings settings() {
+        return settings;
+    }
+
+    void settings(TravelSettings settings) {
+        this.settings = settings;
     }
 
     boolean normal(Player player) {
@@ -80,9 +90,16 @@ final class TravelEngine implements Listener {
 
     String status(Player player) {
         var ride = player.getVehicle() == null ? null : rides.get(player.getVehicle().getUniqueId());
-        return "Mode: " + (normal(player) ? "normal" : "fast") + ". Qualifying travel: "
-                + (ride == null ? 0 : ride.clock.ticks() / 20) + "s. "
-                + (ride != null && ride.destination != null ? "Preparing destination." : "");
+        var text = new StringBuilder("Mode: ").append(normal(player) ? "normal" : "fast")
+                .append(". Qualifying travel: ").append(ride == null ? 0 : ride.clock.ticks() / 20).append("s.");
+        if (player.getVehicle() instanceof Minecart cart) {
+            var pos = TrackSafety.railUnder(cart.getLocation());
+            var hit = pos == null ? null : registry.at(pos);
+            text.append(hit == null ? " This rail is not on a registered fast-travel route."
+                    : " This rail is on a registered route (" + hit.route().rails() + " rails).");
+        }
+        if (ride != null && ride.destination != null) text.append(" Preparing destination.");
+        return text.toString();
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -125,103 +142,60 @@ final class TravelEngine implements Listener {
         } else {
             restoreSpeed(ride, true);
         }
-        if (ride.clock.ticks() == 0 && ride.trace != null) {
-            ride.trace = null;
-            ride.rider = null;
-        }
-        if (ride.clock.ticks() >= settings.fastTicks() && tick >= ride.retryAt
-                && ride.trace == null && pos != null && cart instanceof RideableMinecart
+        if (ride.clock.ticks() >= settings.fastTicks() && pos != null
+                && cart instanceof RideableMinecart && !recording.test(cart)
                 && cart.getPassengers().size() == 1 && cart.getPassengers().getFirst() instanceof Player player) {
+            var data = cart.getWorld().getBlockAt(pos.x(), pos.y(), pos.z()).getBlockData();
+            var hit = data instanceof org.bukkit.block.data.Rail rail ? registry.at(pos, RailShape.of(rail)) : null;
+            if (hit == null || registry.unverified.contains(pos.chunk())) {
+                if (hit == null && !ride.hinted) {
+                    player.sendMessage("This rail line is not registered for fast travel. "
+                            + "Run /minecarttravel register and ride it from lodestone to lodestone to register it.");
+                    ride.hinted = true;
+                }
+                return;
+            }
+            var toward = hit.segment().towardFirst();
+            var velocity = cart.getVelocity();
+            double dot = velocity.getX() * toward.dx() + velocity.getZ() * toward.dz();
+            if (Math.abs(dot) < 0.01) return;
             ride.rider = player;
-            ride.trace = new RouteTrace(graph, pos, settings.maxRails(), settings.maxTurns());
+            ride.route = hit.route();
+            ride.destination = dot > 0 ? hit.route().first() : hit.route().second();
+            ride.origin = cart.getLocation();
             ride.deadline = tick + 1200;
+            restoreSpeed(ride, true);
+            cart.setVelocity(new Vector());
+            tell(cart, "Preparing fast-travel arrival...");
+            loadArrival(ride);
         }
     }
 
     void tick() {
         tick++;
-        var active = new ArrayList<>(rides.values());
-        for (var ride : active) {
+        for (var ride : new ArrayList<>(rides.values())) {
             if (!ride.cart.isValid() || !enabled(ride.cart)) {
                 remove(ride.cart);
                 continue;
             }
-            if (ride.rider != null && (!ride.rider.isOnline() || ride.cart.getPassengers().size() != 1
-                    || !ride.cart.getPassengers().contains(ride.rider))) {
+            if (ride.destination == null || ride.transferring) continue;
+            if (!ride.rider.isOnline() || ride.cart.getPassengers().size() != 1
+                    || !ride.cart.getPassengers().contains(ride.rider)) {
                 abort(ride, "Fast travel cancelled because the rider changed.");
                 continue;
             }
-            if (ride.destination != null && !ride.transferring) {
-                if (tick > ride.deadline || !ride.cart.getWorld().equals(ride.origin.getWorld())
-                        || ride.cart.getLocation().distanceSquared(ride.origin) > 1) {
-                    abort(ride, "Fast travel cancelled: the cart moved or destination preparation timed out.");
-                    continue;
-                }
-                ride.cart.setVelocity(new Vector());
-                if (ride.destination != null && ride.loaded && ride.trace == null && destinationReady(ride)) {
-                    var pos = TrackSafety.railUnder(ride.cart.getLocation());
-                    if (pos == null) abort(ride, "The rail below the cart was removed.");
-                    else ride.trace = new RouteTrace(graph, pos, settings.maxRails(), settings.maxTurns());
-                }
-            } else if (ride.trace != null && tick > ride.deadline) {
-                abort(ride, "Route verification timed out.");
-            }
-        }
-        // One global round-robin work budget, even with many simultaneous carts.
-        if (active.isEmpty()) return;
-        for (int step = 0, idle = 0; step < settings.routeBudget() && idle < active.size(); step++) {
-            var ride = active.get(Math.floorMod(roundRobin++, active.size()));
-            if (!rides.containsKey(ride.cart.getUniqueId()) || ride.trace == null) {
-                idle++;
+            if (tick > ride.deadline || !ride.cart.getWorld().equals(ride.origin.getWorld())
+                    || ride.cart.getLocation().distanceSquared(ride.origin) > 1) {
+                abort(ride, "Fast travel cancelled: the cart moved or destination preparation timed out.");
                 continue;
             }
-            idle = 0;
-            ride.trace.step();
-            if (ride.trace.done()) finishTrace(ride);
-        }
-    }
-
-    private void finishTrace(Ride ride) {
-        var trace = ride.trace;
-        ride.trace = null;
-        if (trace.route() == null) {
-            abort(ride, trace.failure());
-            return;
-        }
-        if (ride.destination != null) {
-            var currentPos = TrackSafety.railUnder(ride.cart.getLocation());
-            var currentRun = currentPos == null ? null : graph.run(currentPos);
-            if (!trace.route().towardFirst().containsKey(currentRun)
-                    || (!trace.route().first().equals(ride.destination)
-                    && !trace.route().second().equals(ride.destination))) {
-                abort(ride, "This cart is no longer on its verified destination route.");
-                return;
+            ride.cart.setVelocity(new Vector());
+            if (!registry.contains(ride.route)) {
+                abort(ride, "Fast travel cancelled: this route was unregistered because a rail or lodestone changed.");
+            } else if (ride.loaded && destinationReady(ride)) {
+                teleport(ride);
             }
-            teleport(ride, trace.route().revision());
-            return;
         }
-        var pos = TrackSafety.railUnder(ride.cart.getLocation());
-        if (pos == null) {
-            abort(ride, "The cart left the rails.");
-            return;
-        }
-        var towardFirst = trace.route().towardFirst().get(graph.run(pos));
-        if (towardFirst == null) {
-            abort(ride, "The cart left its verified route.");
-            return;
-        }
-        var velocity = ride.cart.getVelocity();
-        double dot = velocity.getX() * towardFirst.dx() + velocity.getZ() * towardFirst.dz();
-        if (Math.abs(dot) < 0.01) {
-            abort(ride, "Keep moving toward a destination to start fast travel.");
-            return;
-        }
-        ride.destination = dot > 0 ? trace.route().first() : trace.route().second();
-        ride.origin = ride.cart.getLocation();
-        restoreSpeed(ride, true);
-        ride.cart.setVelocity(new Vector());
-        tell(ride.cart, "Preparing fast-travel arrival...");
-        loadArrival(ride);
     }
 
     private void loadArrival(Ride ride) {
@@ -257,12 +231,12 @@ final class TravelEngine implements Listener {
     }
 
     private boolean destinationReady(Ride ride) {
-        return ride.tickets.stream().noneMatch(chunk -> graph.dirty.contains(
+        return ride.tickets.stream().noneMatch(chunk -> registry.unverified.contains(
                 new TrackPos.ChunkKey(chunk.getWorld().getUID(), chunk.getX(), chunk.getZ())));
     }
 
-    private void teleport(Ride ride, long revision) {
-        if (graph.revision() != revision || !enabled(ride.cart) || !destinationReady(ride)
+    private void teleport(Ride ride) {
+        if (!registry.contains(ride.route) || !enabled(ride.cart) || !destinationReady(ride)
                 || !TrackSafety.arrivalClear(ride.cart, ride.destination)
                 || ride.rider == null || !ride.rider.isOnline()
                 || !ride.cart.getPassengers().equals(List.of(ride.rider))) {
@@ -294,16 +268,7 @@ final class TravelEngine implements Listener {
 
     private void abort(Ride ride, String message) {
         if (ride.rider != null) ride.rider.sendMessage(message);
-        boolean held = ride.destination != null;
         remove(ride.cart);
-        // Retry incomplete graph walks at most once per five seconds without
-        // resetting an otherwise continuously moving cart's earned timer.
-        if (!held && ride.cart.isValid() && enabled(ride.cart)) {
-            ride.trace = null;
-            ride.rider = null;
-            ride.retryAt = tick + 100;
-            rides.put(ride.cart.getUniqueId(), ride);
-        }
     }
 
     private void tell(Minecart cart, String message) {
