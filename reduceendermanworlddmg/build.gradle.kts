@@ -55,6 +55,9 @@ hangarPublish {
         id.set(providers.gradleProperty("hangarProject"))
         channel.set(providers.gradleProperty("hangarChannel").orElse("Release"))
         apiKey.set(providers.environmentVariable("HANGAR_API_TOKEN"))
+        pages {
+            resourcePage(project.file("assets/hangar-description.md").readText())
+        }
         changelog.set(providers.gradleProperty("hangarChangelog").orElse(
             "Initial release: Endermen attempt to return stolen blocks to their original positions after a random 10-45 second delay. Only empty spaces are restored; death cancels the return. Includes persistent tracking and protection-plugin cancellation support."
         ))

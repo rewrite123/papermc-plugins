@@ -291,7 +291,7 @@ def minecarttravel():
     return c
 
 
-def reduceendermanblockdmg():
+def reduceendermanworlddmg():
     c = Canvas("#c38bff", "ENDERMAN RETURN")
     c.poly([(22, 91), (68, 81), (108, 91), (64, 101)], "#0b1326")
     c.rect(38, 18, 88, 55, INK)
@@ -343,7 +343,7 @@ def main():
     factories = (
         tpcost, inventorysorter, enchantcap, sleepy,
         craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
-        reduceendermanblockdmg, flipdisc,
+        reduceendermanworlddmg, flipdisc,
     )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", choices=[factory.__name__ for factory in factories])

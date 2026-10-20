@@ -1,4 +1,4 @@
-package io.github.ihormel.reduceendermanblockdmg;
+package io.github.ihormel.reduceendermanworlddmg;
 
 import java.util.concurrent.ThreadLocalRandom;
 import org.bukkit.Bukkit;
@@ -14,7 +14,7 @@ import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class ReduceEndermanBlockDamagePlugin extends JavaPlugin implements Listener {
+public final class ReduceEndermanWorldDamagePlugin extends JavaPlugin implements Listener {
     private BlockReturns returns;
 
     @Override
@@ -28,7 +28,7 @@ public final class ReduceEndermanBlockDamagePlugin extends JavaPlugin implements
         for (var world : getServer().getWorlds()) {
             for (Enderman entity : world.getEntitiesByClass(Enderman.class)) returns.load(entity);
         }
-        getServer().getScheduler().runTaskTimer(this, returns::tick, 20L, 20L);
+        getServer().getScheduler().runTaskTimer(this, returns::tick, 5L, 5L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

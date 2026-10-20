@@ -18,8 +18,9 @@ Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper
   then use them instead of lapis to enchant and upgrade gear.
 - [minecarttravel](minecarttravel/README.md): earn timed minecart speed boosts
   and fast travel along ride-registered lodestone-to-lodestone rail lines.
-- [reduceendermanblockdmg](reduceendermanblockdmg/README.md): Endermen attempt
-  to return stolen blocks to their original positions after 10-45 seconds.
+- [reduceendermanworlddmg](reduceendermanworlddmg/README.md): Endermen attempt
+  to return stolen blocks to their original positions after 10-45 seconds,
+  falling back to a nearby spot if they cannot within 10 seconds.
 - [flipdisc](flipdisc/README.md): flip ordinary music discs between permanent
   two-song pairs using the crafting grid, preserving single-sided special discs.
 
@@ -34,6 +35,6 @@ Regenerate all ten icons with Python 3 and ImageMagick installed:
 python3 tools/generate-project-icons.py
 ```
 
-To regenerate only one icon, pass `--project reduceendermanblockdmg`.
+To regenerate only one icon, pass `--project reduceendermanworlddmg`.
 
 Regenerating images does not upload them to Hangar or publish a plugin release.

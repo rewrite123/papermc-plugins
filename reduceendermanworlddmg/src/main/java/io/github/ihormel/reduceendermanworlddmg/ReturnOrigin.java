@@ -1,4 +1,4 @@
-package io.github.ihormel.reduceendermanblockdmg;
+package io.github.ihormel.reduceendermanworlddmg;
 
 import java.util.UUID;
 

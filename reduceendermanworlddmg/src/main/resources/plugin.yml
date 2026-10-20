@@ -1,0 +1,5 @@
+name: reduceendermanworlddmg
+version: '${version}'
+main: io.github.ihormel.reduceendermanworlddmg.ReduceEndermanWorldDamagePlugin
+api-version: '26.3'
+description: Endermen return stolen blocks to where they found them, falling back to a nearby spot after 10 seconds.

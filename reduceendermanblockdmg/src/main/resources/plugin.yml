@@ -1,5 +1,0 @@
-name: reduceendermanblockdmg
-version: '${version}'
-main: io.github.ihormel.reduceendermanblockdmg.ReduceEndermanBlockDamagePlugin
-api-version: '26.3'
-description: Endermen try to return stolen blocks to their original locations after 10-45 seconds.
