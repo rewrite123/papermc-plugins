@@ -59,7 +59,7 @@ final class SortingControls implements Listener, CommandExecutor, TabCompleter {
             var current = SortTargets.clicked(player, view, clicked, slot);
             if (current == null || !current.equals(target)) return;
             target.sort();
-            player.sendMessage("Inventory sorted by group and item type.");
+            player.sendMessage("Inventory sorted; matching stacks combined.");
         });
     }
 
@@ -91,7 +91,7 @@ final class SortingControls implements Listener, CommandExecutor, TabCompleter {
                 && !args[0].equalsIgnoreCase("container"))) return false;
         var view = player.getOpenInventory();
         if (!InventorySorting.empty(view.getCursor()) || !SortTargets.supportedView(player, view)) {
-            player.sendMessage("Empty your cursor and use your inventory or a supported storage container.");
+            player.sendMessage("Empty your cursor first.");
             return true;
         }
         var target = SortTargets.container(player, view);
@@ -106,7 +106,7 @@ final class SortingControls implements Listener, CommandExecutor, TabCompleter {
         }
         clicks.clear(player.getUniqueId());
         target.sort();
-        player.sendMessage("Inventory sorted by group and item type.");
+        player.sendMessage("Inventory sorted; matching stacks combined.");
         return true;
     }
 

@@ -2,11 +2,17 @@
 
 Inventory sorting for **Paper 26.3 / Java 25**, with no runtime dependencies.
 
+**Latest release:** [inventorysorter 0.2.0 on Hangar](https://hangar.papermc.io/rewrite123/inventorysorter/versions/0.2.0).
+
+**What's new in 0.2.0:** sorting now combines matching partial stacks (for
+example, 40 + 40 stone becomes 64 + 16). You can also sort your inventory while a
+crafting table, furnace, anvil, enchanting table, or any other screen is open.
+
 ## Usage
 
 Hold Shift and left- or right-click the **same empty inventory slot twice within
 half a second** while your cursor is empty. The inventory section you clicked is
-sorted on the next server tick:
+sorted on the next server tick, and matching stacks are combined first:
 
 - Player inventory: the 27 main storage slots only. Hotbar, armor, offhand, and
   crafting slots are never moved.
@@ -14,11 +20,16 @@ sorted on the next server tick:
 - Shulker box, barrel, or your ender chest: the entire container.
 - Clicking player storage while a container is open sorts only player storage;
   clicking the container sorts only that container. Items never cross between them.
+- Crafting table, furnace, smoker, blast furnace, anvil, enchanting table,
+  brewing stand, villager trade, hopper, and other screens: click your own
+  storage slots to sort them. The slots of the screen itself (crafting grid,
+  furnace input/fuel/output, and so on) are never touched, because they have
+  special meanings.
 
 Open a placed shulker box to sort its contents; the plugin does not change the
-contents of shulker-box items carried inside another inventory. Crafting tables,
-furnaces, anvils, merchant interfaces, and custom plugin menus are not supported:
-their slots may have special meanings or restrictions.
+contents of shulker-box items carried inside another inventory. Custom plugin
+menus are never sorted, but your own storage below them can be (unless the menu
+plugin cancels the click).
 
 The `inventorysorter.use` permission is granted to everyone by default.
 Spectators cannot sort. Cancelled inventory clicks are respected. Closing the
@@ -30,7 +41,7 @@ Optional command alternatives (also useful when the inventory is completely full
 
 | Command | Action |
 | --- | --- |
-| `/sort` | Sort the open container, or player storage if no container is open |
+| `/sort` | Sort the open storage container, or player storage otherwise (including under a crafting table, furnace, etc.) |
 | `/sort player` | Sort the 27 player storage slots |
 | `/sort container` | Sort the open supported container |
 
@@ -53,9 +64,13 @@ Food even if they also drop from mobs; ores are Minerals rather than Building
 Blocks. Unclassified blocks go to Building Blocks, and remaining items go to
 Miscellaneous.
 
-Empty slots move to the end. Existing stacks are **not merged or split**. Stacks
-of the same material retain their relative order. Enchantments, names, durability,
-container contents, counts, and all other item metadata are preserved.
+Before sorting, partial stacks of **identical** items are combined into full
+stacks (up to the item's stack size: 64 for stone, 16 for ender pearls, 1 for
+tools). Only items that would stack in vanilla are combined; a renamed or
+enchanted item never merges with a plain one. Total item counts never change.
+Empty slots move to the end. Stacks of the same material retain their relative
+order. Enchantments, names, durability, container contents, and all other item
+metadata are preserved.
 
 ## Build and install
 
@@ -66,10 +81,10 @@ From this directory:
 ```
 
 Gradle runs on Java 17+ and provisions a Java 25 toolchain if needed. Windows users
-can use `gradlew.bat`. Copy `build/libs/inventorysorter-0.1.0.jar` to the Paper
+can use `gradlew.bat`. Copy `build/libs/inventorysorter-0.2.0.jar` to the Paper
 server's `plugins/` directory and restart the server (running Java 25).
 
-Run `./gradlew test` for the grouping, stack preservation, gesture, inventory
+Run `./gradlew test` for the grouping, stack combining, metadata preservation, gesture, inventory
 target, and event handling tests. Behavioral tests use MockBukkit's available
 26.2 registry harness; production code compiles against Paper 26.3. Verify the
 gesture with your Minecraft client on a Paper 26.3 test server before deploying
@@ -91,4 +106,4 @@ Set a unique `version` in `gradle.properties`, then run:
 
 The default channel is `Release` and declared compatibility is Paper `26.3`.
 Override with `-PhangarProject=your-slug`, `-PhangarChannel=Snapshot`, or
-`-Pversion=0.1.1` as needed. Custom channels must exist on Hangar first.
+`-Pversion=0.2.1` as needed. Custom channels must exist on Hangar first.

@@ -69,7 +69,7 @@ class SortingControlsTest extends PaperTest {
         tasks.getFirst().run();
         verify(inventory).setItem(9, null);
         verify(inventory).setItem(35, null);
-        verify(player).sendMessage("Inventory sorted by group and item type.");
+        verify(player).sendMessage("Inventory sorted; matching stacks combined.");
     }
 
     @Test
@@ -147,6 +147,25 @@ class SortingControlsTest extends PaperTest {
         controls.quit(quit);
         controls.click(event);
         assertTrue(tasks.isEmpty());
+    }
+
+    @Test
+    void sortsPlayerStorageWhileFurnaceOrCraftingTableIsOpen() {
+        for (InventoryType type : new InventoryType[]{InventoryType.FURNACE, InventoryType.WORKBENCH}) {
+            Inventory top = mock(Inventory.class);
+            when(top.getType()).thenReturn(type);
+            when(view.getTopInventory()).thenReturn(top);
+            when(view.getType()).thenReturn(type);
+            when(event.getRawSlot()).thenReturn(type == InventoryType.FURNACE ? 3 : 10);
+            tasks.clear();
+            controls.click(event);
+            controls.click(event);
+            assertEquals(1, tasks.size());
+            tasks.getFirst().run();
+            assertTrue(controls.onCommand(player, mock(Command.class), "sort", new String[0]));
+            verify(top, never()).setItem(anyInt(), any());
+        }
+        verify(inventory, org.mockito.Mockito.times(4)).setItem(9, null);
     }
 
     @Test

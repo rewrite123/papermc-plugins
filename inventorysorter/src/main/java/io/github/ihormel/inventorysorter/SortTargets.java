@@ -37,16 +37,14 @@ final class SortTargets {
         return supported ? new Target(top, 0, top.getSize()) : null;
     }
 
+    /** Player storage can be sorted under any screen that shows it, e.g. crafting tables and furnaces. */
     static boolean supportedView(Player player, InventoryView view) {
-        return container(player, view) != null
-                || ((view.getType() == InventoryType.CRAFTING || view.getType() == InventoryType.PLAYER)
-                    && view.getBottomInventory() == player.getInventory());
+        return view.getBottomInventory() == player.getInventory();
     }
 
     static Target clicked(Player player, InventoryView view, Inventory clicked, int slot) {
-        if (!supportedView(player, view)) return null;
         if (clicked == player.getInventory()) {
-            return slot >= 9 && slot < 36 ? player(player) : null;
+            return supportedView(player, view) && slot >= 9 && slot < 36 ? player(player) : null;
         }
         Target target = container(player, view);
         return target != null && clicked == target.inventory() && slot >= 0 && slot < target.end()

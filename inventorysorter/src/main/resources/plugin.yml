@@ -2,10 +2,10 @@ name: inventorysorter
 version: '${version}'
 main: io.github.ihormel.inventorysorter.InventorySorterPlugin
 api-version: '26.3'
-description: Shift-double-click an empty slot to sort inventory by group and item type.
+description: Shift-double-click an empty slot to combine stacks and sort inventory by group and item type.
 commands:
   sort:
-    description: Sort an open storage container or your main inventory.
+    description: Sort an open storage container or your main inventory (works under any screen).
     usage: /sort [player|container]
     permission: inventorysorter.use
 permissions:

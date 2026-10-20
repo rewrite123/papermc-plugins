@@ -3,6 +3,7 @@ package io.github.ihormel.inventorysorter;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -115,12 +116,75 @@ class InventorySortingTest extends PaperTest {
 
         InventorySorting.sort(inventory, 0, 27);
 
-        assertEquals(carrots, inventory.getItem(0));
-        assertEquals(otherCarrots, inventory.getItem(1));
-        assertEquals(originalTool, inventory.getItem(2));
-        assertNotNull(inventory.getItem(2).getItemMeta().displayName());
-        assertEquals(3, java.util.Arrays.stream(inventory.getContents())
+        assertEquals(new ItemStack(Material.CARROT, 49), inventory.getItem(0));
+        assertEquals(originalTool, inventory.getItem(1));
+        assertNotNull(inventory.getItem(1).getItemMeta().displayName());
+        assertEquals(2, java.util.Arrays.stream(inventory.getContents())
                 .filter(stack -> !InventorySorting.empty(stack)).count());
+    }
+
+    @Test
+    void combinesMatchingStacksUpToTheirStackSize() {
+        Inventory inventory = MockBukkit.getMock().createInventory(null, 9);
+        inventory.setItem(0, new ItemStack(Material.STONE, 40));
+        inventory.setItem(2, new ItemStack(Material.CARROT, 10));
+        inventory.setItem(3, new ItemStack(Material.STONE, 40));
+        inventory.setItem(5, new ItemStack(Material.ENDER_PEARL, 10));
+        inventory.setItem(6, new ItemStack(Material.ENDER_PEARL, 10));
+        inventory.setItem(7, new ItemStack(Material.STONE, 5));
+        inventory.setItem(8, new ItemStack(Material.CARROT, 7));
+
+        InventorySorting.sort(inventory, 0, 9);
+
+        assertEquals(new ItemStack(Material.STONE, 64), inventory.getItem(0));
+        assertEquals(new ItemStack(Material.STONE, 21), inventory.getItem(1));
+        assertEquals(new ItemStack(Material.CARROT, 17), inventory.getItem(2));
+        assertEquals(new ItemStack(Material.ENDER_PEARL, 16), inventory.getItem(3));
+        assertEquals(new ItemStack(Material.ENDER_PEARL, 4), inventory.getItem(4));
+        for (int slot = 5; slot < 9; slot++) assertNull(inventory.getItem(slot));
+    }
+
+    @Test
+    void neverCombinesDifferentMetadataOrUnstackableItems() {
+        ItemStack named = new ItemStack(Material.DIAMOND, 5);
+        var meta = named.getItemMeta();
+        meta.displayName(Component.text("Lucky"));
+        named.setItemMeta(meta);
+        ItemStack plain = new ItemStack(Material.DIAMOND, 5);
+        ItemStack sword = new ItemStack(Material.IRON_SWORD);
+        ItemStack[] result = InventorySorting.sorted(new ItemStack[]{named, sword, plain, sword.clone()});
+
+        assertEquals(named, result[0]);
+        assertEquals(plain, result[1]);
+        assertEquals(sword, result[2]);
+        assertEquals(sword, result[3]);
+        assertEquals(5, result[0].getAmount());
+        assertEquals(5, result[1].getAmount());
+    }
+
+    @Test
+    void combiningDoesNotModifyInputStacksAndRespectsInventoryLimit() {
+        ItemStack first = new ItemStack(Material.STONE, 10);
+        ItemStack second = new ItemStack(Material.STONE, 10);
+        ItemStack third = new ItemStack(Material.STONE, 10);
+        ItemStack[] result = InventorySorting.sorted(new ItemStack[]{first, second, third}, 16);
+
+        assertEquals(10, first.getAmount());
+        assertEquals(10, second.getAmount());
+        assertEquals(10, third.getAmount());
+        assertEquals(16, result[0].getAmount());
+        assertEquals(14, result[1].getAmount());
+        assertNull(result[2]);
+    }
+
+    @Test
+    void leavesOverstackedItemsWhole() {
+        ItemStack big = new ItemStack(Material.STONE, 64);
+        big.setAmount(80);
+        ItemStack small = new ItemStack(Material.STONE, 3);
+        ItemStack[] result = InventorySorting.sorted(new ItemStack[]{big, small});
+        assertEquals(80, result[0].getAmount());
+        assertEquals(3, result[1].getAmount());
     }
 
     private ItemStack item(Material material, int amount) {

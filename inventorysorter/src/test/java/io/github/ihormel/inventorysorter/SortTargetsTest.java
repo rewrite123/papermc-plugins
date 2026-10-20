@@ -1,6 +1,7 @@
 package io.github.ihormel.inventorysorter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -62,14 +63,27 @@ class SortTargetsTest extends PaperTest {
     }
 
     @Test
-    void rejectsCustomMenusAndProcessingInventoriesEvenForPlayerClicks() {
+    void processingScreensAndCustomMenusSortOnlyPlayerStorage() {
         for (InventoryType type : new InventoryType[]{InventoryType.CHEST, InventoryType.FURNACE,
-                InventoryType.ANVIL, InventoryType.MERCHANT, InventoryType.WORKBENCH}) {
+                InventoryType.BLAST_FURNACE, InventoryType.SMOKER, InventoryType.ANVIL,
+                InventoryType.MERCHANT, InventoryType.WORKBENCH, InventoryType.ENCHANTING,
+                InventoryType.BREWING, InventoryType.HOPPER, InventoryType.DISPENSER}) {
             when(view.getType()).thenReturn(type);
             when(top.getType()).thenReturn(type);
+            when(top.getSize()).thenReturn(9);
+            assertTrue(SortTargets.supportedView(player, view));
             assertNull(SortTargets.container(player, view));
-            assertNull(SortTargets.clicked(player, view, storage, 9));
+            assertNull(SortTargets.clicked(player, view, top, 0));
+            assertEquals(SortTargets.player(player), SortTargets.clicked(player, view, storage, 9));
+            assertNull(SortTargets.clicked(player, view, storage, 0));
         }
+    }
+
+    @Test
+    void refusesViewsThatDoNotShowThePlayersOwnInventory() {
+        when(view.getBottomInventory()).thenReturn(mock(PlayerInventory.class));
+        assertFalse(SortTargets.supportedView(player, view));
+        assertNull(SortTargets.clicked(player, view, storage, 9));
     }
 
     private void checkContainer(InventoryType type, InventoryHolder holder, int size) {
