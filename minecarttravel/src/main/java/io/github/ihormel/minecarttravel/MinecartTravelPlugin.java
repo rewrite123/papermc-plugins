@@ -132,6 +132,26 @@ public class MinecartTravelPlugin extends JavaPlugin implements TabExecutor {
                         + travel.settings().describe(TravelSettings.Option.MIN_SPEED) + " to qualify.");
                 return true;
             }
+            case "boost", "fasttravel" -> {
+                if (args.length > 2) return false;
+                boolean boost = sub.equals("boost");
+                boolean current = boost ? travel.boostEnabled(player) : travel.fastTravelEnabled(player);
+                boolean enable;
+                if (args.length == 1) {
+                    enable = !current;
+                } else if (args[1].equalsIgnoreCase("on")) {
+                    enable = true;
+                } else if (args[1].equalsIgnoreCase("off")) {
+                    enable = false;
+                } else {
+                    return false;
+                }
+                if (boost) travel.boost(player, enable);
+                else travel.fastTravel(player, enable);
+                player.sendMessage((boost ? "Minecart speed boost " : "Minecart fast travel ")
+                        + (enable ? "turned on." : "turned off.") + " " + travel.preferences(player));
+                return true;
+            }
             case "register" -> {
                 if (!player.hasPermission(REGISTER)) {
                     player.sendMessage("You do not have permission to register fast-travel routes.");
@@ -156,8 +176,10 @@ public class MinecartTravelPlugin extends JavaPlugin implements TabExecutor {
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         List<String> options;
         if (args.length == 1) {
-            options = new ArrayList<>(List.of("normal", "fast", "status", "register", "settings"));
+            options = new ArrayList<>(List.of("normal", "fast", "boost", "fasttravel", "status", "register", "settings"));
             if (sender.hasPermission(ADMIN)) options.addAll(List.of("set", "rescan"));
+        } else if (args.length == 2 && (args[0].equalsIgnoreCase("boost") || args[0].equalsIgnoreCase("fasttravel"))) {
+            options = List.of("on", "off");
         } else if (args.length == 2 && args[0].equalsIgnoreCase("register")) {
             options = List.of("cancel");
         } else if (args.length == 2 && args[0].equalsIgnoreCase("set") && sender.hasPermission(ADMIN)) {

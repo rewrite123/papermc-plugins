@@ -33,6 +33,8 @@ final class TravelEngine implements Listener {
     private final java.util.function.Predicate<Minecart> recording;
     private TravelSettings settings;
     private final NamespacedKey normalKey;
+    private final NamespacedKey noBoostKey;
+    private final NamespacedKey noFastTravelKey;
     private final NamespacedKey originalSpeedKey;
     private final Map<UUID, Ride> rides = new HashMap<>();
     private long tick;
@@ -67,6 +69,8 @@ final class TravelEngine implements Listener {
         this.settings = settings;
         this.recording = recording;
         normalKey = new NamespacedKey(plugin, "normal_mode");
+        noBoostKey = new NamespacedKey(plugin, "no_boost");
+        noFastTravelKey = new NamespacedKey(plugin, "no_fast_travel");
         originalSpeedKey = new NamespacedKey(plugin, "original_speed");
     }
 
@@ -78,20 +82,59 @@ final class TravelEngine implements Listener {
         this.settings = settings;
     }
 
+    /** True when the player has opted out of both the speed boost and fast travel. */
     boolean normal(Player player) {
         return player.getPersistentDataContainer().has(normalKey, PersistentDataType.BYTE);
     }
 
+    boolean boostEnabled(Player player) {
+        return !normal(player) && !player.getPersistentDataContainer().has(noBoostKey, PersistentDataType.BYTE);
+    }
+
+    boolean fastTravelEnabled(Player player) {
+        return !normal(player) && !player.getPersistentDataContainer().has(noFastTravelKey, PersistentDataType.BYTE);
+    }
+
     void mode(Player player, boolean normal) {
-        if (normal) player.getPersistentDataContainer().set(normalKey, PersistentDataType.BYTE, (byte) 1);
-        else player.getPersistentDataContainer().remove(normalKey);
-        if (player.getVehicle() instanceof Minecart cart) remove(cart);
+        var data = player.getPersistentDataContainer();
+        data.remove(noBoostKey);
+        data.remove(noFastTravelKey);
+        if (normal) data.set(normalKey, PersistentDataType.BYTE, (byte) 1);
+        else data.remove(normalKey);
+        if (normal && player.getVehicle() instanceof Minecart cart) remove(cart);
+    }
+
+    void boost(Player player, boolean enabled) {
+        preferences(player, enabled, fastTravelEnabled(player));
+    }
+
+    void fastTravel(Player player, boolean enabled) {
+        preferences(player, boostEnabled(player), enabled);
+    }
+
+    // Opting out of both is stored as the original normal-mode flag so 0.1.x/0.2.0 preferences keep working.
+    private void preferences(Player player, boolean boost, boolean fastTravel) {
+        if (!boost && !fastTravel) {
+            mode(player, true);
+            return;
+        }
+        var data = player.getPersistentDataContainer();
+        data.remove(normalKey);
+        if (boost) data.remove(noBoostKey);
+        else data.set(noBoostKey, PersistentDataType.BYTE, (byte) 1);
+        if (fastTravel) data.remove(noFastTravelKey);
+        else data.set(noFastTravelKey, PersistentDataType.BYTE, (byte) 1);
+    }
+
+    String preferences(Player player) {
+        return "Speed boost: " + (boostEnabled(player) ? "on" : "off")
+                + ". Fast travel: " + (fastTravelEnabled(player) ? "on" : "off") + ".";
     }
 
     String status(Player player) {
         var ride = player.getVehicle() == null ? null : rides.get(player.getVehicle().getUniqueId());
-        var text = new StringBuilder("Mode: ").append(normal(player) ? "normal" : "fast")
-                .append(". Qualifying travel: ").append(ride == null ? 0 : ride.clock.ticks() / 20).append("s.");
+        var text = new StringBuilder(preferences(player))
+                .append(" Qualifying travel: ").append(ride == null ? 0 : ride.clock.ticks() / 20).append("s.");
         if (player.getVehicle() instanceof Minecart cart) {
             var pos = TrackSafety.railUnder(cart.getLocation());
             var hit = pos == null ? null : registry.at(pos);
@@ -124,7 +167,7 @@ final class TravelEngine implements Listener {
                 settings.minimumSpeed(), settings.boostSpeed());
         ride.previous = location;
         ride.lastTick = tick;
-        if (ride.clock.ticks() >= settings.boostTicks() && pos != null) {
+        if (ride.clock.ticks() >= settings.boostTicks() && pos != null && boostAllowed(cart)) {
             var data = cart.getWorld().getBlockAt(pos.x(), pos.y(), pos.z()).getBlockData();
             var shape = RailShape.of((org.bukkit.block.data.Rail) data);
             var direction = TrackSafety.direction(shape, cart.getVelocity());
@@ -144,7 +187,8 @@ final class TravelEngine implements Listener {
         }
         if (ride.clock.ticks() >= settings.fastTicks() && pos != null
                 && cart instanceof RideableMinecart && !recording.test(cart)
-                && cart.getPassengers().size() == 1 && cart.getPassengers().getFirst() instanceof Player player) {
+                && cart.getPassengers().size() == 1 && cart.getPassengers().getFirst() instanceof Player player
+                && fastTravelEnabled(player)) {
             var data = cart.getWorld().getBlockAt(pos.x(), pos.y(), pos.z()).getBlockData();
             var hit = data instanceof org.bukkit.block.data.Rail rail ? registry.at(pos, RailShape.of(rail)) : null;
             if (hit == null || registry.unverified.contains(pos.chunk())) {
@@ -179,6 +223,10 @@ final class TravelEngine implements Listener {
                 continue;
             }
             if (ride.destination == null || ride.transferring) continue;
+            if (!fastTravelEnabled(ride.rider)) {
+                abort(ride, "Fast travel cancelled because you turned it off.");
+                continue;
+            }
             if (!ride.rider.isOnline() || ride.cart.getPassengers().size() != 1
                     || !ride.cart.getPassengers().contains(ride.rider)) {
                 abort(ride, "Fast travel cancelled because the rider changed.");
@@ -238,7 +286,7 @@ final class TravelEngine implements Listener {
     private void teleport(Ride ride) {
         if (!registry.contains(ride.route) || !enabled(ride.cart) || !destinationReady(ride)
                 || !TrackSafety.arrivalClear(ride.cart, ride.destination)
-                || ride.rider == null || !ride.rider.isOnline()
+                || ride.rider == null || !ride.rider.isOnline() || !fastTravelEnabled(ride.rider)
                 || !ride.cart.getPassengers().equals(List.of(ride.rider))) {
             abort(ride, "Fast travel cancelled: the route or arrival area is no longer safe.");
             return;
@@ -262,6 +310,13 @@ final class TravelEngine implements Listener {
             if (passenger instanceof Player player && (normal(player)
                     || !player.hasPermission("minecarttravel.use") || player.isDead()
                     || player.getGameMode() == org.bukkit.GameMode.SPECTATOR)) return false;
+        }
+        return true;
+    }
+
+    private boolean boostAllowed(Minecart cart) {
+        for (var passenger : cart.getPassengers()) {
+            if (passenger instanceof Player player && !boostEnabled(player)) return false;
         }
         return true;
     }

@@ -3,7 +3,12 @@
 Automatic minecart speed boosts and lodestone-to-lodestone fast travel for
 **Paper 26.3 / Java 25**, with no runtime dependencies.
 
-**Latest release:** [MinecartTravel 0.2.0 on Hangar](https://hangar.papermc.io/rewrite123/minecarttravel/versions/0.2.0).
+**Latest release:** [MinecartTravel 0.2.1 on Hangar](https://hangar.papermc.io/rewrite123/minecarttravel/versions/0.2.1).
+
+**What's new in 0.2.1:** players can opt out of the speed boost and fast travel
+separately with `/minecarttravel boost [on|off]` and
+`/minecarttravel fasttravel [on|off]`. For example, keep fast travel but ride at
+vanilla speed, or keep the boost but never be teleported.
 
 **What's new in 0.2.0:**
 
@@ -20,7 +25,7 @@ above the rail must be passable (air, torches, and redstone torches are fine).
 
 ## Riding
 
-Fast mode is enabled by default. Travel continuously **above 6 blocks/second**:
+The speed boost and fast travel are both on by default. Travel continuously **above 6 blocks/second**:
 
 | Qualifying game time | Effect |
 |---|---|
@@ -37,17 +42,30 @@ traveling at or below the minimum speed, derailing, dismounting, changing riders
 unloading, or external teleporting resets it. The first sample initializes the
 timer, so a new ride needs a full 600 qualifying movement samples.
 
-`/minecarttravel normal` opts out. `/minecarttravel fast` opts back in.
-`/minecarttravel status` reports mode, qualifying time, and whether the current
-rail is on a registered route.
-`/minecartfasttravel` is an alias. Modes persist across restarts and reconnects.
+Each player chooses which features they want:
+
+| Command | Effect |
+|---|---|
+| `/minecarttravel boost off` | Ride at vanilla speed; fast travel still works |
+| `/minecarttravel fasttravel off` | Keep the speed boost; never teleport (and no "register this line" hint) |
+| `/minecarttravel normal` | Turn both off |
+| `/minecarttravel fast` | Turn both back on |
+
+Use `on` to re-enable one feature, or leave off `on`/`off` to toggle it.
+`/minecarttravel status` reports both settings, qualifying time, and whether the
+current rail is on a registered route.
+`/minecartfasttravel` is an alias. Choices persist across restarts and reconnects.
+The qualifying timer keeps running with the boost off, so fast travel still
+triggers after the fast-travel delay. Turning fast travel off while your arrival
+is being prepared cancels that trip.
 `minecarttravel.use` is granted to everyone by default. Players without it do
 not get boosts or endpoint travel. There are no fees.
 
 All minecart variants, including empty and cargo carts, can earn the physical
 boost. Endpoint teleporting requires a rideable minecart with **exactly one
-player rider**. Carts with animals or cargo are not teleported. An opted-out or
-unauthorized player passenger suppresses the cart's boost.
+player rider** who has fast travel on. Carts with animals or cargo are not
+teleported. Any player passenger with the boost off, or without permission,
+suppresses the cart's boost.
 
 ## Safe speed boosts
 
@@ -74,8 +92,10 @@ on the next cart update after an interrupted boosted ride.
 
 | Command | Who | Effect |
 |---|---|---|
-| `/minecarttravel` or `/minecarttravel status` | everyone | Mode, qualifying time, and whether you are on a registered line |
-| `/minecarttravel normal` / `fast` | everyone | Opt out of / back in to boosts and fast travel |
+| `/minecarttravel` or `/minecarttravel status` | everyone | Your boost and fast-travel choices, qualifying time, and whether you are on a registered line |
+| `/minecarttravel boost [on\|off]` | everyone | Turn your speed boost on or off (toggles without an argument) |
+| `/minecarttravel fasttravel [on\|off]` | everyone | Turn your fast travel on or off (toggles without an argument) |
+| `/minecarttravel normal` / `fast` | everyone | Turn both off / both on |
 | `/minecarttravel register` | `minecarttravel.register` (everyone by default) | Register the line you ride next |
 | `/minecarttravel register cancel` | same | Stop a pending or active registration |
 | `/minecarttravel settings` | everyone | Show the current timing and speed settings |
@@ -186,13 +206,13 @@ naturally removes its straight-line speed advantage.
 ## Build and install
 
 Download the compiled plugin from
-[Hangar](https://hangar.papermc.io/rewrite123/minecarttravel/versions/0.2.0), or build it:
+[Hangar](https://hangar.papermc.io/rewrite123/minecarttravel/versions/0.2.1), or build it:
 
 ```sh
 ./gradlew build
 ```
 
-Copy `build/libs/minecarttravel-0.2.0.jar` into your Paper server's `plugins/`
+Copy `build/libs/minecarttravel-0.2.1.jar` into your Paper server's `plugins/`
 directory and restart using Java 25. Gradle runs on Java 17+ and provisions
 Java 25 when needed; Windows users can use `gradlew.bat`. No configuration is
 required.
@@ -200,7 +220,7 @@ required.
 `./gradlew test` covers ride recording (straight, curves, slopes, boosted carts,
 junctions, limits, failures, unloaded track), route storage and lookup,
 invalidation from block changes and chunk loads, admin settings, commands,
-timing, mode preferences, and travel safety. MockBukkit uses Paper 26.2 registry
+timing, per-player boost and fast-travel opt-outs, and travel safety. MockBukkit uses Paper 26.2 registry
 data; production compiles against 26.3. Before production use, smoke-test
 registration, junction switching on a registered line, 90-block/second
 straight-line movement, curves, slopes, braking, chunk boundaries, disconnects
@@ -208,15 +228,20 @@ during preparation, passenger retention, and protection-plugin teleport
 cancellation on a real Paper 26.3 server. The target speed is configured and
 tested mathematically; a live-server movement benchmark is not claimed.
 
-### Upgrading from 0.1.x
+### Upgrading
+
+From 0.2.0, replace the JAR and restart; routes, settings, and player choices
+carry over.
+
+From 0.1.x:
 
 1. Stop the server.
 2. Remove the old `minecarttravel-0.1.x.jar` from `plugins/` and replace it with
-   `minecarttravel-0.2.0.jar`. Do not keep both versions installed.
+   `minecarttravel-0.2.1.jar`. Do not keep both versions installed.
 3. Start the server. Your `config.yml` keeps working: the two renamed work-budget
    keys (`verify-blocks-per-tick`, `record-steps-per-tick`) fall back to their
    defaults, and the old `scan-blocks-per-tick` / `route-steps-per-tick` keys are
-   ignored. Player modes are preserved.
+   ignored. Players who chose normal mode stay opted out of both features.
 4. Register each fast-travel line once with `/minecarttravel register`. Lines
    tracked by 0.1.x are not migrated; `plugins/minecarttravel/rail-graph.txt` is
    no longer used and can be deleted.
@@ -224,7 +249,7 @@ tested mathematically; a live-server movement benchmark is not claimed.
 ## Hangar
 
 Published project: [rewrite123/minecarttravel](https://hangar.papermc.io/rewrite123/minecarttravel).
-Version **0.2.0** is available on the **Release** channel for Paper **26.3**.
+Version **0.2.1** is available on the **Release** channel for Paper **26.3**.
 
 Publishing uses [HangarMC's official plugin](https://github.com/HangarMC/hangar-publish-plugin).
 For a future release, set a new, unique version in `gradle.properties`, set

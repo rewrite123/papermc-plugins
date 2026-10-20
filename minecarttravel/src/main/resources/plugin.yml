@@ -6,7 +6,7 @@ description: Timed minecart boosts and fast travel along registered lodestone ra
 commands:
   minecarttravel:
     description: Choose minecart mode, register fast-travel routes, and view or change settings.
-    usage: /minecarttravel [normal|fast|status|register [cancel]|settings|set <setting> <value>|rescan]
+    usage: /minecarttravel [normal|fast|boost [on|off]|fasttravel [on|off]|status|register [cancel]|settings|set <setting> <value>|rescan]
     aliases: [minecartfasttravel]
     permission: minecarttravel.use
 permissions:

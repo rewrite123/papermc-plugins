@@ -25,6 +25,20 @@ class PluginTest extends PaperTest {
         assertTrue(player.getPersistentDataContainer().has(new NamespacedKey(plugin, "normal_mode")));
         assertTrue(server.dispatchCommand(player, "minecartfasttravel fast"));
         assertFalse(player.getPersistentDataContainer().has(new NamespacedKey(plugin, "normal_mode")));
+        drain(player);
+        server.dispatchCommand(player, "minecarttravel boost off");
+        assertEquals("Minecart speed boost turned off. Speed boost: off. Fast travel: on.", player.nextMessage());
+        server.dispatchCommand(player, "minecarttravel fasttravel");
+        assertEquals("Minecart fast travel turned off. Speed boost: off. Fast travel: off.", player.nextMessage());
+        assertTrue(player.getPersistentDataContainer().has(new NamespacedKey(plugin, "normal_mode")));
+        server.dispatchCommand(player, "minecarttravel fasttravel on");
+        assertEquals("Minecart fast travel turned on. Speed boost: off. Fast travel: on.", player.nextMessage());
+        server.dispatchCommand(player, "minecarttravel status");
+        assertTrue(player.nextMessage().startsWith("Speed boost: off. Fast travel: on."));
+        assertEquals(List.of("on", "off"), plugin.onTabComplete(player, plugin.getCommand("minecarttravel"),
+                "minecarttravel", new String[] {"boost", ""}));
+        assertEquals(List.of("fast", "fasttravel"), plugin.onTabComplete(player, plugin.getCommand("minecarttravel"),
+                "minecarttravel", new String[] {"fa"}));
         server.getPluginManager().disablePlugin(plugin);
     }
 

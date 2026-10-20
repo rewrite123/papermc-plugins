@@ -389,4 +389,79 @@ class TravelEngineTest extends PaperTest {
         assertEquals(3.0, maxSpeed);
         assertEquals(60, velocity.length() * 20, 1e-9);
     }
+
+    @Test
+    void boostOptOutStillFastTravels() {
+        engine.boost(player, false);
+        assertFalse(engine.boostEnabled(player));
+        assertTrue(engine.fastTravelEnabled(player));
+        ride(4);
+        assertEquals(0.4, maxSpeed);
+        ride(5);
+        engine.tick();
+        assertEquals(9, tickets.size());
+        server.getScheduler().performOneTick();
+        engine.tick();
+        assertEquals(63.5, location.getX());
+        assertEquals(0.4, maxSpeed);
+    }
+
+    @Test
+    void fastTravelOptOutStillBoostsButNeverTeleportsOrHints() {
+        registry.remove(route);
+        engine.fastTravel(player, false);
+        ride(4);
+        assertEquals(4.5, maxSpeed);
+        ride(20);
+        engine.tick();
+        assertTrue(tickets.isEmpty());
+        verify(player, never()).sendMessage(contains("not registered"));
+        registry.add(route);
+        ride(5);
+        engine.tick();
+        assertTrue(tickets.isEmpty());
+        verify(cart, never()).teleport(any(Location.class), eq(PlayerTeleportEvent.TeleportCause.PLUGIN));
+    }
+
+    @Test
+    void turningFastTravelOffDuringPreparationCancelsIt() {
+        prepareArrival();
+        engine.fastTravel(player, false);
+        engine.tick();
+        verify(player).sendMessage("Fast travel cancelled because you turned it off.");
+        verify(cart, never()).teleport(any(Location.class), eq(PlayerTeleportEvent.TeleportCause.PLUGIN));
+        for (var chunk : tickets) verify(chunk).removePluginChunkTicket(plugin);
+    }
+
+    @Test
+    void turningBoostOffMidRideRestoresVanillaSpeedWithoutResettingTheTimer() {
+        ride(4);
+        assertEquals(4.5, maxSpeed);
+        engine.boost(player, false);
+        ride(1);
+        assertEquals(0.4, maxSpeed);
+        ride(4);
+        engine.tick();
+        assertEquals(9, tickets.size());
+    }
+
+    @Test
+    void separateOptOutsCombineWithNormalAndFastModes() {
+        engine.boost(player, false);
+        engine.fastTravel(player, false);
+        assertTrue(engine.normal(player));
+        assertEquals("Speed boost: off. Fast travel: off.", engine.preferences(player));
+        engine.boost(player, true);
+        assertFalse(engine.normal(player));
+        assertTrue(engine.boostEnabled(player));
+        assertFalse(engine.fastTravelEnabled(player));
+        var restarted = new TravelEngine(plugin, registry, settings(3, 8), unused -> recording);
+        assertEquals("Speed boost: on. Fast travel: off.", restarted.preferences(player));
+        engine.mode(player, false);
+        assertEquals("Speed boost: on. Fast travel: on.", engine.preferences(player));
+        engine.fastTravel(player, false);
+        engine.mode(player, true);
+        engine.fastTravel(player, true);
+        assertEquals("Speed boost: off. Fast travel: on.", engine.preferences(player));
+    }
 }
