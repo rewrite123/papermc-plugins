@@ -36,9 +36,14 @@ final class GemItems {
         requiredKey = new NamespacedKey(plugin, "required");
     }
 
+    /**
+     * Uncharged gems are real shards. Charged gems are lapis lazuli underneath, because the
+     * vanilla enchanting table only accepts lapis as fuel, but they keep the shard's model.
+     */
     ItemStack create(Kind kind, boolean charged) {
-        ItemStack item = new ItemStack(kind.material);
+        ItemStack item = new ItemStack(charged ? Material.LAPIS_LAZULI : kind.material);
         var meta = item.getItemMeta();
+        if (charged) meta.setItemModel(kind.material.getKey());
         meta.getPersistentDataContainer().set(kindKey, PersistentDataType.STRING, kind.name());
         meta.getPersistentDataContainer().set(chargedKey, PersistentDataType.BYTE, (byte) (charged ? 1 : 0));
         meta.setMaxStackSize(charged ? 64 : 1);
@@ -56,15 +61,35 @@ final class GemItems {
         if (!marked(item)) return null;
         var data = item.getItemMeta().getPersistentDataContainer();
         String value = data.get(kindKey, PersistentDataType.STRING);
+        boolean charged = chargedFlag(item);
         for (Kind kind : Kind.values()) {
-            if (kind.name().equals(value) && item.getType() == kind.material) return kind;
+            if (kind.name().equals(value)
+                    && item.getType() == (charged ? Material.LAPIS_LAZULI : kind.material)) return kind;
         }
         return null;
     }
 
-    boolean charged(ItemStack item) {
-        return kind(item) != null && Byte.valueOf((byte) 1).equals(
+    private boolean chargedFlag(ItemStack item) {
+        return Byte.valueOf((byte) 1).equals(
                 item.getItemMeta().getPersistentDataContainer().get(chargedKey, PersistentDataType.BYTE));
+    }
+
+    boolean charged(ItemStack item) {
+        return kind(item) != null && chargedFlag(item);
+    }
+
+    /** Converts a 0.1.x charged gem (a charged shard) to the current lapis-based form, or returns null. */
+    ItemStack upgradeLegacy(ItemStack item) {
+        if (!marked(item) || !chargedFlag(item)) return null;
+        String value = item.getItemMeta().getPersistentDataContainer().get(kindKey, PersistentDataType.STRING);
+        for (Kind kind : Kind.values()) {
+            if (kind.name().equals(value) && item.getType() == kind.material) {
+                ItemStack upgraded = create(kind, true);
+                upgraded.setAmount(item.getAmount());
+                return upgraded;
+            }
+        }
+        return null;
     }
 
     int progress(ItemStack item) {
@@ -97,7 +122,7 @@ final class GemItems {
                 kind == Kind.ECHO ? NamedTextColor.AQUA : NamedTextColor.LIGHT_PURPLE));
         List<Component> lore = new ArrayList<>();
         if (charged) {
-            lore.add(Component.text("Off-hand: enchanting-table fuel.", NamedTextColor.GRAY));
+            lore.add(Component.text("Enchanting-table fuel: use instead of lapis.", NamedTextColor.GRAY));
             lore.add(Component.text(kind == Kind.ECHO
                     ? "Rolled enchantments gain +1 level." : "Normal enchanting-table power.", NamedTextColor.GRAY));
         } else {

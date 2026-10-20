@@ -4,7 +4,7 @@ Craft soul gems, charge them with newly earned XP, and use them instead of lapis
 to enchant or upgrade gear. For **Paper 26.3 / Java 25**, with no runtime
 dependencies or required resource pack.
 
-**Latest release:** [SoulGem 0.1.0 on Hangar](https://hangar.papermc.io/rewrite123/soulgem/versions/0.1.0).
+**Latest release:** [SoulGem 0.2.0 on Hangar](https://hangar.papermc.io/rewrite123/soulgem/versions/0.2.0).
 
 ## Crafting and charging
 
@@ -12,8 +12,8 @@ Both recipes are shapeless and produce **one uncharged gem**:
 
 | Ingredients | Result | Appearance |
 |---|---|---|
-| 1 lapis lazuli + 1 amethyst shard | Soul Gem | Named amethyst shard |
-| 1 lapis lazuli + 1 echo shard | Echo Soul Gem | Named echo shard |
+| 1 lapis lazuli + 1 amethyst shard | Soul Gem | Amethyst shard |
+| 1 lapis lazuli + 1 echo shard | Echo Soul Gem | Echo shard |
 
 Hold one uncharged gem in your **off-hand** and earn XP. The gem absorbs newly
 earned XP until it contains the full amount needed to advance from your current
@@ -37,14 +37,10 @@ recipes as if they were ordinary shards.
 
 ## Enchanting and upgrading
 
-1. Hold **one piece of gear or one book in your main hand**.
-2. Put **charged gems of one kind in your off-hand**.
-3. Right-click an enchanting table with an empty cursor.
-4. Click one of the three offers in the **Soul Gem Enchanting** menu.
-
-The menu shows the resulting enchantments, minimum player level, and price.
-Its items are display copies, not storage slots; your real gear and gems stay
-in your hands until the purchase succeeds.
+SoulGem uses the **normal vanilla enchanting table screen**. Put your gear or
+book in the item slot and **charged soul gems in the lapis slot**, then pick
+an offer exactly as in vanilla. Offers, bookshelf power, previews, and seeds
+are all vanilla:
 
 | Offer | Charged gems consumed | Player levels consumed |
 |---|---|---|
@@ -52,60 +48,54 @@ in your hands until the purchase succeeds.
 | 2 | 2 | 2 |
 | 3 | 3 | 3 |
 
-Minimum-level offers use vanilla enchanting-table bookshelf formulas, capped
-at 15 effective bookshelves; the third offer requires level 30 at full power.
-Bookshelves need the normal clear gap. Obstructed or unloaded shelves do not
-count, and the plugin never loads neighboring chunks. Vanilla
-enchantment-power-provider/transmitter block tags are respected.
-There is no free creative-mode bypass.
+Plain lapis lazuli no longer produces offers; the action bar explains that
+soul gems are needed. In creative mode, an empty fuel slot still works as in
+vanilla. Don't mix gem kinds: the fuel slot holds one stack.
 
-**Amethyst gems** use the server's enchanting-table enchantment pool and normal
-enchantment levels. **Echo gems** raise each newly rolled enchantment by one,
-up to its vanilla maximum +1: for example, Sharpness V becomes Sharpness VI,
-Protection IV becomes Protection V, and a level-I-only enchantment can become II.
-This does not add treasure-only enchantments such as Mending to the table pool.
-Some enchantments have little or no extra effect above their vanilla maximum.
+**Amethyst gems** give the normal vanilla roll. **Echo gems** raise each rolled
+enchantment by one, up to its vanilla maximum +1 (Sharpness V becomes
+Sharpness VI, Protection IV becomes Protection V, and level-I-only enchantments
+can become II). The hover preview already shows the boosted level. Treasure
+enchantments such as Mending are not added to the pool, and some enchantments
+have little extra effect above their vanilla maximum.
 
-Already-enchanted gear and enchanted books can be upgraded. Existing
-enchantments, names, durability, lore, and persistent metadata are preserved.
-New enchantments must be compatible with the existing ones; lower rolls do not
-reduce existing levels. Existing above-cap enchantments are not reduced.
-An offer that would make no improvement is disabled and costs nothing.
-Repeated echo enchants do not raise an enchantment indefinitely: only new rolls
-receive +1, never the item's existing level.
+**Already-enchanted gear can be upgraded**: vanilla greys out the table for
+enchanted items, but SoulGem re-enables it. Existing enchantments, names,
+durability, and lore are kept. Only rolled enchantments that raise a level and
+don't conflict with what the item already has are applied; lower rolls never
+reduce a level. If an offer would not improve the item, the click is refused
+and nothing is consumed. Pick another offer or change your bookshelves to
+reroll. Echo gems only boost new rolls, never existing levels, so repeated
+enchanting cannot climb indefinitely. Enchanted books can't be re-enchanted
+(vanilla doesn't allow it).
 
-Offers are deterministic for the player's current enchanting seed, item,
-bookshelves, and gem kind. Reopening the menu does not grant free rerolls;
-successful enchanting changes the player's seed. The plugin uses Paper's
-native enchanting API for rolls, rather than reproducing its enchantment
-selection rules. This custom menu is not a byte-for-byte reproduction of
-vanilla previews or their random sequence.
+### Why charged gems are lapis underneath
 
-Normal lapis-based enchanting is disabled server-wide, including the native
-enchanting screen opened by other plugins. Items and costs are rechecked on
-purchase; changing hands, bookshelves, seed, cursor, permission, world, or
-distance invalidates the menu without consuming anything.
-Stay within six blocks of the table, which must still exist.
-All menu inventory moves, shift-clicks, number keys, double-clicks, drops, and
-drags are blocked. Disconnecting or closing the menu cannot lose stored items
-because it never stores any real items.
+The vanilla table's fuel slot only accepts lapis lazuli, and the client
+enforces that too, so no plugin can make it take amethyst or echo shards. A
+charged gem is therefore a lapis lazuli item that keeps the amethyst or echo
+shard **model**, name, glint, and lore. In the inventory it still looks like a
+shard. The client may show "Lapis Lazuli" in places that read the base item,
+such as the table's "x Lapis Lazuli" cost tooltip. Uncharged gems are still
+real shards. Gems can't be used as crafting lapis. Ordinary lapis renamed to
+"Soul Gem" is not a gem.
+
+Upgrading from 0.1.x: old charged gems (charged shards) are converted
+automatically when the holder joins or opens any inventory, keeping their
+count. 0.2.0 removes the custom chest menu, so you no longer hold gear and
+gems in your hands.
 
 ## Compatibility
 
-- `soulgem.use` defaults to everyone and permits charging/enchanting. Players
-  without it cannot fall back to normal lapis enchanting.
-- Existing compatible enchantments remain intact, including enchantments
-  obtained with other plugins. Anvils, loot, villagers, and enchanted-book use
-  outside the enchanting table are not modified.
-- With `craftablebottleofenchanting` installed, main-hand glass bottles retain
-  that plugin's Bottle Experience menu. SoulGem loads after it.
-- Table interaction protection cancellations are respected. Enchanting uses a
-  custom chest menu and does **not** fire native `EnchantItemEvent` or
-  `PrepareItemEnchantEvent` for purchases; plugins relying solely on those
-  events need a compatibility integration. Protection plugins can cancel the
-  table interaction or menu click.
-- Vanilla amethyst/echo shards provide the appearance. No custom texture pack
-  or client mod is required.
+- `soulgem.use` defaults to everyone and permits charging and enchanting.
+  Players without it cannot enchant at tables at all.
+- Enchanting fires the native `PrepareItemEnchantEvent` and `EnchantItemEvent`,
+  so protection, logging, and enchant-modifying plugins keep working. SoulGem
+  validates at `HIGH` priority. Plugins that edit enchantments at `HIGHEST`
+  can still change the result.
+- Anvils, loot, villagers, and enchanted books used outside the table are not
+  modified. `craftablebottleofenchanting` works independently.
+- No resource pack, datapack, or client mod is required.
 
 ## Build and install
 
@@ -113,16 +103,16 @@ because it never stores any real items.
 ./gradlew build
 ```
 
-Copy `build/libs/soulgem-0.1.0.jar` into your server's `plugins/` directory and
+Copy `build/libs/soulgem-0.2.0.jar` into your server's `plugins/` directory and
 restart Paper 26.3 using Java 25. Gradle runs on Java 17+ and provisions Java 25;
 Windows users can run `gradlew.bat`. No configuration is required.
 
-Tests cover gem identity, recipes, charging accounting, offer costs, upgrade
-merging, book handling, and menu transaction protections. The MockBukkit
+Tests cover gem identity, legacy conversion, recipes, charging accounting,
+lapis refusal, echo boosts, and upgrade merging. The MockBukkit
 registry harness targets Paper 26.2; production compiles against Paper 26.3.
-Before production deployment, smoke-test native enchantment rolls, bookshelf
-gaps, XP orbs with Mending, recipe-book/shift crafting, reconnects, and your
-protection plugins on an actual Paper 26.3 server.
+Before production deployment, smoke-test the table with gems, enchanted-gear
+upgrades, XP orbs with Mending, and your protection plugins on an actual
+Paper 26.3 server.
 
 ## Publish to Hangar
 

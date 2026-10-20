@@ -33,6 +33,34 @@ class GemItemsTest extends PaperTest {
     }
 
     @Test
+    void chargedGemsAreLapisThatLookLikeTheirShard() {
+        for (var kind : GemItems.Kind.values()) {
+            var item = gems.create(kind, true);
+            assertEquals(Material.LAPIS_LAZULI, item.getType());
+            assertEquals(kind.material.getKey(), item.getItemMeta().getItemModel());
+            assertEquals(kind, gems.kind(item));
+            assertFalse(item.isSimilar(new ItemStack(Material.LAPIS_LAZULI)));
+        }
+        assertFalse(gems.create(GemItems.Kind.ECHO, true).isSimilar(gems.create(GemItems.Kind.AMETHYST, true)));
+    }
+
+    @Test
+    void legacyChargedShardsUpgradeToLapisKeepingTheirAmount() {
+        for (var kind : GemItems.Kind.values()) {
+            var legacy = gems.create(kind, true).withType(kind.material);
+            legacy.setAmount(5);
+            assertFalse(gems.charged(legacy));
+            var upgraded = gems.upgradeLegacy(legacy);
+            assertEquals(gems.create(kind, true).asQuantity(5), upgraded);
+            assertTrue(gems.charged(upgraded));
+            assertNull(gems.upgradeLegacy(upgraded));
+            assertNull(gems.upgradeLegacy(gems.create(kind, false)));
+        }
+        assertNull(gems.upgradeLegacy(new ItemStack(Material.AMETHYST_SHARD)));
+        assertNull(gems.upgradeLegacy(null));
+    }
+
+    @Test
     void chargedGemsStackAndGlowWithoutFunctionalEnchantments() {
         for (var kind : GemItems.Kind.values()) {
             var item = gems.create(kind, true);
@@ -69,6 +97,9 @@ class GemItemsTest extends PaperTest {
         assertNull(gems.kind(item));
         assertFalse(gems.charged(item));
         assertTrue(gems.marked(item));
+        assertNull(gems.upgradeLegacy(item));
+        var uncharged = gems.create(GemItems.Kind.AMETHYST, false).withType(Material.LAPIS_LAZULI);
+        assertNull(gems.kind(uncharged));
     }
 
     @Test

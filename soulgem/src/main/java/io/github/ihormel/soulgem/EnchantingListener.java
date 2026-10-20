@@ -1,160 +1,120 @@
 package io.github.ihormel.soulgem;
 
-import java.util.concurrent.ThreadLocalRandom;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.EnchantingInventory;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 
+/** Makes the vanilla enchanting table run on charged soul gems instead of lapis lazuli. */
 final class EnchantingListener implements Listener {
-    private final JavaPlugin plugin;
+    static final Component LAPIS_REFUSED = Component.text(
+            "Enchanting uses charged soul gems instead of lapis lazuli.", NamedTextColor.LIGHT_PURPLE);
     private final GemItems gems;
-    private final EnchantingOffers offers;
 
-    EnchantingListener(JavaPlugin plugin, GemItems gems, EnchantingOffers offers) {
-        this.plugin = plugin;
+    EnchantingListener(GemItems gems) {
         this.gems = gems;
-        this.offers = offers;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void interact(PlayerInteractEvent event) {
-        if (event.getHand() != EquipmentSlot.HAND || event.getAction() != Action.RIGHT_CLICK_BLOCK
-                || event.useInteractedBlock() == Event.Result.DENY || event.getClickedBlock() == null
-                || event.getClickedBlock().getType() != Material.ENCHANTING_TABLE) return;
-        var player = event.getPlayer();
-        if (player.isSneaking()) return;
-        var inventory = player.getInventory();
-        var input = inventory.getItemInMainHand();
-        if (input.getType() == Material.GLASS_BOTTLE && plugin.getServer().getPluginManager()
-                .isPluginEnabled("craftablebottleofenchanting")) return;
-        event.setCancelled(true);
-        if (!allowed(player)) {
-            player.sendMessage("You cannot use soul gem enchanting right now.");
-            return;
-        }
-        var fuel = inventory.getItemInOffHand();
-        if (!gems.charged(fuel)) {
-            player.sendMessage("Hold gear in your main hand and charged soul gems in your off-hand.");
-            return;
-        }
-        if (input.getType().isAir() || input.getAmount() != 1 || gems.marked(input)
-                || !player.getItemOnCursor().getType().isAir()) {
-            player.sendMessage("Hold one piece of gear or one book, and empty your cursor.");
-            return;
-        }
-        var table = event.getClickedBlock().getLocation();
-        int shelves = offers.bookshelves(table);
-        var choices = offers.create(input, gems.kind(fuel), shelves, player.getEnchantmentSeed());
-        if (choices.stream().allMatch(choice -> choice.result() == null)) {
-            player.sendMessage("No compatible improvements are available for this item. Try more bookshelves.");
-            return;
-        }
-        player.openInventory(new GemMenu(player, table, shelves, choices).getInventory());
+    private static ItemStack fuel(Inventory inventory) {
+        return inventory instanceof EnchantingInventory table ? table.getSecondary() : null;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void click(InventoryClickEvent event) {
-        if (!(event.getView().getTopInventory().getHolder() instanceof GemMenu menu)) return;
-        boolean cancelled = event.isCancelled();
-        event.setCancelled(true);
-        int index = GemMenu.offerIndex(event.getRawSlot());
-        if (cancelled || index < 0 || !(event.getWhoClicked() instanceof Player player)
-                || (event.getClick() != ClickType.LEFT && event.getClick() != ClickType.RIGHT)) return;
-        var view = event.getView();
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
-            if (!player.isOnline() || player.getOpenInventory() != view || menu.used) return;
-            commit(player, menu, index);
-        });
+    private static boolean empty(ItemStack item) {
+        return item == null || item.getType().isAir() || item.getAmount() <= 0;
     }
 
-    void commit(Player player, GemMenu menu, int index) {
-        if (menu.used) return;
-        if (!allowed(player) || !player.getUniqueId().equals(menu.owner)) {
-            player.sendMessage("You cannot use soul gem enchanting right now.");
-            return;
-        }
-        var table = menu.table;
-        if (!table.getWorld().equals(player.getWorld())
-                || !table.getWorld().isChunkLoaded(table.getBlockX() >> 4, table.getBlockZ() >> 4)
-                || table.clone().add(0.5, 0.5, 0.5).distanceSquared(player.getLocation()) > 36
-                || table.getBlock().getType() != Material.ENCHANTING_TABLE) {
-            player.sendMessage("Stay near the enchanting table to enchant.");
-            player.closeInventory();
-            return;
-        }
-        var inventory = player.getInventory();
-        if (inventory.getHeldItemSlot() != menu.heldSlot
-                || !menu.gear.equals(inventory.getItemInMainHand())
-                || !menu.fuel.equals(inventory.getItemInOffHand())
-                || player.getEnchantmentSeed() != menu.seed
-                || offers.bookshelves(table) != menu.shelves
-                || !player.getItemOnCursor().getType().isAir()) {
-            player.sendMessage("Your items or enchanting setup changed. Reopen the enchanting table.");
-            player.closeInventory();
-            return;
-        }
-        var offer = menu.offers.get(index);
-        if (offer.result() == null) {
-            player.sendMessage("This offer has no compatible improvements.");
-            return;
-        }
-        if (player.getLevel() < Math.max(offer.requiredLevel(), offer.cost())
-                || !gems.charged(menu.fuel) || menu.fuel.getAmount() < offer.cost()) {
-            player.sendMessage("This offer requires level " + offer.requiredLevel() + " and "
-                    + offer.cost() + " charged soul gems; it consumes " + offer.cost() + " levels.");
-            return;
-        }
-        menu.used = true;
-        var fuel = menu.fuel.clone();
-        fuel.setAmount(fuel.getAmount() - offer.cost());
-        inventory.setItemInMainHand(offer.result().clone());
-        inventory.setItemInOffHand(fuel.getAmount() == 0 ? new ItemStack(Material.AIR) : fuel);
-        player.giveExpLevels(-offer.cost());
-        player.setEnchantmentSeed(ThreadLocalRandom.current().nextInt());
-        player.closeInventory();
-        player.sendMessage("Your gear has been enchanted using " + offer.cost() + " charged soul gems.");
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void drag(InventoryDragEvent event) {
-        if (event.getView().getTopInventory().getHolder() instanceof GemMenu) event.setCancelled(true);
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void nativeOpen(InventoryOpenEvent event) {
-        if (event.getInventory().getType() == InventoryType.ENCHANTING) {
+    /**
+     * Runs first so other plugins can still veto. Paper pre-cancels this event for items
+     * that already carry enchantments; soul gems may upgrade those, so it is un-cancelled.
+     */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void prepare(PrepareItemEnchantEvent event) {
+        var player = event.getEnchanter();
+        var fuel = fuel(event.getInventory());
+        if (!empty(fuel) && !gems.charged(fuel)) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage("Use charged soul gems in your off-hand at an enchanting table.");
+            if (fuel.getType() == Material.LAPIS_LAZULI) player.sendActionBar(LAPIS_REFUSED);
+            return;
+        }
+        if (!allowed(player)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (event.isCancelled() && upgradeable(event.getItem()) && hasOffer(event)) event.setCancelled(false);
+        if (event.isCancelled() || gems.kind(fuel) != GemItems.Kind.ECHO) return;
+        for (var offer : event.getOffers()) {
+            if (offer != null) {
+                offer.setEnchantmentLevel(EnchantingRules.boosted(offer.getEnchantment(),
+                        offer.getEnchantmentLevel(), true));
+            }
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void nativePrepare(PrepareItemEnchantEvent event) {
-        event.setCancelled(true);
+    private static boolean upgradeable(ItemStack item) {
+        return item != null && item.getAmount() == 1 && item.getType() != Material.ENCHANTED_BOOK
+                && !item.getEnchantments().isEmpty();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void nativeEnchant(EnchantItemEvent event) {
-        event.setCancelled(true);
+    private static boolean hasOffer(PrepareItemEnchantEvent event) {
+        for (var offer : event.getOffers()) {
+            if (offer != null && offer.getCost() > 0) return true;
+        }
+        return false;
     }
 
-    private boolean allowed(Player player) {
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void enchant(EnchantItemEvent event) {
+        var player = event.getEnchanter();
+        var fuel = fuel(event.getInventory());
+        boolean creativeWithoutFuel = empty(fuel) && player.getGameMode() == GameMode.CREATIVE;
+        if (!allowed(player) || (!gems.charged(fuel) && !creativeWithoutFuel)) {
+            event.setCancelled(true);
+            player.sendMessage(LAPIS_REFUSED);
+            return;
+        }
+        var added = EnchantingRules.improvements(EnchantingRules.enchantments(event.getItem()),
+                event.getEnchantsToAdd(), gems.kind(fuel) == GemItems.Kind.ECHO);
+        if (added.isEmpty()) {
+            event.setCancelled(true);
+            player.sendMessage(Component.text("That offer would not improve this item. "
+                    + "Try another offer or change your bookshelves.", NamedTextColor.RED));
+            return;
+        }
+        event.getEnchantsToAdd().clear();
+        event.getEnchantsToAdd().putAll(added);
+    }
+
+    @EventHandler
+    public void join(PlayerJoinEvent event) {
+        upgradeLegacy(event.getPlayer().getInventory());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void open(InventoryOpenEvent event) {
+        upgradeLegacy(event.getPlayer().getInventory());
+        upgradeLegacy(event.getInventory());
+    }
+
+    void upgradeLegacy(Inventory inventory) {
+        var contents = inventory.getContents();
+        for (int slot = 0; slot < contents.length; slot++) {
+            var upgraded = gems.upgradeLegacy(contents[slot]);
+            if (upgraded != null) inventory.setItem(slot, upgraded);
+        }
+    }
+
+    private static boolean allowed(Player player) {
         return player.hasPermission("soulgem.use") && !player.isDead()
                 && player.getGameMode() != GameMode.SPECTATOR;
     }

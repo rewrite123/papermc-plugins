@@ -10,17 +10,11 @@ public class SoulGemPlugin extends JavaPlugin {
         recipes.register();
         getServer().getPluginManager().registerEvents(recipes, this);
         getServer().getPluginManager().registerEvents(new GemCharging(gems), this);
-        getServer().getPluginManager().registerEvents(
-                new EnchantingListener(this, gems, new EnchantingOffers()), this);
+        getServer().getPluginManager().registerEvents(new EnchantingListener(gems), this);
     }
 
     @Override
     public void onDisable() {
-        for (var player : getServer().getOnlinePlayers()) {
-            if (player.getOpenInventory().getTopInventory().getHolder() instanceof GemMenu) {
-                player.closeInventory();
-            }
-        }
         getServer().removeRecipe(new org.bukkit.NamespacedKey(this, "amethyst_soul_gem"));
         getServer().removeRecipe(new org.bukkit.NamespacedKey(this, "echo_soul_gem"));
     }
