@@ -1,0 +1,9 @@
+# Night is skipped when EITHER condition is met (whichever needs fewer sleepers).
+# Change these in game with /sleepy percent <0-100> and /sleepy minplayers <number|off>.
+
+# Percentage of non-spectator players in a world who must sleep (0-100).
+sleeping-percentage: 50
+
+# Number of sleeping players that always skips the night, even if it is below the
+# percentage. 0 turns it off.
+min-sleeping-players: 0

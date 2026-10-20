@@ -2,4 +2,12 @@ name: sleepy
 version: '${version}'
 main: io.github.ihormel.sleepy.SleepyPlugin
 api-version: '26.3'
-description: Skip the night when at least half of eligible players are sleeping.
+description: Skip the night when a percentage or a minimum number of players are sleeping.
+commands:
+  sleepy:
+    description: Show or change the sleep requirements.
+    usage: /sleepy [status|percent <0-100>|minplayers <number|off>]
+permissions:
+  sleepy.admin:
+    description: Change the sleeping percentage and minimum sleeping players.
+    default: op
