@@ -19,10 +19,10 @@ class DiscPairsTest {
     }
 
     @Test
-    void specialDiscsAndElevenHaveNoOpposite() {
+    void specialDiscsAndLavaChickenHaveNoOpposite() {
         for (Material special : Set.of(Material.MUSIC_DISC_PIGSTEP, Material.MUSIC_DISC_OTHERSIDE,
                 Material.MUSIC_DISC_5, Material.MUSIC_DISC_RELIC, Material.MUSIC_DISC_CREATOR,
-                Material.MUSIC_DISC_CREATOR_MUSIC_BOX, Material.MUSIC_DISC_PRECIPICE, Material.MUSIC_DISC_11)) {
+                Material.MUSIC_DISC_CREATOR_MUSIC_BOX, Material.MUSIC_DISC_PRECIPICE, Material.MUSIC_DISC_LAVA_CHICKEN)) {
             assertFalse(DiscPairs.OPPOSITES.containsKey(special), special.name());
             assertFalse(DiscPairs.OPPOSITES.containsValue(special), special.name());
         }
@@ -39,8 +39,15 @@ class DiscPairsTest {
     @Test
     void nonC418ArtistsEachHaveADifferentArtistOnTheOtherSide() {
         assertEquals(Material.MUSIC_DISC_CAT, DiscPairs.OPPOSITES.get(Material.MUSIC_DISC_TEARS));
-        assertEquals(Material.MUSIC_DISC_BLOCKS, DiscPairs.OPPOSITES.get(Material.MUSIC_DISC_LAVA_CHICKEN));
         assertEquals(Material.MUSIC_DISC_CHIRP, DiscPairs.OPPOSITES.get(Material.MUSIC_DISC_BOUNCE));
+    }
+
+    @Test
+    void blocksAndElevenReplaceTheOldLavaChickenPairInBothDirections() {
+        assertEquals(Material.MUSIC_DISC_11, DiscPairs.OPPOSITES.get(Material.MUSIC_DISC_BLOCKS));
+        assertEquals(Material.MUSIC_DISC_BLOCKS, DiscPairs.OPPOSITES.get(Material.MUSIC_DISC_11));
+        assertFalse(DiscPairs.OPPOSITES.containsKey(Material.MUSIC_DISC_LAVA_CHICKEN));
+        assertFalse(DiscPairs.OPPOSITES.containsValue(Material.MUSIC_DISC_LAVA_CHICKEN));
     }
 
     @Test

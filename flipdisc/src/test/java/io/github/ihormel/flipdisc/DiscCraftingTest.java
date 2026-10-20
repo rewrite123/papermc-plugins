@@ -111,6 +111,8 @@ class DiscCraftingTest {
         assertNull(crafting.flip(recipe(), new ItemStack[4]));
         assertNull(crafting.flip(recipe(), new ItemStack[]{item(Material.STONE), null, null, null}));
         assertNull(crafting.flip(recipe(), new ItemStack[]{item(Material.MUSIC_DISC_5), null, null, null}));
+        assertNull(crafting.flip(recipes.get(Material.MUSIC_DISC_BLOCKS),
+                new ItemStack[]{item(Material.MUSIC_DISC_LAVA_CHICKEN), null, null, null}));
         verify(input, never()).withType(any());
     }
 

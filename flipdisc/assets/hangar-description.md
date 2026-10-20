@@ -24,7 +24,7 @@ shift-clicks and inventory space. Automated crafter blocks cannot flip discs.
 | Side A | Artist | Side B | Artist |
 | --- | --- | --- | --- |
 | Cat | C418 | Tears | Amos Roddy |
-| Blocks | C418 | Lava Chicken | Hyper Potions |
+| Blocks | C418 | 11 | C418 |
 | Chirp | C418 | Bounce | Fingerspit |
 | 13 | C418 | Mellohi | C418 |
 | Far | C418 | Strad | C418 |
@@ -39,9 +39,12 @@ always flips back to Cat. Repeated flipping cannot unlock unrelated songs.
 
 ## Special discs stay special
 
-**Pigstep, Otherside, 5, Relic, Creator, Creator (Music Box), Precipice, and 11**
-remain single-sided and have no flipping recipe. Disc 11 is left unpaired
-because there is an odd number of otherwise eligible discs.
+**Pigstep, Otherside, 5, Relic, Creator, Creator (Music Box), Precipice, and Lava Chicken**
+remain single-sided and have no flipping recipe.
+
+Since version **0.1.1**, Blocks pairs with 11 instead of Lava Chicken. Existing
+Lava Chicken discs keep their song and cannot be flipped; existing Blocks discs
+now flip to 11. Updating does not convert items already in your inventory.
 
 Discs with custom jukebox-playback settings are also excluded to avoid changing
 another plugin's custom songs. Newly added Minecraft discs are not automatically

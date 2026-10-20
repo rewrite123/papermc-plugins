@@ -27,7 +27,7 @@ Automated crafter blocks cannot perform these manual flipping recipes.
 | Side A | Artist | Side B | Artist |
 | --- | --- | --- | --- |
 | Cat | C418 | Tears | Amos Roddy |
-| Blocks | C418 | Lava Chicken | Hyper Potions |
+| Blocks | C418 | 11 | C418 |
 | Chirp | C418 | Bounce | Fingerspit |
 | 13 | C418 | Mellohi | C418 |
 | Far | C418 | Strad | C418 |
@@ -38,12 +38,10 @@ Different artists are paired wherever possible. Most eligible songs are by
 C418, so the remaining pairs necessarily share an artist.
 
 **Single-sided:** Pigstep, Otherside, 5, Relic, Creator, Creator (Music Box),
-Precipice, and 11. These have no flipping recipe. Disc 11 is the unpaired
-ordinary disc because there is an odd number of eligible discs.
+Precipice, and Lava Chicken. These have no flipping recipe.
 New discs added by future Minecraft versions are not automatically paired.
 
 Artist references: [Tears](https://minecraft.wiki/w/Music_Disc_Tears),
-[Lava Chicken](https://minecraft.wiki/w/Music_Disc_Lava_Chicken),
 [Bounce](https://minecraft.wiki/w/Music_Disc_Bounce).
 The plugin only selects existing vanilla songs; it does not distribute music.
 
@@ -54,11 +52,18 @@ The plugin only selects existing vanilla songs; it does not distribute music.
 ```
 
 The wrapper downloads a Java 25 build toolchain if needed.
-Copy `build/libs/flipdisc-0.1.0.jar` into the server's `plugins` directory and
+Copy `build/libs/flipdisc-0.1.1.jar` into the server's `plugins` directory and
 restart Paper. Stop the server before removing the plugin; avoid hot-reloading.
 
 There are no commands, permissions, configuration files, or runtime dependencies.
 Recipes appear in the recipe book for players when they join.
+
+### Updating from 0.1.0
+
+Stop Paper, replace the old plugin JAR (do not leave both versions installed),
+and restart. Blocks now pairs with 11 instead of Lava Chicken. Existing Lava
+Chicken discs stay Lava Chicken and cannot be flipped; existing Blocks discs
+now flip to 11. No inventory conversion or world migration is performed.
 
 Tests cover pair symmetry/exclusions, both crafting grid sizes, one-disc input,
 metadata-preserving conversion, custom-song rejection, preview validation,

@@ -11,7 +11,7 @@ final class DiscPairs {
     static {
         EnumMap<Material, Material> pairs = new EnumMap<>(Material.class);
         pair(pairs, Material.MUSIC_DISC_CAT, Material.MUSIC_DISC_TEARS);
-        pair(pairs, Material.MUSIC_DISC_BLOCKS, Material.MUSIC_DISC_LAVA_CHICKEN);
+        pair(pairs, Material.MUSIC_DISC_BLOCKS, Material.MUSIC_DISC_11);
         pair(pairs, Material.MUSIC_DISC_CHIRP, Material.MUSIC_DISC_BOUNCE);
         pair(pairs, Material.MUSIC_DISC_13, Material.MUSIC_DISC_MELLOHI);
         pair(pairs, Material.MUSIC_DISC_FAR, Material.MUSIC_DISC_STRAD);

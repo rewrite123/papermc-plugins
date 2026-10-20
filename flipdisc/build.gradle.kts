@@ -56,7 +56,7 @@ hangarPublish {
         channel.set(providers.gradleProperty("hangarChannel").orElse("Release"))
         apiKey.set(providers.environmentVariable("HANGAR_API_TOKEN"))
         changelog.set(providers.gradleProperty("hangarChangelog").orElse(
-            "Initial release: Flip music discs in either crafting grid between seven permanent two-song pairs. Different artists are paired where possible. Special discs and disc 11 remain single-sided. Preserves item metadata and excludes custom-playback discs."
+            "Lava Chicken is now unique and single-sided. Blocks now flips to disc 11, and disc 11 flips back to Blocks. All other pairs and special-disc exclusions are unchanged."
         ))
         platforms {
             paper {
