@@ -1,5 +1,7 @@
 # spidereyenetherwartblock
 
+![Nine spider eyes crafting a nether wart block](assets/icon.png)
+
 Craft **one nether wart block** from **nine spider eyes** in a crafting table.
 For **Paper 26.3 / Java 25**, with no runtime dependencies.
 
@@ -48,3 +50,9 @@ Provide an API token through `HANGAR_API_TOKEN`, then run:
 
 The official Hangar publishing plugin uploads the JAR and syncs this README.
 Never commit credentials.
+
+Regenerate the original 512 x 512 project icon from the repository root:
+
+```sh
+python3 tools/generate-project-icons.py --project spidereyenetherwartblock
+```

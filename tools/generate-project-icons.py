@@ -372,11 +372,42 @@ def phantommenace():
     return c
 
 
+def spidereyenetherwartblock():
+    c = Canvas("#f07891", "SPIDER EYE WART")
+    c.rect(15, 22, 63, 72, INK)
+    c.rect(18, 25, 60, 69, "#573149")
+    for x in (20, 34, 48):
+        for y in (28, 42, 56):
+            c.rect(x, y, x + 10, y + 10, "#20192d")
+            c.poly([(x + 1, y + 4), (x + 4, y + 1), (x + 9, y + 3),
+                    (x + 8, y + 8), (x + 3, y + 9)], "#b93558")
+            c.rect(x + 3, y + 3, x + 6, y + 6, "#f47b91")
+            c.rect(x + 4, y + 3, x + 5, y + 5, "#ffe4c8")
+    c.poly([(69, 35), (85, 35), (85, 28), (99, 41), (85, 54),
+            (85, 47), (69, 47)], INK)
+    c.poly([(72, 38), (88, 38), (88, 35), (94, 41), (88, 47),
+            (88, 44), (72, 44)], "#ffd9a1")
+    c.poly([(53, 64), (84, 53), (110, 67), (110, 89), (79, 100),
+            (53, 86)], INK)
+    c.poly([(57, 65), (84, 57), (106, 68), (79, 77)], "#bf4055")
+    c.poly([(57, 66), (79, 78), (79, 96), (57, 84)], "#73253d")
+    c.poly([(80, 78), (106, 69), (106, 87), (80, 96)], "#942c45")
+    c.poly([(63, 65), (73, 62), (79, 65), (69, 69)], "#e0646b")
+    c.poly([(82, 59), (91, 62), (88, 66), (78, 64)], "#9c2e45")
+    c.poly([(86, 69), (97, 65), (103, 68), (92, 72)], "#e0646b")
+    c.rect(60, 73, 64, 79, "#ac3a50")
+    c.rect(70, 81, 74, 88, "#a4344e")
+    c.poly([(84, 81), (91, 79), (91, 83), (84, 86)], "#bc3d56")
+    c.poly([(98, 75), (103, 73), (103, 79), (98, 81)], "#6b2039")
+    c.spark(28, 88, "#ffd9a1")
+    return c
+
+
 def main():
     factories = (
         tpcost, inventorysorter, enchantcap, sleepy,
         craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
-        reduceendermanworlddmg, flipdisc, phantommenace,
+        reduceendermanworlddmg, flipdisc, phantommenace, spidereyenetherwartblock,
     )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", choices=[factory.__name__ for factory in factories])
