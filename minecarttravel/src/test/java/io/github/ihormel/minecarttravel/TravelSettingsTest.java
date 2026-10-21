@@ -16,8 +16,8 @@ class TravelSettingsTest {
     @Test
     void defaultsMatchTheAgreedTimingSpeedAndWorkBudgets() {
         var settings = TravelSettings.read(defaults());
-        assertEquals(600, settings.boostTicks());
-        assertEquals(2400, settings.fastTicks());
+        assertEquals(300, settings.boostTicks());
+        assertEquals(600, settings.fastTicks());
         assertEquals(6, settings.minimumSpeed());
         assertEquals(90, settings.boostSpeed());
         assertTrue(settings.boostSpeed() > 73);
@@ -76,7 +76,7 @@ class TravelSettingsTest {
         var settings = TravelSettings.read(config);
         for (var bad : java.util.List.of(
                 new String[] {"boost-delay", "120"}, new String[] {"boost-delay", "0"},
-                new String[] {"fast-travel-delay", "30"}, new String[] {"fast-travel-delay", "abc"},
+                new String[] {"fast-travel-delay", "15"}, new String[] {"fast-travel-delay", "abc"},
                 new String[] {"min-speed", "9"}, new String[] {"min-speed", "NaN"},
                 new String[] {"boost-speed", "5"}, new String[] {"boost-speed", "121"})) {
             var option = TravelSettings.Option.named(bad[0]);

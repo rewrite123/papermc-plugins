@@ -1,7 +1,7 @@
 # Times are game ticks (20 ticks = one second at normal server speed).
 # Admins can change the first four settings in-game with /minecarttravel set.
-boost-after-ticks: 600
-fast-travel-after-ticks: 2400
+boost-after-ticks: 300
+fast-travel-after-ticks: 600
 minimum-blocks-per-second: 6.0
 boost-blocks-per-second: 90.0
 # Straight, level, unobstructed, loaded track needed ahead at full speed.

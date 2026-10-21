@@ -3,7 +3,13 @@
 Automatic minecart speed boosts and lodestone-to-lodestone fast travel for
 **Paper 26.3 / Java 25**, with no runtime dependencies.
 
-**Latest version:** 0.2.2.
+**Latest version:** 0.2.3.
+
+**What's new in 0.2.3:** default boost delay is now **15 seconds**, and fast
+travel starts after **30 seconds total**. Existing saved settings are preserved.
+To apply these timings to an existing server, run
+`/minecarttravel set boost-delay 15` and
+`/minecarttravel set fast-travel-delay 30`.
 
 **What's new in 0.2.2:** destination chunks are protected individually as they
 finish loading, fixing an unloading race during fast-travel preparation.
@@ -37,18 +43,18 @@ The speed boost and fast travel are both on by default. Travel continuously **ab
 
 | Qualifying game time | Effect |
 |---|---|
-| First 30 seconds | Normal minecart movement |
-| After 30 seconds | Target **90 blocks/second** on safe straight track |
-| After 120 seconds total | On a registered line, automatically travel to the far lodestone endpoint |
+| First 15 seconds | Normal minecart movement |
+| After 15 seconds | Target **90 blocks/second** on safe straight track |
+| After 30 seconds total | On a registered line, automatically travel to the far lodestone endpoint |
 
 These are the defaults; admins can change them in-game (see
-[Admin settings](#admin-settings)). The 120 seconds include the initial 30 seconds. Timings use game ticks:
-600 ticks for boost, 2400 for endpoint travel, at 20 TPS. Server lag lengthens
+[Admin settings](#admin-settings)). The 30 seconds include the initial 15 seconds. Timings use game ticks:
+300 ticks for boost, 600 for endpoint travel, at 20 TPS. Server lag lengthens
 the real-world wait and lowers real-world movement speed.
 The timer measures actual displacement, not just commanded velocity. Stopping,
 traveling at or below the minimum speed, derailing, dismounting, changing riders,
 unloading, or external teleporting resets it. The first sample initializes the
-timer, so a new ride needs a full 600 qualifying movement samples.
+timer, so a new ride needs a full 300 qualifying movement samples for the boost.
 
 Each player chooses which features they want:
 
@@ -116,8 +122,8 @@ on the next cart update after an interrupted boosted ride.
 
 | Setting | Unit | Default | Allowed |
 |---|---|---|---|
-| `boost-delay` | seconds | 30 | 0.05-3600, below `fast-travel-delay` |
-| `fast-travel-delay` | seconds | 120 | 0.05-7200, above `boost-delay` |
+| `boost-delay` | seconds | 15 | 0.05-3600, below `fast-travel-delay` |
+| `fast-travel-delay` | seconds | 30 | 0.05-7200, above `boost-delay` |
 | `min-speed` | blocks/second | 6 | 0.1-8 (vanilla top speed), at most `boost-speed` |
 | `boost-speed` | blocks/second | 90 | `min-speed` to 120 |
 
@@ -225,7 +231,7 @@ Download the compiled plugin from
 ./gradlew build
 ```
 
-Copy `build/libs/minecarttravel-0.2.2.jar` into your Paper server's `plugins/`
+Copy `build/libs/minecarttravel-0.2.3.jar` into your Paper server's `plugins/`
 directory and restart using Java 25. Gradle runs on Java 17+ and provisions
 Java 25 when needed; Windows users can use `gradlew.bat`. No configuration is
 required.

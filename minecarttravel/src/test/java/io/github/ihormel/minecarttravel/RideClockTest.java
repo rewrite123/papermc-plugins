@@ -6,14 +6,15 @@ import org.junit.jupiter.api.Test;
 
 class RideClockTest {
     @Test
-    void fullThirtySecondsAndTwoMinutesHaveExactBoundaries() {
+    void fullFifteenAndThirtySecondsHaveExactBoundaries() {
         var clock = new RideClock();
-        for (int tick = 1; tick <= 2400; tick++) {
+        for (int tick = 1; tick <= 600; tick++) {
             clock.sample(true, true, 0.4, 6, 90);
             assertEquals(tick, clock.ticks());
+            if (tick == 299) assertTrue(clock.ticks() < 300);
+            if (tick == 300) assertEquals(300, clock.ticks());
             if (tick == 599) assertTrue(clock.ticks() < 600);
             if (tick == 600) assertEquals(600, clock.ticks());
-            if (tick == 2399) assertTrue(clock.ticks() < 2400);
         }
     }
 
