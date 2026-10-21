@@ -37,6 +37,7 @@ class PhantomMenaceTest {
     private EnchantingInventory table;
     private EnchantmentView view;
     private Enchantment menace;
+    private org.bukkit.plugin.java.JavaPlugin plugin;
 
     @BeforeEach
     void setup() {
@@ -44,7 +45,8 @@ class PhantomMenaceTest {
         // MockBukkit cannot bootstrap custom registries; use a real registered enchantment
         // as the injected identity to test purchases and spawn behavior.
         menace = Enchantment.RESPIRATION;
-        listener = new MenaceListener(menace);
+        plugin = MockBukkit.createMockPlugin("phantommenace");
+        listener = new MenaceListener(menace, plugin);
         player = mock(Player.class);
         when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
         table = mock(EnchantingInventory.class);
@@ -59,10 +61,13 @@ class PhantomMenaceTest {
     }
 
     @Test
-    void repellantIsMarkedLapisWithCharcoalModelAndStacks() {
+    void repellantIsNonDrinkableLapisWithGlowingAwkwardPotionAppearance() {
         var item = RepellantItems.create();
         assertEquals(Material.LAPIS_LAZULI, item.getType());
-        assertEquals(Material.CHARCOAL.getKey(), item.getItemMeta().getItemModel());
+        assertEquals(Material.POTION.getKey(), item.getItemMeta().getItemModel());
+        assertTrue(item.getItemMeta().getEnchantmentGlintOverride());
+        assertEquals(PotionType.AWKWARD, item.getData(
+                io.papermc.paper.datacomponent.DataComponentTypes.POTION_CONTENTS).potion());
         assertTrue(RepellantItems.isRepellant(item));
         assertTrue(item.isSimilar(RepellantItems.create()));
         assertEquals(64, item.getMaxStackSize());
@@ -177,6 +182,64 @@ class PhantomMenaceTest {
         var event = enchant(item, 0);
         assertEquals(Map.of(Enchantment.UNBREAKING, 3), event.getEnchantsToAdd());
         assertEquals(30, event.getExpLevelCost());
+    }
+
+    private org.bukkit.World bottleWorld;
+
+    private EnchantItemEvent bottlePurchase() {
+        bottleWorld = mock(org.bukkit.World.class);
+        var block = mock(org.bukkit.block.Block.class);
+        when(block.getLocation()).thenReturn(new Location(bottleWorld, 10, 64, 20));
+        var event = new EnchantItemEvent(player, view, block, new ItemStack(Material.DIAMOND_HELMET), 1,
+                new HashMap<>(Map.of(menace, 1)), menace, 1, 0);
+        listener.returnBottle(event);
+        return event;
+    }
+
+    @Test
+    void successfulPurchaseDropsOneBottleOnlyAfterVanillaCommits() {
+        var event = bottlePurchase();
+        verify(bottleWorld, never()).dropItemNaturally(any(Location.class), any(ItemStack.class));
+        event.getItem().addUnsafeEnchantment(menace, 1);
+        server.getScheduler().performOneTick();
+        verify(bottleWorld, times(1)).dropItemNaturally(
+                new Location(bottleWorld, 10.5, 65, 20.5), new ItemStack(Material.GLASS_BOTTLE));
+        server.getScheduler().performOneTick();
+        verify(bottleWorld, times(1)).dropItemNaturally(any(Location.class), any(ItemStack.class));
+    }
+
+    @Test
+    void uncommittedPurchaseDoesNotDropABottle() {
+        bottlePurchase();
+        server.getScheduler().performOneTick();
+        verify(bottleWorld, never()).dropItemNaturally(any(Location.class), any(ItemStack.class));
+    }
+
+    @Test
+    void laterCancellationDoesNotDropABottleEvenIfItemWasChanged() {
+        var event = bottlePurchase();
+        event.setCancelled(true);
+        event.getItem().addUnsafeEnchantment(menace, 1);
+        server.getScheduler().performOneTick();
+        verify(bottleWorld, never()).dropItemNaturally(any(Location.class), any(ItemStack.class));
+    }
+
+    @Test
+    void creativeEnchantingDoesNotCreateFreeBottles() {
+        when(player.getGameMode()).thenReturn(GameMode.CREATIVE);
+        var event = bottlePurchase();
+        event.getItem().addUnsafeEnchantment(menace, 1);
+        server.getScheduler().performOneTick();
+        verify(bottleWorld, never()).dropItemNaturally(any(Location.class), any(ItemStack.class));
+    }
+
+    @Test
+    void ordinaryFuelDoesNotReturnABottle() {
+        when(table.getSecondary()).thenReturn(new ItemStack(Material.LAPIS_LAZULI));
+        var event = bottlePurchase();
+        event.getItem().addUnsafeEnchantment(menace, 1);
+        server.getScheduler().performOneTick();
+        verify(bottleWorld, never()).dropItemNaturally(any(Location.class), any(ItemStack.class));
     }
 
     private PhantomPreSpawnEvent spawn(Player source, SpawnReason reason) {

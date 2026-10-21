@@ -3,6 +3,7 @@ package io.github.ihormel.phantommenace;
 import com.destroystokyo.paper.event.entity.PhantomPreSpawnEvent;
 import java.util.Arrays;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentOffer;
 import org.bukkit.entity.Player;
@@ -16,12 +17,15 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.EnchantingInventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
 final class MenaceListener implements Listener {
     private final Enchantment enchantment;
+    private final JavaPlugin plugin;
 
-    MenaceListener(Enchantment enchantment) {
+    MenaceListener(Enchantment enchantment, JavaPlugin plugin) {
         this.enchantment = enchantment;
+        this.plugin = plugin;
     }
 
     static boolean helmet(ItemStack item) {
@@ -63,6 +67,23 @@ final class MenaceListener implements Listener {
         event.setExpLevelCost(1);
         event.getEnchantsToAdd().clear();
         event.getEnchantsToAdd().put(enchantment, 1);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void returnBottle(EnchantItemEvent event) {
+        if (!(event.getInventory() instanceof EnchantingInventory table)
+                || !RepellantItems.isRepellant(table.getSecondary())
+                || event.whichButton() != 0 || !eligible(event.getEnchanter(), event.getItem())
+                || !event.getEnchantsToAdd().containsKey(enchantment)
+                || event.getEnchanter().getGameMode() == GameMode.CREATIVE) return;
+        var item = event.getItem();
+        var location = event.getEnchantBlock().getLocation().add(0.5, 1, 0.5);
+        // The event fires before vanilla commits the enchantment and consumes the fuel.
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            if (!event.isCancelled() && item.containsEnchantment(enchantment)) {
+                location.getWorld().dropItemNaturally(location, new ItemStack(Material.GLASS_BOTTLE));
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

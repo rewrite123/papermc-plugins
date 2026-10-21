@@ -20,7 +20,7 @@ public final class PhantomMenacePlugin extends JavaPlugin {
                 RepellantItems.waterInput(), new RecipeChoice.MaterialChoice(Material.PHANTOM_MEMBRANE)))) {
             throw new IllegalStateException("Could not register phantom repellant brewing recipe");
         }
-        getServer().getPluginManager().registerEvents(new MenaceListener(enchantment), this);
+        getServer().getPluginManager().registerEvents(new MenaceListener(enchantment, this), this);
     }
 
     @Override

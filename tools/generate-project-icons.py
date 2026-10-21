@@ -339,11 +339,44 @@ def flipdisc():
     return c
 
 
+def phantommenace():
+    c = Canvas("#82e4dd", "PHANTOM MENACE")
+    # A phantom above an enchanted helmet, separated by a protective arc.
+    c.poly([(14, 23), (40, 34), (53, 28), (75, 28), (88, 34),
+            (114, 23), (102, 48), (85, 45), (75, 52), (53, 52),
+            (43, 45), (26, 48)], INK)
+    c.poly([(18, 28), (41, 38), (53, 33), (75, 33), (87, 38),
+            (109, 28), (99, 43), (83, 40), (73, 47), (55, 47),
+            (45, 40), (29, 43)], "#526a9b")
+    c.poly([(22, 30), (40, 38), (30, 39)], "#8398c3")
+    c.poly([(106, 30), (88, 38), (98, 39)], "#8398c3")
+    c.rect(51, 31, 77, 43, "#7388b3")
+    c.rect(53, 37, 60, 40, "#a8fa92")
+    c.rect(68, 37, 75, 40, "#a8fa92")
+    c.rect(55, 37, 57, 40, "#e0ffd0")
+    c.rect(70, 37, 72, 40, "#e0ffd0")
+    c.poly([(27, 74), (32, 62), (44, 54), (84, 54), (96, 62),
+            (101, 74), (96, 74), (92, 65), (82, 59), (46, 59),
+            (36, 65), (32, 74)], "#67d4d0")
+    c.poly([(42, 97), (42, 75), (51, 65), (77, 65), (86, 75),
+            (86, 97), (72, 97), (72, 84), (56, 84), (56, 97)], INK)
+    c.poly([(46, 93), (46, 77), (53, 69), (75, 69), (82, 77),
+            (82, 93), (76, 93), (76, 80), (52, 80), (52, 93)], "#49b8c5")
+    c.rect(53, 70, 73, 73, "#a3f0ea")
+    c.rect(47, 77, 50, 89, "#81dfdf")
+    c.rect(78, 78, 81, 92, "#258895")
+    c.rect(59, 74, 63, 78, "#c9a1ff")
+    c.spark(85, 66, "#d8bcff")
+    c.spark(34, 87, "#a4f5e4")
+    c.spark(94, 86, "#a4f5e4")
+    return c
+
+
 def main():
     factories = (
         tpcost, inventorysorter, enchantcap, sleepy,
         craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
-        reduceendermanworlddmg, flipdisc,
+        reduceendermanworlddmg, flipdisc, phantommenace,
     )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", choices=[factory.__name__ for factory in factories])

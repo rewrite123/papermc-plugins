@@ -1,5 +1,7 @@
 package io.github.ihormel.phantommenace;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.PotionContents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -17,11 +19,14 @@ final class RepellantItems {
         var item = new ItemStack(Material.LAPIS_LAZULI);
         item.editMeta(meta -> {
             meta.itemName(Component.text("Phantom Repellant", NamedTextColor.AQUA));
-            meta.setItemModel(Material.CHARCOAL.getKey());
+            meta.setItemModel(Material.POTION.getKey());
+            meta.setEnchantmentGlintOverride(true);
             meta.lore(java.util.List.of(Component.text("Enchant a helmet with Phantom Menace.", NamedTextColor.GRAY),
                     Component.text("Use in an enchanting table's lapis slot.", NamedTextColor.GRAY)));
             meta.getPersistentDataContainer().set(MARKER, PersistentDataType.BYTE, (byte) 1);
         });
+        item.setData(DataComponentTypes.POTION_CONTENTS,
+                PotionContents.potionContents().potion(PotionType.AWKWARD).build());
         return item;
     }
 

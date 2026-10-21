@@ -1,10 +1,15 @@
 # phantommenace
 
+![Phantom above an enchanted helmet protected by a glowing ward](assets/icon.png)
+
 Brew **Phantom Repellant** and enchant a helmet with **Phantom Menace** to stop
 phantoms spawning because you have not slept. For **Paper 26.3 / Java 25**.
 No client mod, resource pack, or datapack is required.
 
-**Latest release:** [PhantomMenace 0.1.0 on Hangar](https://hangar.papermc.io/rewrite123/phantommenace/versions/0.1.0).
+**Latest release:** [PhantomMenace 0.1.1 on Hangar](https://hangar.papermc.io/rewrite123/phantommenace/versions/0.1.1).
+
+**What's new in 0.1.1:** Repellant now looks like a glowing awkward
+potion, and successful survival enchanting drops an empty bottle at the table.
 
 ## Brewing
 
@@ -14,15 +19,19 @@ No client mod, resource pack, or datapack is required.
 4. After the normal brewing cycle, each water bottle becomes one repellant.
 
 One membrane makes up to three repellants, depending on how many water bottles
-you use. The bottles are consumed. Awkward potions and other potion types do not
+you use. The filled bottles become repellant; each consumed repellant returns
+an empty bottle when used for enchanting. Awkward potions and other potion types do not
 work. Use plain water bottles without custom names or effects. Brewing uses
 Paper's native brewing recipe system, including normal fuel,
 ingredient consumption, hoppers, and cancellable brewing events.
 
-Repellant looks like **charcoal** but is **lapis lazuli underneath**, so the
-vanilla enchanting table accepts it in its fuel slot. It has its own name and
-persistent identity; renamed charcoal or lapis does not work. Vanilla cost
+Repellant looks like an **enchanted awkward potion** but is **lapis lazuli
+underneath**, so it cannot be drunk and the vanilla enchanting table accepts it
+in its fuel slot. The potion model, awkward potion contents, and glint are visual;
+they do not make it a drinkable potion. It has its own name and
+persistent identity; renamed potions or lapis do not work. Vanilla cost
 tooltips can still call it lapis. Repellant cannot be used as crafting lapis.
+Previously brewed charcoal-model repellant still works and also returns bottles.
 
 ## Enchanting
 
@@ -30,6 +39,11 @@ Open an enchanting table, put a helmet in the item slot, and repellant in the
 lapis slot. Select the first offer to add **Phantom Menace I** for **one
 repellant and one player level**. No bookshelves are needed. Creative mode uses
 vanilla's free enchanting behavior.
+
+After a successful non-creative enchantment, **one empty glass bottle drops
+above the enchanting table**. Cancelled or unsuccessful enchanting returns
+nothing; creative enchanting does not generate bottles because it consumes no
+repellant.
 
 Leather, copper, chainmail, iron, golden, diamond, netherite, and turtle helmets
 are supported. Already-enchanted helmets work, and keep their enchantments,
@@ -58,7 +72,7 @@ Other plugins can still cancel native enchanting and brewing events.
 ./gradlew build
 ```
 
-Install `build/libs/phantommenace-0.1.0.jar` in your server's `plugins/` folder
+Install `build/libs/phantommenace-0.1.1.jar` in your server's `plugins/` folder
 and restart Paper with Java 25. Registry registration requires a full restart;
 do not hot-load this plugin. No configuration, commands, or permissions.
 
@@ -77,3 +91,9 @@ Create the `rewrite123/phantommenace` Hangar project, then provide a token throu
 
 The official Hangar publishing plugin uploads the JAR and syncs this README.
 Never commit API tokens.
+
+Regenerate the original 512 x 512 project icon from the repository root:
+
+```sh
+python3 tools/generate-project-icons.py --project phantommenace
+```
