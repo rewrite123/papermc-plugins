@@ -71,6 +71,23 @@ class EnchantingListenerTest extends PaperTest {
     }
 
     @Test
+    void phantomRepellantIsDelegatedOnlyWhileItsPluginIsEnabled() {
+        var fuel = new ItemStack(Material.LAPIS_LAZULI);
+        fuel.editMeta(meta -> meta.getPersistentDataContainer().set(
+                new org.bukkit.NamespacedKey("phantommenace", "repellant"),
+                org.bukkit.persistence.PersistentDataType.BYTE, (byte) 1));
+        var helmet = new ItemStack(Material.DIAMOND_HELMET);
+        assertTrue(prepare(helmet, fuel, false).isCancelled());
+        var companion = MockBukkit.createMockPlugin("phantommenace");
+        assertTrue(companion.isEnabled());
+        assertFalse(prepare(helmet, fuel, false).isCancelled());
+        var rolled = Map.of(Enchantment.PROTECTION, 3);
+        var event = enchant(helmet, fuel, rolled);
+        assertFalse(event.isCancelled());
+        assertEquals(rolled, event.getEnchantsToAdd());
+    }
+
+    @Test
     void chargedGemsShowVanillaOffersAndPlainLapisClearsThem() {
         var sword = new ItemStack(Material.DIAMOND_SWORD);
         assertFalse(prepare(sword, gems.create(GemItems.Kind.AMETHYST, true).asQuantity(3), false).isCancelled());

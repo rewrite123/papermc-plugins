@@ -1,0 +1,6 @@
+name: phantommenace
+version: '${version}'
+main: io.github.ihormel.phantommenace.PhantomMenacePlugin
+bootstrapper: io.github.ihormel.phantommenace.PhantomMenaceBootstrap
+api-version: '26.3'
+description: Brew phantom repellant to enchant helmets and prevent insomnia phantom spawns.

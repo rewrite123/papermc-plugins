@@ -4,7 +4,9 @@ Craft soul gems, charge them with newly earned XP, and use them instead of lapis
 to enchant or upgrade gear. For **Paper 26.3 / Java 25**, with no runtime
 dependencies or required resource pack.
 
-**Latest release:** [SoulGem 0.2.0 on Hangar](https://hangar.papermc.io/rewrite123/soulgem/versions/0.2.0).
+**Latest release:** [SoulGem 0.2.1 on Hangar](https://hangar.papermc.io/rewrite123/soulgem/versions/0.2.1).
+
+**What's new in 0.2.1:** PhantomMenace compatibility.
 
 ## Crafting and charging
 
@@ -87,6 +89,10 @@ gems in your hands.
 
 ## Compatibility
 
+- SoulGem 0.2.1 recognizes PhantomMenace's marked phantom repellant and leaves
+  its helmet-enchanting offers and purchases to that plugin. Ordinary lapis is
+  still rejected. Both plugins must be installed for this exception to apply.
+
 - `soulgem.use` defaults to everyone and permits charging and enchanting.
   Players without it cannot enchant at tables at all.
 - Enchanting fires the native `PrepareItemEnchantEvent` and `EnchantItemEvent`,
@@ -103,7 +109,7 @@ gems in your hands.
 ./gradlew build
 ```
 
-Copy `build/libs/soulgem-0.2.0.jar` into your server's `plugins/` directory and
+Copy `build/libs/soulgem-0.2.1.jar` into your server's `plugins/` directory and
 restart Paper 26.3 using Java 25. Gradle runs on Java 17+ and provisions Java 25;
 Windows users can run `gradlew.bat`. No configuration is required.
 

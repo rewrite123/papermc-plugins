@@ -23,6 +23,8 @@ Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper
   falling back to a nearby spot if they cannot within 10 seconds.
 - [flipdisc](flipdisc/README.md): flip ordinary music discs between permanent
   two-song pairs using the crafting grid, preserving single-sided special discs.
+- [phantommenace](phantommenace/README.md): brew phantom repellant and enchant
+  helmets to prevent insomnia-triggered phantom spawns for the wearer.
 
 ## Project icons
 

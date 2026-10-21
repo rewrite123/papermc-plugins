@@ -4,6 +4,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -34,6 +37,13 @@ final class EnchantingListener implements Listener {
         return item == null || item.getType().isAir() || item.getAmount() <= 0;
     }
 
+    private static boolean phantomRepellant(ItemStack fuel) {
+        return fuel != null && fuel.getType() == Material.LAPIS_LAZULI && fuel.hasItemMeta()
+                && Byte.valueOf((byte) 1).equals(fuel.getItemMeta().getPersistentDataContainer()
+                .get(new NamespacedKey("phantommenace", "repellant"), PersistentDataType.BYTE))
+                && Bukkit.getPluginManager().isPluginEnabled("phantommenace");
+    }
+
     /**
      * Runs first so other plugins can still veto. Paper pre-cancels this event for items
      * that already carry enchantments; soul gems may upgrade those, so it is un-cancelled.
@@ -42,6 +52,7 @@ final class EnchantingListener implements Listener {
     public void prepare(PrepareItemEnchantEvent event) {
         var player = event.getEnchanter();
         var fuel = fuel(event.getInventory());
+        if (phantomRepellant(fuel)) return;
         if (!empty(fuel) && !gems.charged(fuel)) {
             event.setCancelled(true);
             if (fuel.getType() == Material.LAPIS_LAZULI) player.sendActionBar(LAPIS_REFUSED);
@@ -77,6 +88,7 @@ final class EnchantingListener implements Listener {
     public void enchant(EnchantItemEvent event) {
         var player = event.getEnchanter();
         var fuel = fuel(event.getInventory());
+        if (phantomRepellant(fuel)) return;
         boolean creativeWithoutFuel = empty(fuel) && player.getGameMode() == GameMode.CREATIVE;
         if (!allowed(player) || (!gems.charged(fuel) && !creativeWithoutFuel)) {
             event.setCancelled(true);
