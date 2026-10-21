@@ -1,0 +1,5 @@
+name: spidereyenetherwartblock
+version: '${version}'
+main: io.github.ihormel.spidereyenetherwartblock.SpiderEyeNetherWartBlockPlugin
+api-version: '26.3'
+description: Craft one nether wart block from a full 3x3 grid of spider eyes.
