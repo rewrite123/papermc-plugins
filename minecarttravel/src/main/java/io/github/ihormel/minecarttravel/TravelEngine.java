@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -37,6 +36,7 @@ final class TravelEngine implements Listener {
     private final NamespacedKey noFastTravelKey;
     private final NamespacedKey originalSpeedKey;
     private final Map<UUID, Ride> rides = new HashMap<>();
+    private final Map<Chunk, Integer> ticketUsers = new HashMap<>();
     private long tick;
 
     private static final class Ride {
@@ -54,6 +54,8 @@ final class TravelEngine implements Listener {
         Location origin;
         long deadline;
         boolean loaded;
+        boolean fastTravelFailed;
+        Vector departureVelocity;
         final List<Chunk> tickets = new ArrayList<>();
 
         Ride(Minecart cart) {
@@ -185,7 +187,7 @@ final class TravelEngine implements Listener {
         } else {
             restoreSpeed(ride, true);
         }
-        if (ride.clock.ticks() >= settings.fastTicks() && pos != null
+        if (!ride.fastTravelFailed && ride.clock.ticks() >= settings.fastTicks() && pos != null
                 && cart instanceof RideableMinecart && !recording.test(cart)
                 && cart.getPassengers().size() == 1 && cart.getPassengers().getFirst() instanceof Player player
                 && fastTravelEnabled(player)) {
@@ -208,7 +210,7 @@ final class TravelEngine implements Listener {
             ride.destination = dot > 0 ? hit.route().first() : hit.route().second();
             ride.origin = cart.getLocation();
             ride.deadline = tick + 1200;
-            restoreSpeed(ride, true);
+            ride.departureVelocity = cart.getVelocity();
             cart.setVelocity(new Vector());
             tell(cart, "Preparing fast-travel arrival...");
             loadArrival(ride);
@@ -249,33 +251,28 @@ final class TravelEngine implements Listener {
     private void loadArrival(Ride ride) {
         var world = ride.cart.getWorld();
         var pos = ride.destination.rail();
-        var futures = new ArrayList<CompletableFuture<Chunk>>();
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
-                futures.add(world.getChunkAtAsync((pos.x() >> 4) + dx, (pos.z() >> 4) + dz, false));
+                world.getChunkAtAsync((pos.x() >> 4) + dx, (pos.z() >> 4) + dz, false)
+                        .whenComplete((chunk, error) -> {
+                            if (!plugin.isEnabled()) return;
+                            Runnable complete = () -> {
+                                if (rides.get(ride.cart.getUniqueId()) != ride || ride.destination == null) return;
+                                if (error != null || chunk == null) {
+                                    if (error != null) plugin.getLogger().log(Level.WARNING, "Arrival chunk loading failed", error);
+                                    abort(ride, "The destination area could not be loaded.");
+                                    return;
+                                }
+                                // Adding the ticket also reloads a chunk if it unloaded before this callback.
+                                if (!ticketUsers.containsKey(chunk)) chunk.addPluginChunkTicket(plugin);
+                                ticketUsers.merge(chunk, 1, Integer::sum);
+                                ride.tickets.add(chunk);
+                                ride.loaded = ride.tickets.size() == 9;
+                            };
+                            plugin.getServer().getScheduler().runTask(plugin, complete);
+                        });
             }
         }
-        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).whenComplete((unused, error) -> {
-            if (!plugin.isEnabled()) return;
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                if (rides.get(ride.cart.getUniqueId()) != ride || ride.destination == null) return;
-                if (error != null || futures.stream().anyMatch(future -> future.getNow(null) == null)) {
-                    if (error != null) plugin.getLogger().log(Level.WARNING, "Arrival chunk loading failed", error);
-                    abort(ride, "The destination area could not be loaded.");
-                    return;
-                }
-                for (var future : futures) {
-                    var chunk = future.getNow(null);
-                    if (!world.isChunkLoaded(chunk.getX(), chunk.getZ())) {
-                        abort(ride, "The destination area unloaded before it was ready.");
-                        return;
-                    }
-                    chunk.addPluginChunkTicket(plugin);
-                    ride.tickets.add(chunk);
-                }
-                ride.loaded = true;
-            });
-        });
     }
 
     private boolean destinationReady(Ride ride) {
@@ -323,7 +320,40 @@ final class TravelEngine implements Listener {
 
     private void abort(Ride ride, String message) {
         if (ride.rider != null) ride.rider.sendMessage(message);
-        remove(ride.cart);
+        releaseTickets(ride);
+        ride.destination = null;
+        ride.route = null;
+        ride.fastTravelFailed = true;
+        ride.loaded = false;
+        var cart = ride.cart;
+        if (!cart.isValid() || !enabled(cart) || !cart.getPassengers().equals(List.of(ride.rider))
+                || !ride.rider.isOnline() || !cart.getWorld().equals(ride.origin.getWorld())
+                || cart.getLocation().distanceSquared(ride.origin) > 1) {
+            remove(cart);
+            return;
+        }
+        var pos = TrackSafety.railUnder(cart.getLocation());
+        if (pos != null && cart.getWorld().getBlockAt(pos.x(), pos.y(), pos.z()).getBlockData()
+                instanceof org.bukkit.block.data.Rail rail) {
+            var shape = RailShape.of(rail);
+            var direction = TrackSafety.direction(shape, ride.departureVelocity);
+            if (TrackSafety.clear(cart.getWorld(), pos, shape, direction, settings.lookahead())
+                    && TrackSafety.clearOfEntities(cart, pos, direction, settings.lookahead())) {
+                var velocity = ride.departureVelocity.clone();
+                if (!boostAllowed(cart)) {
+                    restoreSpeed(ride, false);
+                    double limit = Math.min(0.4, ride.originalSpeed);
+                    if (velocity.lengthSquared() > limit * limit) velocity.normalize().multiply(limit);
+                }
+                cart.setVelocity(velocity);
+            } else {
+                restoreSpeed(ride, true);
+            }
+        } else {
+            restoreSpeed(ride, true);
+        }
+        ride.previous = cart.getLocation();
+        ride.lastTick = tick;
     }
 
     private void tell(Minecart cart, String message) {
@@ -360,7 +390,19 @@ final class TravelEngine implements Listener {
         var ride = rides.remove(cart.getUniqueId());
         if (ride == null) return;
         restoreSpeed(ride, true);
-        for (var chunk : ride.tickets) chunk.removePluginChunkTicket(plugin);
+        releaseTickets(ride);
+    }
+
+    private void releaseTickets(Ride ride) {
+        for (var chunk : ride.tickets) {
+            int users = ticketUsers.get(chunk);
+            if (users == 1) {
+                ticketUsers.remove(chunk);
+                chunk.removePluginChunkTicket(plugin);
+            } else {
+                ticketUsers.put(chunk, users - 1);
+            }
+        }
         ride.tickets.clear();
     }
 

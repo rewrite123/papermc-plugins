@@ -343,6 +343,134 @@ class TravelEngineTest extends PaperTest {
         for (int tick = 0; tick < 1201; tick++) engine.tick();
         verify(player).sendMessage("Fast travel cancelled: the cart moved or destination preparation timed out.");
         verify(cart, never()).teleport(any(Location.class), eq(PlayerTeleportEvent.TeleportCause.PLUGIN));
+        assertEquals(4.5, maxSpeed);
+        assertEquals(4.5, velocity.getX());
+    }
+
+    @Test
+    void eachChunkIsTicketedBeforeTheOtherLoadsFinish() {
+        var futures = new ArrayList<CompletableFuture<Chunk>>();
+        doAnswer(call -> {
+            var future = new CompletableFuture<Chunk>();
+            futures.add(future);
+            return future;
+        }).when(world).getChunkAtAsync(anyInt(), anyInt(), eq(false));
+        ride(9);
+        var first = mock(Chunk.class);
+        futures.getFirst().complete(first);
+        server.getScheduler().performOneTick();
+        verify(first).addPluginChunkTicket(plugin);
+        engine.tick();
+        verify(cart, never()).teleport(any(Location.class), eq(PlayerTeleportEvent.TeleportCause.PLUGIN));
+        futures.get(1).completeExceptionally(new IllegalStateException("Test chunk load failure"));
+        server.getScheduler().performOneTick();
+        verify(first).removePluginChunkTicket(plugin);
+        assertEquals(4.5, velocity.getX());
+        assertEquals(4.5, maxSpeed);
+        var late = mock(Chunk.class);
+        futures.get(2).complete(late);
+        server.getScheduler().performOneTick();
+        verify(late, never()).addPluginChunkTicket(plugin);
+    }
+
+    @Test
+    void chunkUnloadedBetweenCompletionAndCallbackIsTicketedInsteadOfAborting() {
+        ride(9);
+        doReturn(false).when(world).isChunkLoaded(anyInt(), anyInt());
+        server.getScheduler().performOneTick();
+        for (var chunk : tickets) verify(chunk).addPluginChunkTicket(plugin);
+        verify(player, never()).sendMessage("The destination area unloaded before it was ready.");
+        doReturn(true).when(world).isChunkLoaded(anyInt(), anyInt());
+        engine.tick();
+        assertEquals(63.5, location.getX());
+    }
+
+    @Test
+    void failedTeleportResumesBoostAndDoesNotKeepRetryingThisRide() {
+        doReturn(false).when(cart).teleport(any(Location.class), eq(PlayerTeleportEvent.TeleportCause.PLUGIN));
+        prepareArrival();
+        engine.tick();
+        assertEquals(4.5, maxSpeed);
+        assertEquals(4.5, velocity.getX());
+        assertEquals(0, velocity.getZ());
+        ride(5);
+        assertEquals(9, tickets.size());
+        assertEquals(4.5, velocity.getX());
+        verify(cart, times(1)).teleport(any(Location.class), eq(PlayerTeleportEvent.TeleportCause.PLUGIN));
+        engine.exit(new VehicleExitEvent(cart, player));
+        ride(9);
+        assertEquals(18, tickets.size());
+    }
+
+    @Test
+    void failedArrivalWithoutBoostResumesVanillaVelocity() {
+        engine.boost(player, false);
+        doReturn(false).when(cart).teleport(any(Location.class), eq(PlayerTeleportEvent.TeleportCause.PLUGIN));
+        prepareArrival();
+        engine.tick();
+        assertEquals(0.4, maxSpeed);
+        assertEquals(0.4, velocity.getX());
+    }
+
+    @Test
+    void failedArrivalNeverPushesIntoNewlyBrokenTrack() {
+        prepareArrival();
+        registry.remove(route);
+        world.getBlockAt(15, 64, 8).setType(Material.AIR);
+        engine.tick();
+        assertEquals(0, velocity.length());
+        assertEquals(0.4, maxSpeed);
+    }
+
+    @Test
+    void fastTravelOptOutDuringPreparationResumesTheRide() {
+        prepareArrival();
+        engine.fastTravel(player, false);
+        engine.tick();
+        assertEquals(4.5, velocity.getX());
+        assertEquals(4.5, maxSpeed);
+        for (var chunk : tickets) verify(chunk).removePluginChunkTicket(plugin);
+    }
+
+    @Test
+    void sharedArrivalTicketsStayUntilTheLastRideReleasesThem() {
+        var chunks = new java.util.HashMap<String, Chunk>();
+        doAnswer(call -> {
+            int x = call.getArgument(0);
+            int z = call.getArgument(1);
+            var chunk = chunks.computeIfAbsent(x + "," + z, unused -> {
+                var result = mock(Chunk.class);
+                when(result.getWorld()).thenReturn(world);
+                when(result.getX()).thenReturn(x);
+                when(result.getZ()).thenReturn(z);
+                return result;
+            });
+            return CompletableFuture.completedFuture(chunk);
+        }).when(world).getChunkAtAsync(anyInt(), anyInt(), eq(false));
+        var other = mock(RideableMinecart.class);
+        when(other.getUniqueId()).thenReturn(UUID.randomUUID());
+        when(other.getWorld()).thenReturn(world);
+        when(other.isValid()).thenReturn(true);
+        when(other.getPassengers()).thenReturn(List.of(player));
+        when(other.getPersistentDataContainer()).thenReturn(new PersistentDataContainerMock());
+        when(other.getLocation()).thenAnswer(unused -> location.clone());
+        when(other.getVelocity()).thenAnswer(unused -> new Vector(0.4, 0, 0));
+        when(other.getMaxSpeed()).thenReturn(0.4);
+        for (int tick = 0; tick < 9; tick++) {
+            engine.tick();
+            location.add(0.4, 0, 0);
+            engine.update(update);
+            engine.update(new VehicleUpdateEvent(other));
+        }
+        server.getScheduler().performOneTick();
+        assertEquals(9, chunks.size());
+        engine.exit(new VehicleExitEvent(cart, player));
+        for (var chunk : chunks.values()) {
+            verify(chunk, times(1)).addPluginChunkTicket(plugin);
+            verify(chunk, never()).removePluginChunkTicket(plugin);
+        }
+        engine.close();
+        for (var chunk : chunks.values()) verify(chunk, times(1)).removePluginChunkTicket(plugin);
     }
 
     @Test

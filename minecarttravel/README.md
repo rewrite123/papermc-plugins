@@ -3,7 +3,15 @@
 Automatic minecart speed boosts and lodestone-to-lodestone fast travel for
 **Paper 26.3 / Java 25**, with no runtime dependencies.
 
-**Latest release:** [MinecartTravel 0.2.1 on Hangar](https://hangar.papermc.io/rewrite123/minecarttravel/versions/0.2.1).
+**Latest version:** 0.2.2.
+
+**What's new in 0.2.2:** destination chunks are protected individually as they
+finish loading, fixing an unloading race during fast-travel preparation.
+If preparation or teleporting fails, the cart resumes its saved speed when
+the track ahead is safe, keeping its earned boost time. Fast travel will not
+retry during that ride; dismount and re-enter to allow another attempt.
+Unsafe track, brakes, obstructions, changed riders, and externally moved carts
+never get a forced restart.
 
 **What's new in 0.2.1:** players can opt out of the speed boost and fast travel
 separately with `/minecarttravel boost [on|off]` and
@@ -178,7 +186,12 @@ headroom, lodestone, an in-border position, and no nearby obstructing entities.
 If the route is unregistered, the rider leaves, the cart moves during
 preparation, loading fails, the destination is blocked, or another plugin
 rejects the teleport, travel is cancelled with a message. Preparation times out
-after 60 game seconds, and tickets are always released. A successful trip
+after 60 game seconds, and tickets are always released. Each destination chunk
+receives a ticket independently, without waiting for the others. Tickets shared
+by multiple preparing rides remain until the last ride releases them.
+A failed attempt resumes the saved velocity only after the normal straight-track
+and entity safety checks; it does not force movement on unsafe track.
+A successful trip
 resets the timer. Riding an unregistered line tells you once how to register it.
 
 ## Route storage and performance
@@ -206,13 +219,13 @@ naturally removes its straight-line speed advantage.
 ## Build and install
 
 Download the compiled plugin from
-[Hangar](https://hangar.papermc.io/rewrite123/minecarttravel/versions/0.2.1), or build it:
+[Hangar](https://hangar.papermc.io/rewrite123/minecarttravel), or build it:
 
 ```sh
 ./gradlew build
 ```
 
-Copy `build/libs/minecarttravel-0.2.1.jar` into your Paper server's `plugins/`
+Copy `build/libs/minecarttravel-0.2.2.jar` into your Paper server's `plugins/`
 directory and restart using Java 25. Gradle runs on Java 17+ and provisions
 Java 25 when needed; Windows users can use `gradlew.bat`. No configuration is
 required.
