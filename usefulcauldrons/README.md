@@ -105,6 +105,26 @@ Use an **empty, heated cauldron**, without water:
 Adding water instead of using an empty pot does not make milk. Clear unwanted
 ingredients using the retrieval gesture.
 
+## Wax and honey
+
+Use an **empty, heated, uncovered cauldron**, without water:
+
+| Ingredients | Output |
+|---|---|
+| 1 raw beef **or** 1 raw porkchop + 1 gunpowder | 1 wax |
+| 1 ordinary honeycomb + 1 empty glass bottle | 1 wax + 1 normal honey bottle |
+
+No blaze powder is required. Outputs pop out automatically, and incomplete
+ingredients remain stored/retrievable. Wax looks like **white dye**, but is
+actually **honeycomb**, not dye. Use it in vanilla candle recipes (with string),
+in copper-waxing crafting recipes, or directly on unwaxed copper blocks.
+Vanilla consumes it and handles the block change normally, including protection
+events. It also works in other vanilla honeycomb recipes. It cannot dye water.
+
+Wax is a custom item and is **not** accepted as the ordinary honeycomb ingredient
+for honey extraction, preventing a wax-to-honey loop. Pick up the normal honey
+bottles and throw them back in if you want to use them for candy.
+
 ## Candy
 
 Use an **empty, heated, uncovered cauldron**, without water:

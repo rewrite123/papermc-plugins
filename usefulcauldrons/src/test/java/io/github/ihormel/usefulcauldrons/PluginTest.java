@@ -3,6 +3,7 @@ package io.github.ihormel.usefulcauldrons;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.bukkit.Material.*;
 import java.io.IOException;
+import java.util.Map;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -376,6 +377,59 @@ class PluginTest {
         assertEquals(63, saved().uses);
         tick(40);
         assertEquals(63, saved().uses);
+    }
+
+    @Test
+    void meatWaxRecipeEjectsCustomWaxAndItCannotBeReusedForHoneyExtraction() throws IOException {
+        drop(BEEF, 1);
+        drop(GUNPOWDER, 1);
+        tick(10);
+        assertEquals(1, dropped(HONEYCOMB));
+        var wax = world.getEntitiesByClass(Item.class).stream().filter(Item::isValid)
+                .filter(i -> i.getItemStack().getType() == HONEYCOMB).findFirst().orElseThrow();
+        assertEquals(WHITE_DYE.getKey(), wax.getItemStack().getItemMeta().getItemModel());
+        var rethrown = world.dropItem(pot.getLocation().clone().add(0.5, 0.4, 0.5), wax.getItemStack());
+        wax.remove();
+        server.getPluginManager().callEvent(new org.bukkit.event.entity.ItemSpawnEvent(rethrown));
+        drop(GLASS_BOTTLE, 1);
+        tick(20);
+        assertTrue(rethrown.isValid());
+        assertEquals(0, dropped(HONEY_BOTTLE));
+        assertEquals(Map.of(GLASS_BOTTLE, 1), saved().ingredients);
+    }
+
+    @Test
+    void honeyExtractionEjectsOneWaxAndOneOrdinaryHoneyBottleWithoutReintake() throws IOException {
+        drop(HONEYCOMB, 1);
+        drop(GLASS_BOTTLE, 1);
+        tick(10);
+        assertEquals(1, dropped(HONEYCOMB));
+        assertEquals(1, dropped(HONEY_BOTTLE));
+        var honey = world.getEntitiesByClass(Item.class).stream().filter(Item::isValid)
+                .filter(i -> i.getItemStack().getType() == HONEY_BOTTLE).findFirst().orElseThrow();
+        assertTrue(honey.getItemStack().isSimilar(new ItemStack(HONEY_BOTTLE)));
+        for (var item : world.getEntitiesByClass(Item.class)) {
+            if (item.isValid()) item.teleport(pot.getLocation().clone().add(0.5, 0.4, 0.5));
+        }
+        tick(20);
+        assertNull(saved());
+        assertEquals(1, dropped(HONEYCOMB));
+        assertEquals(1, dropped(HONEY_BOTTLE));
+    }
+
+    @Test
+    void cancelledWaxCraftPreservesStoredIngredientsAndProducesNothing() throws IOException {
+        server.getPluginManager().registerEvents(new Listener() {
+            @EventHandler
+            public void cancel(CauldronProcessEvent event) {
+                if (event.getOperation().equals("render_wax")) event.setCancelled(true);
+            }
+        }, plugin);
+        drop(PORKCHOP, 1);
+        drop(GUNPOWDER, 1);
+        tick(20);
+        assertEquals(0, dropped(HONEYCOMB));
+        assertEquals(Map.of(PORKCHOP, 1, GUNPOWDER, 1), saved().ingredients);
     }
 
     @Test

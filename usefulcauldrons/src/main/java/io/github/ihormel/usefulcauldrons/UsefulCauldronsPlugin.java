@@ -260,7 +260,10 @@ public class UsefulCauldronsPlugin extends JavaPlugin implements Listener {
         if (plan == null || !allowed(block, plan.id(), null)) return;
         if (plan.water() > 0 && !drain(block)) return;
         plan.apply(state);
-        plan.returns().forEach((material, amount) -> eject(block, material, amount));
+        plan.returns().forEach((material, amount) -> {
+            if (material == Material.HONEYCOMB) eject(block, WaxItems.create(amount));
+            else eject(block, material, amount);
+        });
         if (plan.food() != null && Foods.candy(plan.food())) {
             eject(block, Foods.create(plan.food()));
             state.food = null;

@@ -41,6 +41,8 @@ final class Recipes {
     static final List<Recipe> STEWS = stews();
     static final Recipe MILK = recipe("warm_milk", 4, one(MILK_BUCKET), new Ingredient(4, BOWL), one(BLAZE_POWDER));
     static final Recipe CHOCOLATE = recipe("hot_chocolate", 4, new Ingredient(6, COCOA_BEANS), new Ingredient(2, SUGAR));
+    static final Recipe WAX = recipe("render_wax", 0, one(BEEF, PORKCHOP), one(GUNPOWDER));
+    static final Recipe HONEY = recipe("extract_honey", 0, one(HONEYCOMB), one(GLASS_BOTTLE));
     static final Set<Material> CANDY = Set.of(APPLE, SWEET_BERRIES, CARROT, MELON_SLICE,
             GOLDEN_APPLE, GLISTERING_MELON_SLICE, GOLDEN_CARROT, PUMPKIN, CHORUS_FRUIT);
 
@@ -97,6 +99,7 @@ final class Recipes {
 
     static boolean ingredient(Material material) {
         return material == SUGAR || material == HONEY_BOTTLE || CANDY.contains(material)
+                || material == HONEYCOMB || material == GLASS_BOTTLE
                 || MILK.ingredients().stream().anyMatch(i -> i.alternatives().contains(material))
                 || CHOCOLATE.ingredients().stream().anyMatch(i -> i.alternatives().contains(material))
                 || STEWS.stream().flatMap(r -> r.ingredients().stream())

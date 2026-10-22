@@ -38,6 +38,11 @@ final class Cooking {
                 if (costs != null) return new Plan(recipe.food(), recipe.food(), recipe.servings(), costs, Map.of(), 1, 0);
             }
         } else {
+            var wax = Recipes.WAX.match(state);
+            if (wax != null) return new Plan("render_wax", null, 0, wax, Map.of(HONEYCOMB, 1), 0, 0);
+            var extraction = Recipes.HONEY.match(state);
+            if (extraction != null) return new Plan("extract_honey", null, 0, extraction,
+                    Map.of(HONEYCOMB, 1, HONEY_BOTTLE, 1), 0, 0);
             var milk = Recipes.MILK.match(state);
             if (milk != null) return new Plan("warm_milk", "warm_milk", 4, milk, Map.of(BUCKET, 1), 0, 0);
             for (var material : Material.values()) {
