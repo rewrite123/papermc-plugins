@@ -379,11 +379,37 @@ class PluginTest {
     }
 
     @Test
+    void floatingDisplaysFollowIntakeCraftingAndRetrievalWithoutExtraDroppedItems() {
+        drop(MILK_BUCKET, 1);
+        tick(10);
+        assertEquals(1, world.getEntitiesByClass(org.bukkit.entity.ItemDisplay.class).stream()
+                .filter(org.bukkit.entity.Entity::isValid).count());
+        assertEquals(0, dropped(MILK_BUCKET));
+        drop(BOWL, 4);
+        drop(BLAZE_POWDER, 1);
+        tick(10);
+        var visible = world.getEntitiesByClass(org.bukkit.entity.ItemDisplay.class).stream()
+                .filter(org.bukkit.entity.Entity::isValid).toList();
+        assertEquals(1, visible.size());
+        assertEquals("warm_milk", Foods.id(visible.getFirst().getItemStack()));
+        assertEquals(1, dropped(BUCKET));
+        click(null, true);
+        assertFalse(visible.getFirst().isValid());
+        assertEquals(4, player.getInventory().all(MUSHROOM_STEW).size());
+        assertEquals(0, dropped(MUSHROOM_STEW));
+    }
+
+    @Test
     void normalDisableEnablePreservesPartialRecipesWithoutForceLoading() throws IOException {
         drop(SUGAR, 25);
         tick(10);
+        var original = world.getEntitiesByClass(org.bukkit.entity.ItemDisplay.class).stream()
+                .filter(org.bukkit.entity.Entity::isValid).findFirst().orElseThrow();
         server.getPluginManager().disablePlugin(plugin);
+        assertFalse(original.isValid());
         server.getPluginManager().enablePlugin(plugin);
+        assertEquals(1, world.getEntitiesByClass(org.bukkit.entity.ItemDisplay.class).stream()
+                .filter(org.bukkit.entity.Entity::isValid).count());
         assertEquals(25, saved().count(SUGAR));
         drop(SUGAR, 1);
         drop(APPLE, 1);

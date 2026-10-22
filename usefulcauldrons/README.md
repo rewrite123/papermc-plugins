@@ -11,6 +11,14 @@ matches. Partial recipes and leftovers remain inside. Only ordinary, unmodified
 items are accepted as ingredients: named, enchanted and other custom items are
 not consumed by recipes. Capacity: 4,096 ingredients per cauldron.
 
+Stored ingredients appear as small, gently floating and spinning items inside
+the cauldron, with one visual per ingredient type. Cooked servings also have a
+food visual. These are display entities, not dropped items: players, mobs and
+hoppers cannot pick them up, and they cannot burn or despawn as dropped items do.
+They update when ingredients cook or are retrieved, and disappear when empty.
+The visuals are recreated from stored contents after a restart or chunk reload;
+they do not contain extra copies of your items or keep chunks loaded.
+
 - Add water normally with a water bucket.
 - Heat means fire, soul fire, lava, or a **lit** campfire/soul campfire immediately
   below the cauldron.
@@ -115,7 +123,8 @@ Use an **empty, heated, uncovered cauldron**, without water:
 
 Entering a heated cauldron that still contains sugar starts a **20-second
 sticky burn**. Leaving or entering water does not stop it; re-entering the
-cauldron refreshes the timer. It deals 1 point of fire damage per second.
+cauldron refreshes the timer. It deals **2 health points (1 heart) of fire
+damage per second**, twice the previous damage, for the same 20-second duration.
 Fire resistance and creative/spectator immunity still apply; other plugins
 may cancel the damage. Milk is not a cure for this burn, which is not a potion
 effect. Death clears it. Burn and milk-immunity timers use real elapsed time,

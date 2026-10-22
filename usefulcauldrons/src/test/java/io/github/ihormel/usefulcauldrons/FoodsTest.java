@@ -1,9 +1,13 @@
 package io.github.ihormel.usefulcauldrons;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import java.util.stream.Stream;
 import org.bukkit.Material;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -12,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
 
@@ -112,6 +117,43 @@ class FoodsTest {
         player.setAbsorptionAmount(0);
         Foods.absorption(player, 5);
         assertEquals(5, player.getAbsorptionAmount());
+    }
+
+    @Test
+    void stickyBurnDealsTwoHealthPointsAndReignitesEvenAfterWaterClearsFire() {
+        var player = spy(server.addPlayer());
+        // MockBukkit does not implement damage(double, DamageSource); capture that API call explicitly.
+        doNothing().when(player).damage(anyDouble(), any(DamageSource.class));
+        var listener = new MealsListener(null);
+        long now = System.currentTimeMillis();
+        MealsListener.burn(player, now);
+        player.setFireTicks(0);
+        listener.tick(player, now + 1000);
+        var source = ArgumentCaptor.forClass(DamageSource.class);
+        verify(player).damage(eq(2.0), source.capture());
+        assertEquals(DamageType.ON_FIRE, source.getValue().getDamageType());
+        assertEquals(40, player.getFireTicks());
+        listener.tick(player, now + 2000);
+        verify(player, times(2)).damage(eq(2.0), any(DamageSource.class));
+        listener.tick(player, now + 20_000);
+        verify(player, times(2)).damage(anyDouble(), any(DamageSource.class));
+    }
+
+    @Test
+    void strongerBurnStillRespectsFireResistanceCreativeAndSpectator() {
+        var player = server.addPlayer();
+        var listener = new MealsListener(null);
+        long now = System.currentTimeMillis();
+        MealsListener.burn(player, now);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 600, 0));
+        listener.tick(player, now + 1000);
+        assertEquals(20, player.getHealth());
+        player.removePotionEffect(PotionEffectType.FIRE_RESISTANCE);
+        for (var mode : new org.bukkit.GameMode[] {org.bukkit.GameMode.CREATIVE, org.bukkit.GameMode.SPECTATOR}) {
+            player.setGameMode(mode);
+            listener.tick(player, now + 2000);
+            assertEquals(20, player.getHealth());
+        }
     }
 
     @Test

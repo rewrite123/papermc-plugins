@@ -128,7 +128,7 @@ final class MealsListener implements Listener {
                 || player.getGameMode() == org.bukkit.GameMode.SPECTATOR) return;
         burnDamage.add(player.getUniqueId());
         try {
-            player.damage(1, DamageSource.builder(DamageType.ON_FIRE).build());
+            player.damage(2, DamageSource.builder(DamageType.ON_FIRE).build());
         } finally {
             burnDamage.remove(player.getUniqueId());
         }

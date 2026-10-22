@@ -54,6 +54,7 @@ public class UsefulCauldronsPlugin extends JavaPlugin implements Listener {
     private Map<ContentsStore.Position, CauldronContents> contents;
     private ContentsStore store;
     private MealsListener meals;
+    private CauldronDisplays displays;
     private boolean dirty;
     private int ticks;
 
@@ -66,20 +67,28 @@ public class UsefulCauldronsPlugin extends JavaPlugin implements Listener {
             throw new IllegalStateException("UsefulCauldrons cannot start safely. Fix contents.yml before restarting.", exception);
         }
         meals = new MealsListener(this);
+        displays = new CauldronDisplays();
+        displays.removeLoadedRemnants();
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(meals, this);
+        getServer().getPluginManager().registerEvents(displays, this);
         for (var world : getServer().getWorlds()) {
             for (var item : world.getEntitiesByClass(Item.class)) track(item);
         }
+        displays.sync(contents, 0);
         getServer().getScheduler().runTaskTimer(this, this::tick, 10, 10);
     }
 
     @Override
     public void onDisable() {
-        if (contents != null) save();
-        items.clear();
-        occupants.clear();
-        lastTrail.clear();
+        try {
+            if (contents != null) save();
+        } finally {
+            if (displays != null) displays.clear();
+            items.clear();
+            occupants.clear();
+            lastTrail.clear();
+        }
     }
 
     private void save() {
@@ -179,6 +188,7 @@ public class UsefulCauldronsPlugin extends JavaPlugin implements Listener {
                 dirty = true;
             }
         }
+        displays.sync(contents, ticks);
         occupants();
         if (ticks % 20 == 0) {
             long now = System.currentTimeMillis();
@@ -340,6 +350,7 @@ public class UsefulCauldronsPlugin extends JavaPlugin implements Listener {
                 state.food = null;
             }
             state.charcoalTicks = 0;
+            displays.update(block, state, ticks);
             dirty = true;
             return;
         }
@@ -351,6 +362,7 @@ public class UsefulCauldronsPlugin extends JavaPlugin implements Listener {
             if (!Foods.prepaid(state.food)) takeHand(player);
             give(player, Foods.create(state.food));
             if (--state.servings == 0) state.food = null;
+            displays.update(block, state, ticks);
             dirty = true;
             return;
         }
