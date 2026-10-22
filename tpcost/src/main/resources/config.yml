@@ -1,0 +1,7 @@
+# Admin command: /tpcostadmin <setting> <value>
+# Commands save and apply immediately. Restart after manually editing this file.
+minimum-cost: 3
+levels-per-1000-blocks: 3
+maximum-cost: 25
+# Added after the distance-cost cap.
+cross-world-surcharge: 3

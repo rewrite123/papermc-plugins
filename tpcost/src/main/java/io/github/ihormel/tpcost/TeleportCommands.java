@@ -3,6 +3,7 @@ package io.github.ihormel.tpcost;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.Supplier;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -16,10 +17,16 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 final class TeleportCommands implements TabExecutor, Listener {
     private final Server server;
     private final TeleportRequests requests;
+    private final Supplier<TeleportPricing> pricing;
 
     TeleportCommands(Server server, TeleportRequests requests) {
+        this(server, requests, () -> TeleportPricing.DEFAULT);
+    }
+
+    TeleportCommands(Server server, TeleportRequests requests, Supplier<TeleportPricing> pricing) {
         this.server = server;
         this.requests = requests;
+        this.pricing = pricing;
     }
 
     @Override
@@ -75,7 +82,7 @@ final class TeleportCommands implements TabExecutor, Listener {
             tell(sender, "You cannot teleport to yourself.");
             return;
         }
-        int cost = TeleportCost.between(sender.getLocation(), target.getLocation());
+        int cost = TeleportCost.between(sender.getLocation(), target.getLocation(), pricing.get());
         if (quoteOnly) {
             tell(sender, "Teleporting to " + target.getName() + " currently costs " + cost + " levels.");
             return;
@@ -133,7 +140,7 @@ final class TeleportCommands implements TabExecutor, Listener {
             return;
         }
         var destination = target.getLocation();
-        int cost = TeleportCost.between(sender.getLocation(), destination);
+        int cost = TeleportCost.between(sender.getLocation(), destination, pricing.get());
         if (sender.getLevel() < cost) {
             tell(sender, "Teleport cancelled: you now need " + cost + " levels; you have " + sender.getLevel() + ".");
             tell(target, "Teleport cancelled: " + sender.getName() + " does not have enough levels.");

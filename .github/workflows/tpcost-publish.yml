@@ -40,5 +40,5 @@ jobs:
             echo "::error::Set the HANGAR_API_TOKEN repository secret before publishing."
             exit 1
           fi
-          ./gradlew publishPluginPublicationToHangar --no-daemon \
+          ./gradlew publishPluginPublicationToHangar syncAllPluginPublicationPagesToHangar --no-daemon \
             "-PhangarProject=$HANGAR_PROJECT" "-PhangarChangelog=$CHANGELOG"

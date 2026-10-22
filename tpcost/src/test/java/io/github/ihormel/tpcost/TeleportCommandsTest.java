@@ -42,6 +42,31 @@ class TeleportCommandsTest {
     }
 
     @Test
+    void activePricingIsUsedForQuotesRequestsAndRecalculatedAtAcceptance() {
+        var pricing = new java.util.concurrent.atomic.AtomicReference<>(new TeleportPricing(1, 2, 20, 4));
+        var dynamic = new TeleportCommands(server, requests, pricing::get);
+        dynamic.onCommand(alice, command("tpcost"), "tpcost", new String[] {"Bob"});
+        verify(alice).sendMessage(contains("currently costs 6 levels"));
+        dynamic.onCommand(alice, command("tpa"), "tpa", new String[] {"Bob"});
+        verify(alice).sendMessage(contains("Current cost: 6"));
+        pricing.set(new TeleportPricing(1, 4, 20, 4));
+        dynamic.onCommand(bob, command("tpaccept"), "tpaccept", new String[0]);
+        verify(alice).giveExpLevels(-12);
+    }
+
+    @Test
+    void pricingIncreaseCanMakePendingRequestUnaffordableWithoutCharging() {
+        var pricing = new java.util.concurrent.atomic.AtomicReference<>(TeleportPricing.DEFAULT);
+        var dynamic = new TeleportCommands(server, requests, pricing::get);
+        dynamic.onCommand(alice, command("tpa"), "tpa", new String[] {"Bob"});
+        pricing.set(new TeleportPricing(1, 20, 100, 0));
+        dynamic.onCommand(bob, command("tpaccept"), "tpaccept", new String[0]);
+        verify(alice).sendMessage(contains("now need 60 levels"));
+        verify(alice, never()).teleport(any(Location.class), any(TeleportCause.class));
+        verify(alice, never()).giveExpLevels(anyInt());
+    }
+
+    @Test
     void requiresApprovalAndChargesExactlyOnceOnlyAfterSuccess() {
         run(alice, "tpa", "Bob");
         verify(alice, never()).teleport(any(Location.class), any(TeleportCause.class));

@@ -33,6 +33,33 @@ class TeleportCostTest {
     }
 
     @Test
+    void configuredPricingRespectsMinimumRoundingCapAndSurcharge() {
+        var pricing = new TeleportPricing(2, 5, 12, 7);
+        assertEquals(2, TeleportCost.levels(0, false, pricing));
+        assertEquals(5, TeleportCost.levels(1000, false, pricing));
+        assertEquals(6, TeleportCost.levels(1000.01, false, pricing));
+        assertEquals(19, TeleportCost.levels(3000, true, pricing));
+        assertEquals(19, TeleportCost.levels(Double.MAX_VALUE, true, pricing));
+    }
+
+    @Test
+    void zeroPricesAllowFreeOrFlatTeleportsAndLargeValidCostsDoNotOverflow() {
+        assertEquals(0, TeleportCost.levels(Double.MAX_VALUE, true, new TeleportPricing(0, 0, 0, 0)));
+        assertEquals(5, TeleportCost.levels(100000, true, new TeleportPricing(2, 0, 20, 3)));
+        assertEquals(Integer.MAX_VALUE, TeleportCost.levels(Double.MAX_VALUE, true,
+                new TeleportPricing(0, Integer.MAX_VALUE, Integer.MAX_VALUE - 1, 1)));
+    }
+
+    @Test
+    void invalidPricingIsRejected() {
+        assertThrows(IllegalArgumentException.class, () -> new TeleportPricing(-1, 3, 25, 3));
+        assertThrows(IllegalArgumentException.class, () -> new TeleportPricing(3, -1, 25, 3));
+        assertThrows(IllegalArgumentException.class, () -> new TeleportPricing(3, 3, 2, 3));
+        assertThrows(IllegalArgumentException.class, () -> new TeleportPricing(3, 3, 25, -1));
+        assertThrows(IllegalArgumentException.class, () -> new TeleportPricing(0, 3, Integer.MAX_VALUE, 1));
+    }
+
+    @Test
     void measuresThreeDimensionalDistance() {
         World world = world();
         assertEquals(15, TeleportCost.between(

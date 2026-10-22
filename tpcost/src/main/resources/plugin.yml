@@ -24,7 +24,14 @@ commands:
     description: Check the current level cost of teleporting to a player.
     usage: /tpcost <player>
     permission: tpcost.use
+  tpcostadmin:
+    description: View or change teleport pricing immediately.
+    usage: /tpcostadmin [minimum-cost|levels-per-1000-blocks|maximum-cost|cross-world-surcharge] [value]
+    permission: tpcost.admin
 permissions:
   tpcost.use:
     description: Request, approve, deny, cancel, and quote paid teleports.
     default: true
+  tpcost.admin:
+    description: View and change saved teleport pricing.
+    default: op

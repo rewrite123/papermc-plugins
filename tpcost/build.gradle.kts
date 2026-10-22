@@ -16,11 +16,12 @@ java {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:${property("paperApiVersion")}")
-    testImplementation("io.papermc.paper:paper-api:${property("paperApiVersion")}")
+    testImplementation("io.papermc.paper:paper-api:26.2.build.134-stable")
     testImplementation(platform("org.junit:junit-bom:5.13.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.23.0")
+    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v26.2:4.117.0")
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -56,6 +57,7 @@ hangarPublish {
         channel.set(providers.gradleProperty("hangarChannel").orElse("Release"))
         apiKey.set(providers.environmentVariable("HANGAR_API_TOKEN"))
         changelog.set(providers.gradleProperty("hangarChangelog").orElse("See the project README for features and usage."))
+        pages { resourcePage(project.file("README.md").readText()) }
         platforms {
             paper {
                 jar.set(tasks.jar.flatMap { it.archiveFile })
