@@ -9,12 +9,25 @@ import org.bukkit.inventory.view.AnvilView;
 
 final class AnvilCostListener implements Listener {
     static final int MAX_CHARGE = 39;
+    private final int additionalLevels;
+
+    AnvilCostListener() {
+        this(0);
+    }
+
+    AnvilCostListener(int additionalLevels) {
+        if (additionalLevels < 0 || additionalLevels > 254) {
+            throw new IllegalArgumentException("Additional enchantment levels must be between 0 and 254");
+        }
+        this.additionalLevels = additionalLevels;
+    }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void open(InventoryOpenEvent event) {
         if (!event.isCancelled() && event.getView() instanceof AnvilView anvil) {
             // Set this before vanilla calculates a result, otherwise expensive results are discarded.
             anvil.setMaximumRepairCost(Integer.MAX_VALUE);
+            if (additionalLevels > 0) anvil.bypassEnchantmentLevelRestriction(true);
         }
     }
 
@@ -22,9 +35,16 @@ final class AnvilCostListener implements Listener {
     public void prepare(PrepareAnvilEvent event) {
         AnvilView anvil = event.getView();
         anvil.setMaximumRepairCost(Integer.MAX_VALUE);
-        if (event.getResult() != null && !event.getResult().isEmpty()
-                && anvil.getRepairCost() > MAX_CHARGE) {
-            anvil.setRepairCost(MAX_CHARGE);
-        }
+        if (additionalLevels > 0) anvil.bypassEnchantmentLevelRestriction(true);
+        var result = event.getResult();
+        if (result == null || result.isEmpty() || anvil.getRepairCost() <= 0) return;
+        var inventory = event.getInventory();
+        var first = inventory.getFirstItem();
+        var second = inventory.getSecondItem();
+        int cost = MaterialRepairCost.charge(Math.min(anvil.getRepairCost(), MAX_CHARGE),
+                first, second, result, anvil.getRepairItemCountCost());
+        if (cost != anvil.getRepairCost()) anvil.setRepairCost(cost);
+        var adjusted = EnchantmentLimits.restrict(result, first, additionalLevels);
+        if (adjusted != result) event.setResult(adjusted);
     }
 }

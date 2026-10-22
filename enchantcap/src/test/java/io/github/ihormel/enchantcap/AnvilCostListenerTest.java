@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.view.AnvilView;
 import org.junit.jupiter.api.Test;
@@ -94,7 +95,9 @@ class AnvilCostListenerTest {
         PrepareAnvilEvent event = mock(PrepareAnvilEvent.class);
         ItemStack result = mock(ItemStack.class);
         when(event.getView()).thenReturn(anvil);
+        when(event.getInventory()).thenReturn(mock(AnvilInventory.class));
         when(event.getResult()).thenReturn(result);
+        when(result.getEnchantments()).thenReturn(java.util.Map.of());
         when(anvil.getRepairCost()).thenReturn(cost);
         return event;
     }
