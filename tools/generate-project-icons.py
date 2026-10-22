@@ -403,11 +403,61 @@ def spidereyenetherwartblock():
     return c
 
 
+def usefulcauldrons():
+    c = Canvas("#8ee3a1", "USEFUL CAULDRONS")
+    c.poly([(24, 92), (68, 83), (106, 94), (61, 101)], "#0b1326")
+    # A bubbling iron cauldron over flames, with colorful ingredients and steam.
+    c.poly([(40, 94), (36, 85), (43, 87), (47, 76), (54, 87),
+            (63, 79), (69, 87), (79, 75), (81, 86), (91, 81),
+            (86, 95)], "#d65a35")
+    c.poly([(46, 95), (45, 88), (51, 90), (55, 83), (61, 91),
+            (69, 86), (73, 91), (79, 83), (80, 95)], "#ffba53")
+    c.rect(54, 91, 74, 96, "#ffe79a")
+    c.poly([(29, 47), (98, 47), (94, 84), (85, 91), (42, 91),
+            (33, 84)], INK)
+    c.poly([(34, 52), (93, 52), (90, 82), (83, 87), (44, 87),
+            (38, 81)], "#526379")
+    c.poly([(35, 54), (46, 58), (49, 85), (43, 83), (39, 79)], "#8195a5")
+    c.poly([(79, 56), (92, 52), (89, 81), (82, 86), (76, 86)], "#354459")
+    c.rect(48, 62, 76, 65, "#6f8396")
+    c.rect(51, 69, 73, 78, "#46576d")
+    c.rect(40, 85, 48, 94, INK)
+    c.rect(79, 85, 87, 94, INK)
+    c.rect(42, 87, 46, 92, "#8296a6")
+    c.rect(81, 87, 85, 92, "#526379")
+    c.poly([(27, 44), (39, 37), (87, 37), (101, 44), (101, 53),
+            (89, 60), (39, 60), (27, 53)], INK)
+    c.poly([(31, 44), (41, 40), (86, 40), (97, 44), (97, 51),
+            (87, 56), (40, 56), (31, 51)], "#91a5b4")
+    c.poly([(36, 45), (44, 42), (83, 42), (92, 45), (85, 51),
+            (43, 51)], "#264d46")
+    c.poly([(39, 46), (46, 44), (82, 44), (89, 46), (83, 49),
+            (45, 49)], "#62be85")
+    c.rect(46, 45, 54, 46, "#c7f5aa")
+    c.rect(68, 47, 77, 48, "#96e4a3")
+    for x, y, color in [(48, 35, "#9be6b4"), (72, 30, "#c0f2d1"),
+                         (60, 20, "#83cfa9")]:
+        c.rect(x, y, x + 4, y + 3, color)
+        c.rect(x + 2, y - 3, x + 6, y - 1, color)
+    c.poly([(84, 20), (94, 25), (84, 37), (80, 35)], INK)
+    c.poly([(85, 23), (91, 26), (84, 34), (83, 33)], "#ffac53")
+    c.rect(89, 16, 91, 22, "#75c87d")
+    c.rect(93, 19, 98, 21, "#a3e691")
+    c.rect(29, 25, 41, 34, INK)
+    c.rect(31, 26, 39, 32, "#dc667a")
+    c.rect(33, 24, 37, 26, "#f5a0a1")
+    c.rect(33, 33, 37, 37, "#eac69a")
+    c.spark(101, 68, "#b4eafb")
+    c.spark(23, 62, "#ffd392")
+    return c
+
+
 def main():
     factories = (
         tpcost, inventorysorter, enchantcap, sleepy,
         craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
         reduceendermanworlddmg, flipdisc, phantommenace, spidereyenetherwartblock,
+        usefulcauldrons,
     )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", choices=[factory.__name__ for factory in factories])
