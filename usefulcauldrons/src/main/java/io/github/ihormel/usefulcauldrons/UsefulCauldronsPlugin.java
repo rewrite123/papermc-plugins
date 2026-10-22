@@ -384,6 +384,7 @@ public class UsefulCauldronsPlugin extends JavaPlugin implements Listener {
         }
         if (state != null && (state.hasItems() || state.dye != null)) {
             if (hand.getType() == Material.WATER_BUCKET) return;
+            if (hand.getType() == Material.BUCKET && !state.hasItems()) return;
             event.setCancelled(true);
             player.sendActionBar(Component.text("Sneak-right-click with an empty hand to retrieve ingredients. "
                     + state.servings + " servings; " + state.uses + " dye uses.", NamedTextColor.GOLD));

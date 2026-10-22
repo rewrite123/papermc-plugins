@@ -135,8 +135,12 @@ including time logged out or while the server is stopped.
 Drop one ordinary dye into water to give it **64 uses**. A different dye
 replaces the color and resets to 64; the same dye does not waste additional dye
 while the water is already that color. Retrieve ingredients before changing
-color. Refilling water does not reset uses. Emptying it with a bucket discards
-the color.
+color. Refilling water does not reset uses. Right-click a full dyed water
+cauldron with an **empty bucket** to empty it and receive a **normal water
+bucket**. The color and remaining dye uses are discarded, not stored in the
+bucket. As with vanilla cauldrons, bucket collection requires a full cauldron;
+top up partial water first. Retrieve any ingredients or cooked servings before
+emptying the water.
 
 - Drop **4 sand + 4 gravel** into dyed water to make **8 concrete** in that color,
   with **no crafting dye**. Costs **8 uses**. No heat needed.

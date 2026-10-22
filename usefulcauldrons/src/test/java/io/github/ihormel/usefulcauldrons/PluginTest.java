@@ -379,6 +379,89 @@ class PluginTest {
     }
 
     @Test
+    void emptyBucketCanReachVanillaDyedWaterCollectionAndEmptyPotLosesDye() throws IOException {
+        water(3);
+        drop(BLUE_DYE, 1);
+        tick(10);
+        assertEquals(64, saved().uses);
+        var interaction = click(new ItemStack(BUCKET), false);
+        assertNotEquals(org.bukkit.event.Event.Result.DENY, interaction.useInteractedBlock());
+        assertNotEquals(org.bukkit.event.Event.Result.DENY, interaction.useItemInHand());
+        var empty = pot.getState(true);
+        empty.setType(CAULDRON);
+        var collection = new CauldronLevelChangeEvent(pot, player,
+                CauldronLevelChangeEvent.ChangeReason.BUCKET_FILL, empty);
+        server.getPluginManager().callEvent(collection);
+        assertFalse(collection.isCancelled());
+        assertTrue(collection.getNewState().update(true, false));
+        assertEquals(CAULDRON, pot.getType());
+        assertNull(saved());
+        water(3);
+        assertNull(saved());
+    }
+
+    @Test
+    void bucketCollectionStillProtectsStoredIngredients() {
+        water(3);
+        drop(RED_DYE, 1);
+        tick(10);
+        drop(SAND, 1);
+        tick(10);
+        assertTrue(click(new ItemStack(BUCKET), false).isCancelled());
+        var empty = pot.getState(true);
+        empty.setType(CAULDRON);
+        var collection = new CauldronLevelChangeEvent(pot, player,
+                CauldronLevelChangeEvent.ChangeReason.BUCKET_FILL, empty);
+        server.getPluginManager().callEvent(collection);
+        assertTrue(collection.isCancelled());
+        click(null, true);
+        assertNotEquals(org.bukkit.event.Event.Result.DENY,
+                click(new ItemStack(BUCKET), false).useInteractedBlock());
+    }
+
+    @Test
+    void bucketCollectionStillProtectsCookedServings() {
+        water(3);
+        drop(RED_MUSHROOM, 1);
+        drop(BROWN_MUSHROOM, 1);
+        tick(10);
+        assertTrue(click(new ItemStack(BUCKET), false).isCancelled());
+        var empty = pot.getState(true);
+        empty.setType(CAULDRON);
+        var collection = new CauldronLevelChangeEvent(pot, player,
+                CauldronLevelChangeEvent.ChangeReason.BUCKET_FILL, empty);
+        server.getPluginManager().callEvent(collection);
+        assertTrue(collection.isCancelled());
+    }
+
+    @Test
+    void cancelledBucketInteractionsAndFluidCollectionPreserveDyedWater() throws IOException {
+        water(3);
+        drop(PURPLE_DYE, 1);
+        tick(10);
+        var interaction = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, new ItemStack(BUCKET),
+                pot, BlockFace.UP, EquipmentSlot.HAND);
+        interaction.setCancelled(true);
+        server.getPluginManager().callEvent(interaction);
+        assertTrue(interaction.isCancelled());
+        server.getPluginManager().registerEvents(new Listener() {
+            @EventHandler
+            public void cancel(CauldronLevelChangeEvent event) {
+                event.setCancelled(true);
+            }
+        }, plugin);
+        var empty = pot.getState(true);
+        empty.setType(CAULDRON);
+        var collection = new CauldronLevelChangeEvent(pot, player,
+                CauldronLevelChangeEvent.ChangeReason.BUCKET_FILL, empty);
+        server.getPluginManager().callEvent(collection);
+        assertTrue(collection.isCancelled());
+        assertEquals(WATER_CAULDRON, pot.getType());
+        assertEquals(DyeColor.PURPLE, saved().dye);
+        assertEquals(64, saved().uses);
+    }
+
+    @Test
     void floatingDisplaysFollowIntakeCraftingAndRetrievalWithoutExtraDroppedItems() {
         drop(MILK_BUCKET, 1);
         tick(10);
