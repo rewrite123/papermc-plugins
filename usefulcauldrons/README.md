@@ -153,10 +153,10 @@ light-gray smoke, and ejects the charcoal above the lid.
 
 | Input | Charcoal |
 |---|---:|
-| 1 log/wood/stripped log/stripped wood (including nether stems/hyphae) | 16 |
-| 1 plank | 4 |
-| 1 wooden stair/fence/fence gate/door/trapdoor | 3 |
-| 1 wooden slab | 2 |
+| 1 log/wood/stripped log/stripped wood (including nether stems/hyphae) | 2 |
+| 2 planks of the **same type** | 1 |
+| 2 wooden stairs/fences/fence gates/doors/trapdoors of the **same type** | 1 |
+| 4 wooden slabs of the **same type** | 1 |
 | 4 leaves, saplings or flowers of the **same type** | 1 |
 | 4 sticks, bamboo, sugar cane, paper, vines, short grass, ferns, dead bushes, hanging/mangrove roots, red/brown mushrooms, wheat, kelp/dried kelp, carrots, potatoes, beetroot, sweet/glow berries of the **same type** | 1 |
 | 8 wheat/melon/pumpkin/beetroot/torchflower seeds of the **same type** | 1 |

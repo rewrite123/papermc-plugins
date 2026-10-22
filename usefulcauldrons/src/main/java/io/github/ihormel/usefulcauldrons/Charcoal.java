@@ -10,12 +10,12 @@ final class Charcoal {
     record Batch(Map<Material, Integer> costs, int output) {}
 
     static Ratio ratio(Material material) {
-        if (Tag.LOGS.isTagged(material)) return new Ratio(1, 16);
-        if (Tag.PLANKS.isTagged(material)) return new Ratio(1, 4);
-        if (Tag.WOODEN_STAIRS.isTagged(material)) return new Ratio(1, 3);
-        if (Tag.WOODEN_SLABS.isTagged(material)) return new Ratio(1, 2);
-        if (Tag.WOODEN_FENCES.isTagged(material) || Tag.FENCE_GATES.isTagged(material)) return new Ratio(1, 3);
-        if (Tag.WOODEN_DOORS.isTagged(material) || Tag.WOODEN_TRAPDOORS.isTagged(material)) return new Ratio(1, 3);
+        if (Tag.LOGS.isTagged(material)) return new Ratio(1, 2);
+        if (Tag.PLANKS.isTagged(material)) return new Ratio(2, 1);
+        if (Tag.WOODEN_STAIRS.isTagged(material)) return new Ratio(2, 1);
+        if (Tag.WOODEN_SLABS.isTagged(material)) return new Ratio(4, 1);
+        if (Tag.WOODEN_FENCES.isTagged(material) || Tag.FENCE_GATES.isTagged(material)) return new Ratio(2, 1);
+        if (Tag.WOODEN_DOORS.isTagged(material) || Tag.WOODEN_TRAPDOORS.isTagged(material)) return new Ratio(2, 1);
         if (Tag.LEAVES.isTagged(material) || Tag.FLOWERS.isTagged(material)
                 || Tag.SAPLINGS.isTagged(material)) return new Ratio(4, 1);
         return switch (material) {

@@ -245,7 +245,7 @@ class PluginTest {
         tick(1190);
         assertEquals(0, dropped(CHARCOAL));
         tick(10);
-        assertEquals(16, dropped(CHARCOAL));
+        assertEquals(2, dropped(CHARCOAL));
         assertNull(saved());
     }
 

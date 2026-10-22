@@ -211,17 +211,44 @@ class CauldronTest {
     void charcoalHonorsRatesKeepsRemaindersAndDoesNotBurnUnlistedItems() {
         var state = new CauldronContents();
         state.deposit(OAK_LOG, 1);
-        state.deposit(OAK_PLANKS, 1);
-        state.deposit(OAK_SLAB, 1);
+        state.deposit(OAK_PLANKS, 3);
+        state.deposit(OAK_SLAB, 5);
         state.deposit(OAK_LEAVES, 7);
         state.deposit(WHEAT_SEEDS, 9);
         state.deposit(BLAZE_POWDER, 1);
         var batch = Charcoal.batch(state);
-        assertEquals(24, batch.output());
+        assertEquals(6, batch.output());
         state.consume(batch.costs());
-        assertEquals(Map.of(OAK_LEAVES, 3, WHEAT_SEEDS, 1, BLAZE_POWDER, 1), state.ingredients);
+        assertEquals(Map.of(OAK_PLANKS, 1, OAK_SLAB, 1, OAK_LEAVES, 3, WHEAT_SEEDS, 1,
+                BLAZE_POWDER, 1), state.ingredients);
         assertEquals(0, Charcoal.batch(state).output());
         assertNull(Charcoal.ratio(DIAMOND));
+    }
+
+    @Test
+    void everyWoodCategoryUsesBalancedRatesAndKeepsIncompleteGroups() {
+        var categories = Map.of(
+                org.bukkit.Tag.LOGS, new Charcoal.Ratio(1, 2),
+                org.bukkit.Tag.PLANKS, new Charcoal.Ratio(2, 1),
+                org.bukkit.Tag.WOODEN_STAIRS, new Charcoal.Ratio(2, 1),
+                org.bukkit.Tag.WOODEN_SLABS, new Charcoal.Ratio(4, 1),
+                org.bukkit.Tag.WOODEN_FENCES, new Charcoal.Ratio(2, 1),
+                org.bukkit.Tag.FENCE_GATES, new Charcoal.Ratio(2, 1),
+                org.bukkit.Tag.WOODEN_DOORS, new Charcoal.Ratio(2, 1),
+                org.bukkit.Tag.WOODEN_TRAPDOORS, new Charcoal.Ratio(2, 1));
+        categories.forEach((tag, ratio) -> {
+            assertFalse(tag.getValues().isEmpty(), tag.getKey().toString());
+            for (var material : tag.getValues()) {
+                assertEquals(ratio, Charcoal.ratio(material), material.toString());
+                var state = new CauldronContents();
+                state.deposit(material, 3 * ratio.input() - 1);
+                var batch = Charcoal.batch(state);
+                assertEquals(2 * ratio.output(), batch.output(), material.toString());
+                state.consume(batch.costs());
+                assertEquals(ratio.input() - 1, state.count(material), material.toString());
+                assertEquals(0, Charcoal.batch(state).output(), material.toString());
+            }
+        });
     }
 
     @Test
