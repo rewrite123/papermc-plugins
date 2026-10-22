@@ -74,9 +74,9 @@ class CauldronTest {
     }
 
     @Test
-    void customRecipesHaveExactlyEightServingsAndCorrectBlazeCosts() {
+    void customRecipesHaveExactlyTwoServingsAndCorrectBlazeCosts() {
         for (var recipe : Recipes.STEWS.subList(0, 6)) {
-            assertEquals(8, recipe.servings());
+            assertEquals(2, recipe.servings());
             assertEquals(recipe.food().equals("hearty_stew") ? 2 : 1, fill(recipe).count(BLAZE_POWDER));
         }
         assertEquals(4, fill(Recipes.STEWS.get(2)).count(GOLDEN_CARROT));
@@ -316,6 +316,20 @@ class CauldronTest {
         assertFalse(Files.exists(directory.resolve("contents.yml.tmp")));
         store.save(Map.of());
         assertTrue(store.load().isEmpty());
+    }
+
+    @Test
+    void previouslyCookedEightServingBatchesRemainLoadableAfterYieldChange() throws IOException {
+        var state = new CauldronContents();
+        state.food = "golden_flavor";
+        state.servings = 8;
+        var position = new ContentsStore.Position(UUID.randomUUID(), 1, 65, 3);
+        var store = new ContentsStore(directory.resolve("contents.yml"));
+        store.save(Map.of(position, state));
+        var loaded = store.load().get(position);
+        assertEquals("golden_flavor", loaded.food);
+        assertEquals(8, loaded.servings);
+        assertNull(Cooking.next(loaded, true, true, false));
     }
 
     @Test

@@ -59,9 +59,11 @@ closed eyeblossom nausea (7s).
 
 ### Special batches
 
-Every row makes **eight servings** and requires **one blaze powder**, except
+Every row makes **two servings** and requires **one blaze powder**, except
 Hearty which needs **two**. Ingredients are one item each unless stated.
 Effects are level I. Absorption is yellow extra hearts lasting 30 seconds.
+Ingredient and blaze-powder costs are per two-serving batch. Previously cooked
+servings remain available after updating; only newly cooked batches use this yield.
 
 | Food | Ingredients (plus blaze powder) | Effect per serving |
 |---|---|---|

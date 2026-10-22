@@ -54,17 +54,17 @@ final class Recipes {
 
     static List<Recipe> stews() {
         var recipes = new ArrayList<Recipe>();
-        recipes.add(recipe("golden_flavor", 8, one(GOLDEN_APPLE), one(GOLDEN_CARROT),
+        recipes.add(recipe("golden_flavor", 2, one(GOLDEN_APPLE), one(GOLDEN_CARROT),
                 one(GLOW_BERRIES, COCOA_BEANS), one(BLAZE_POWDER)));
-        recipes.add(recipe("speedy_stew", 8, one(RABBIT, COD, SALMON, TROPICAL_FISH, PUFFERFISH),
+        recipes.add(recipe("speedy_stew", 2, one(RABBIT, COD, SALMON, TROPICAL_FISH, PUFFERFISH),
                 one(NETHER_WART), one(CARROT), one(SWEET_BERRIES), one(BLAZE_POWDER)));
-        recipes.add(recipe("carrota_stew", 8, new Ingredient(4, GOLDEN_CARROT), one(SHORT_GRASS),
+        recipes.add(recipe("carrota_stew", 2, new Ingredient(4, GOLDEN_CARROT), one(SHORT_GRASS),
                 one(SPIDER_EYE), one(NETHER_WART), one(BLAZE_POWDER)));
-        recipes.add(recipe("spicy_chilli", 8, one(BEEF), one(BEETROOT), one(DRIED_KELP), one(GUNPOWDER),
+        recipes.add(recipe("spicy_chilli", 2, one(BEEF), one(BEETROOT), one(DRIED_KELP), one(GUNPOWDER),
                 one(MAGMA_CREAM), one(NETHER_WART), one(BLAZE_POWDER)));
-        recipes.add(recipe("hearty_stew", 8, one(BEEF), one(PORKCHOP), one(MUTTON), one(PUMPKIN),
+        recipes.add(recipe("hearty_stew", 2, one(BEEF), one(PORKCHOP), one(MUTTON), one(PUMPKIN),
                 one(POTATO), one(NETHER_WART), new Ingredient(2, BLAZE_POWDER)));
-        recipes.add(recipe("fish_soup", 8, one(COD), one(SALMON), one(CARROT), one(SHORT_GRASS),
+        recipes.add(recipe("fish_soup", 2, one(COD), one(SALMON), one(CARROT), one(SHORT_GRASS),
                 one(VINE), one(NETHER_WART), one(BLAZE_POWDER)));
         FLOWERS.keySet().forEach(flower -> recipes.add(recipe("suspicious:" + flower.name(), 2,
                 one(RED_MUSHROOM), one(BROWN_MUSHROOM), one(flower))));
