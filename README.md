@@ -27,6 +27,8 @@ Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper
   helmets to prevent insomnia-triggered phantom spawns for the wearer.
 - [spidereyenetherwartblock](spidereyenetherwartblock/README.md): craft one
   nether wart block from a full 3x3 crafting grid of spider eyes.
+- [usefulcauldrons](usefulcauldrons/README.md): cook stews, warm milk and candy,
+  dye materials, harden concrete and turn organics into charcoal in cauldrons.
 
 ## Project icons
 

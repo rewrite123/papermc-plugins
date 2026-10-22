@@ -1,0 +1,6 @@
+name: UsefulCauldrons
+version: '${version}'
+main: io.github.ihormel.usefulcauldrons.UsefulCauldronsPlugin
+api-version: '26.3'
+description: Automatic cauldron cooking, dyeing, candy and charcoal.
+author: rewrite123
