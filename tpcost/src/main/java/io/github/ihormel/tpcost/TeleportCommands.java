@@ -1,9 +1,15 @@
 package io.github.ihormel.tpcost;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -18,15 +24,24 @@ final class TeleportCommands implements TabExecutor, Listener {
     private final Server server;
     private final TeleportRequests requests;
     private final Supplier<TeleportPricing> pricing;
+    private final BooleanSupplier quotesEnabled;
+    private final RequestPreferences preferences;
 
     TeleportCommands(Server server, TeleportRequests requests) {
         this(server, requests, () -> TeleportPricing.DEFAULT);
     }
 
     TeleportCommands(Server server, TeleportRequests requests, Supplier<TeleportPricing> pricing) {
+        this(server, requests, pricing, () -> true, null);
+    }
+
+    TeleportCommands(Server server, TeleportRequests requests, Supplier<TeleportPricing> pricing,
+            BooleanSupplier quotesEnabled, RequestPreferences preferences) {
         this.server = server;
         this.requests = requests;
         this.pricing = pricing;
+        this.quotesEnabled = quotesEnabled;
+        this.preferences = preferences;
     }
 
     @Override
@@ -41,6 +56,25 @@ final class TeleportCommands implements TabExecutor, Listener {
         }
         expireRequests();
         switch (command.getName()) {
+            case "tpclose", "tpopen" -> {
+                if (args.length != 0) return false;
+                boolean close = command.getName().equals("tpclose");
+                try {
+                    preferences.setClosed(player.getUniqueId(), close);
+                } catch (IOException exception) {
+                    server.getLogger().log(Level.SEVERE, "Could not save teleport request preference.", exception);
+                    tell(player, "Could not save your preference. Nothing changed; contact an admin.");
+                    return true;
+                }
+                if (close) {
+                    requests.incoming(player.getUniqueId()).forEach(request -> {
+                        requests.remove(request.sender());
+                        notify(request.sender(), player.getName() + " closed incoming teleport requests.");
+                    });
+                }
+                tell(player, "Incoming teleport requests are now " + (close ? "closed" : "open")
+                        + ". This choice is saved across restarts. Use /" + (close ? "tpopen" : "tpclose") + " to change it.");
+            }
             case "tpa", "tpcost" -> {
                 if (args.length != 1) {
                     return false;
@@ -73,6 +107,10 @@ final class TeleportCommands implements TabExecutor, Listener {
     }
 
     private void requestOrQuote(Player sender, String targetName, boolean quoteOnly) {
+        if (quoteOnly && !quotesEnabled.getAsBoolean()) {
+            tell(sender, "Teleport cost lookup is disabled by the server.");
+            return;
+        }
         Player target = server.getPlayerExact(targetName);
         if (target == null || !sender.canSee(target)) {
             tell(sender, "That player is not online or visible to you.");
@@ -80,6 +118,10 @@ final class TeleportCommands implements TabExecutor, Listener {
         }
         if (sender.getUniqueId().equals(target.getUniqueId())) {
             tell(sender, "You cannot teleport to yourself.");
+            return;
+        }
+        if (preferences != null && preferences.isClosed(target.getUniqueId())) {
+            tell(sender, "That player is not accepting teleport requests.");
             return;
         }
         int cost = TeleportCost.between(sender.getLocation(), target.getLocation(), pricing.get());
@@ -90,20 +132,33 @@ final class TeleportCommands implements TabExecutor, Listener {
         if (!ready(sender, target)) {
             return;
         }
-        if (sender.getLevel() < cost) {
+        if (quotesEnabled.getAsBoolean() && sender.getLevel() < cost) {
             tell(sender, "You need " + cost + " levels to teleport; you have " + sender.getLevel() + ".");
             return;
         }
         requests.add(sender.getUniqueId(), target.getUniqueId()).ifPresent(previous -> {
             notify(previous.target(), sender.getName() + " replaced their previous teleport request.");
         });
-        tell(sender, "Request sent to " + target.getName() + ". Current cost: " + cost
-                + " levels (recalculated on acceptance). Expires in 60 seconds.");
-        tell(target, sender.getName() + " wants to teleport to you and pay " + cost
-                + " levels. Use /tpaccept " + sender.getName() + " or /tpdeny " + sender.getName() + ".");
+        tell(sender, "Request sent to " + target.getName() + ". "
+                + (quotesEnabled.getAsBoolean() ? "Current cost: " + cost + " levels (recalculated on acceptance). "
+                        : "You pay XP levels on acceptance. ")
+                + "Expires in 60 seconds.");
+        target.sendMessage(Component.text("[tpcost] " + sender.getName() + " wants to teleport to you. ")
+                .append(Component.text("[Accept]", NamedTextColor.GREEN)
+                        .clickEvent(ClickEvent.runCommand("/tpcost:tpaccept " + sender.getName()))
+                        .hoverEvent(Component.text("Accept " + sender.getName() + "'s teleport request")))
+                .append(Component.text(" "))
+                .append(Component.text("[Deny]", NamedTextColor.RED)
+                        .clickEvent(ClickEvent.runCommand("/tpcost:tpdeny " + sender.getName())))
+                .append(Component.text(" Expires in 60 seconds. You can also use /tpaccept or /tpdeny "
+                        + sender.getName() + ".")));
     }
 
     private void respond(Player target, String[] args, boolean accept) {
+        if (accept && preferences != null && preferences.isClosed(target.getUniqueId())) {
+            tell(target, "Your incoming teleport requests are closed. Use /tpopen first.");
+            return;
+        }
         var incoming = requests.incoming(target.getUniqueId());
         if (args.length == 0 && incoming.size() > 1) {
             tell(target, "You have multiple requests. Specify a player with /"
@@ -198,6 +253,7 @@ final class TeleportCommands implements TabExecutor, Listener {
             return List.of();
         }
         String prefix = args[0].toLowerCase(Locale.ROOT);
+        if (command.getName().equals("tpcost") && !quotesEnabled.getAsBoolean()) return List.of();
         return switch (command.getName()) {
             case "tpa", "tpcost" -> server.getOnlinePlayers().stream()
                     .filter(other -> !other.getUniqueId().equals(player.getUniqueId()) && player.canSee(other))

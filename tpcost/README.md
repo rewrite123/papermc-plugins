@@ -36,7 +36,9 @@ Creative and spectator players also pay; there is no free operator bypass.
 | `/tpaccept [player]` | Accept a request to your location |
 | `/tpdeny [player]` | Deny an incoming request |
 | `/tpcancel` | Cancel your outgoing request |
-| `/tpcost <player>` | Show the current cost without making a request |
+| `/tpclose` | Close incoming requests and cancel pending incoming requests |
+| `/tpopen` | Reopen incoming requests |
+| `/tpcost <player>` | Show the current cost, only if an admin enables lookup |
 
 All player commands above require `tpcost.use`, granted to everyone by default. Use full online
 player names (case-insensitive); tab completion is available. If multiple requests
@@ -51,6 +53,41 @@ successful teleport, preserving fractional level progress. Denied, expired,
 cancelled, or failed teleports cost nothing. Other plugins can cancel the normal
 `PlayerTeleportEvent` (`PLUGIN` cause).
 
+Incoming chat requests include clickable **[Accept]** and **[Deny]** buttons.
+They run the namespaced response command for that sender, with the same expiry,
+permission, visibility, and payment checks as typing the command. An expired or
+cancelled request cannot be accepted just by clicking an old message.
+
+Players accept incoming requests by default. `/tpclose` closes only incoming
+requests, cancels all pending incoming requests, and notifies their senders.
+You can still send outgoing requests while closed. `/tpopen` reopens incoming
+requests. This preference is saved by player UUID in
+`plugins/tpcost/request-preferences.yml` and survives disconnects and restarts.
+
+### Location privacy
+
+**Cost lookup is disabled by default**, including on upgrades and for operators,
+because repeated distance quotes can reveal a player's location. While disabled:
+
+- `/tpcost <player>` does not return a price or suggest player names.
+- `/tpa` does not show the price before acceptance, including in insufficient-XP
+  errors. XP affordability is checked only after the recipient accepts.
+- Teleports still cost the configured levels. The cost is recalculated on
+  acceptance and reported on success, or if the accepted request cannot be paid.
+
+This prevents unapproved distance quotes; it does not hide distance from someone
+whose teleport request you accept. Use `/tpclose` to refuse incoming requests.
+
+Admins can opt back into pre-acceptance prices:
+
+```text
+/tpcostadmin cost-command-enabled true
+/tpcostadmin cost-command-enabled false
+```
+
+The setting is persistent and applies immediately. When enabled, `/tpcost`
+returns prices and `/tpa` once again shows its price and checks XP before sending.
+
 ## Admin pricing commands
 
 Operators, the server console, and players with **`tpcost.admin`** can view or
@@ -62,6 +99,7 @@ change the distance-based pricing without restarting:
 /tpcostadmin levels-per-1000-blocks 3
 /tpcostadmin maximum-cost 25
 /tpcostadmin cross-world-surcharge 3
+/tpcostadmin cost-command-enabled false
 ```
 
 With no arguments, the command shows all active prices. A setting without a
@@ -75,7 +113,7 @@ acceptance, so changing prices can increase or decrease a pending request's cost
 If saving fails, the command reports an error, logs the failure, and leaves
 the active pricing unchanged.
 
-Settings are non-negative whole numbers up to 2,147,483,647. The minimum cannot
+Pricing settings are non-negative whole numbers up to 2,147,483,647. The minimum cannot
 exceed the maximum; the maximum plus cross-world surcharge must also fit within
 2,147,483,647. Increase the maximum before raising the minimum beyond it, or lower
 the minimum before lowering the maximum below it. Zero is allowed: setting the
@@ -90,6 +128,7 @@ minimum-cost: 3
 levels-per-1000-blocks: 3
 maximum-cost: 25
 cross-world-surcharge: 3
+cost-command-enabled: false
 ```
 
 Use commands for live changes; restart after manually editing this file.
@@ -108,7 +147,7 @@ From this directory:
 On Windows use `gradlew.bat`. Gradle runs on Java 17+ and automatically downloads
 a Java 25 toolchain if missing; the **server itself must run Java 25**.
 
-Copy `build/libs/tpcost-0.2.0.jar` into your Paper server's `plugins/` directory and
+Copy `build/libs/tpcost-0.3.0.jar` into your Paper server's `plugins/` directory and
 restart the server. Default configuration is created automatically; no additional plugins are required.
 Run `./gradlew test` for the pricing and request/command lifecycle tests. Tests
 mock the Paper API; they do not replace a multiplayer smoke test on your server.

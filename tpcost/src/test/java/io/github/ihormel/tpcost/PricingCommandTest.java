@@ -35,6 +35,7 @@ class PricingCommandTest {
         for (var key : TeleportPricing.SETTINGS) {
             assertEquals("[tpcost] " + key + " = " + TeleportPricing.DEFAULT.value(key), console.nextMessage());
         }
+        assertEquals("[tpcost] cost-command-enabled = false", console.nextMessage());
     }
 
     @ParameterizedTest
@@ -104,7 +105,8 @@ class PricingCommandTest {
         var command = plugin.getCommand("tpcostadmin");
         assertTrue(plugin.onTabComplete(player, command, "tpcostadmin", new String[] {""}).isEmpty());
         player.setOp(true);
-        assertEquals(TeleportPricing.SETTINGS,
+        assertEquals(java.util.stream.Stream.concat(TeleportPricing.SETTINGS.stream(),
+                        java.util.stream.Stream.of("cost-command-enabled")).toList(),
                 plugin.onTabComplete(player, command, "tpcostadmin", new String[] {""}));
         assertEquals(java.util.List.of("25"),
                 plugin.onTabComplete(player, command, "tpcostadmin", new String[] {"maximum-cost", ""}));
@@ -127,6 +129,7 @@ class PricingCommandTest {
         var bob = server.addPlayer("Bob");
         alice.teleport(new org.bukkit.Location(world, 0, 64, 0));
         bob.teleport(new org.bukkit.Location(world, 3000, 64, 0));
+        server.dispatchCommand(server.getConsoleSender(), "tpcostadmin cost-command-enabled true");
         server.dispatchCommand(alice, "tpcost Bob");
         assertTrue(alice.nextMessage().contains("costs 9 levels"));
         server.dispatchCommand(server.getConsoleSender(), "tpcostadmin levels-per-1000-blocks 2");

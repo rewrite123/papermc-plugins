@@ -4,6 +4,14 @@ main: io.github.ihormel.tpcost.TpCostPlugin
 api-version: '26.3'
 description: Player-approved teleportation paid for with experience levels.
 commands:
+  tpclose:
+    description: Close incoming teleport requests until you reopen them.
+    usage: /tpclose
+    permission: tpcost.use
+  tpopen:
+    description: Reopen incoming teleport requests.
+    usage: /tpopen
+    permission: tpcost.use
   tpa:
     description: Request to teleport to another player.
     usage: /tpa <player>
@@ -21,17 +29,17 @@ commands:
     usage: /tpcancel
     permission: tpcost.use
   tpcost:
-    description: Check the current level cost of teleporting to a player.
+    description: Check teleport cost if the server has enabled lookup.
     usage: /tpcost <player>
     permission: tpcost.use
   tpcostadmin:
-    description: View or change teleport pricing immediately.
-    usage: /tpcostadmin [minimum-cost|levels-per-1000-blocks|maximum-cost|cross-world-surcharge] [value]
+    description: View or change teleport pricing and cost lookup immediately.
+    usage: /tpcostadmin [minimum-cost|levels-per-1000-blocks|maximum-cost|cross-world-surcharge|cost-command-enabled] [value]
     permission: tpcost.admin
 permissions:
   tpcost.use:
     description: Request, approve, deny, cancel, and quote paid teleports.
     default: true
   tpcost.admin:
-    description: View and change saved teleport pricing.
+    description: View and change saved teleport pricing and cost lookup.
     default: op

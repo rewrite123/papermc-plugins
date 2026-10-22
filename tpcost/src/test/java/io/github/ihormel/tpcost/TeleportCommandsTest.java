@@ -42,6 +42,22 @@ class TeleportCommandsTest {
     }
 
     @Test
+    void requestHasClickableNamespacedAcceptanceForCorrectSenderAndStillRequiresLiveRequest() {
+        run(alice, "tpa", "Bob");
+        var message = org.mockito.ArgumentCaptor.forClass(net.kyori.adventure.text.Component.class);
+        verify(bob).sendMessage(message.capture());
+        var accept = message.getValue().children().stream()
+                .filter(child -> net.kyori.adventure.text.event.ClickEvent.runCommand("/tpcost:tpaccept Alice")
+                        .equals(child.clickEvent())).findFirst().orElseThrow();
+        assertEquals(net.kyori.adventure.text.event.ClickEvent.Action.RUN_COMMAND, accept.clickEvent().action());
+        assertTrue(accept.hoverEvent() != null);
+        time.set(TeleportRequests.LIFETIME.toNanos());
+        run(bob, "tpaccept", "Alice");
+        verify(alice, never()).teleport(any(Location.class), any(TeleportCause.class));
+        verify(alice, never()).giveExpLevels(anyInt());
+    }
+
+    @Test
     void activePricingIsUsedForQuotesRequestsAndRecalculatedAtAcceptance() {
         var pricing = new java.util.concurrent.atomic.AtomicReference<>(new TeleportPricing(1, 2, 20, 4));
         var dynamic = new TeleportCommands(server, requests, pricing::get);

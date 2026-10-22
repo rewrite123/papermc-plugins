@@ -5,3 +5,5 @@ levels-per-1000-blocks: 3
 maximum-cost: 25
 # Added after the distance-cost cap.
 cross-world-surcharge: 3
+# Hide distance-based quotes until a target accepts the teleport.
+cost-command-enabled: false
