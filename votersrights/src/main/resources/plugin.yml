@@ -1,0 +1,21 @@
+name: votersrights
+version: '${version}'
+main: io.github.ihormel.votersrights.VotersRightsPlugin
+api-version: '26.3'
+description: Player votes for server actions with configurable voting rights.
+commands:
+  vote:
+    description: Propose an action, vote yes/no, or view the current vote.
+    usage: /vote [action|yes|no] [arguments]
+    permission: votersrights.vote
+  votersrights:
+    description: Configure voting rights, actions, and limits.
+    usage: /votersrights [show|set|allow|difficulties|whitelist|blacklist|action|reload]
+    permission: votersrights.admin
+permissions:
+  votersrights.vote:
+    description: Propose actions and cast votes, subject to voting lists.
+    default: true
+  votersrights.admin:
+    description: Manage voting settings and custom console actions.
+    default: op

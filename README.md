@@ -30,13 +30,15 @@ Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper
   nether wart block from a full 3x3 crafting grid of spider eyes.
 - [usefulcauldrons](usefulcauldrons/README.md): cook stews, warm milk and candy,
   dye materials, harden concrete and turn organics into charcoal in cauldrons.
+- [votersrights](votersrights/README.md): player votes for restarts, timeouts,
+  difficulty, time, distances and admin-defined console actions.
 
 ## Project icons
 
 Project icons are saved as `assets/icon.png` inside their project folders.
-The thirteen-icon set uses 512 x 512 images. The matching
+The fourteen-icon set uses 512 x 512 images. The matching
 Minecraft-inspired pixel art is drawn from scratch, without external textures.
-Regenerate all thirteen icons with Python 3 and ImageMagick installed:
+Regenerate all fourteen icons with Python 3 and ImageMagick installed:
 
 ```sh
 python3 tools/generate-project-icons.py

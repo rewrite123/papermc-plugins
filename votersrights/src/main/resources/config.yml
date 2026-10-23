@@ -1,0 +1,33 @@
+# Live changes: /votersrights. Manual edits: /votersrights reload.
+# A vote lasts 60 seconds and passes at ceil(eligible online players * percent / 100).
+pass-percentage: 50
+minimum-online-players: 3
+restart-cooldown-minutes: 20
+timeout-duration-minutes: 3
+# Starts when the timeout ends, whether or not the player reconnects.
+timeout-protection-minutes: 30
+minimum-view-distance: 6
+maximum-view-distance: 18
+minimum-simulation-distance: 4
+maximum-simulation-distance: 12
+allowed-difficulties: [EASY, NORMAL, HARD]
+whitelist-enabled: false
+# UUIDs, not names. Commands accept online names, cached names, or UUIDs.
+whitelist: []
+blacklist: []
+actions:
+  restart: true
+  lowerViewDistance: true
+  increaseViewDistance: true
+  lowerSimulationDistance: true
+  increaseSimulationDistance: true
+  timeout: true
+  difficulty: true
+  setTimeDay: true
+  setTimeNight: true
+# Named fixed console commands, without leading slashes or player substitutions.
+# custom-actions:
+#   example:
+#     enabled: true
+#     commands: ["say A player-approved message"]
+custom-actions: {}

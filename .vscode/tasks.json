@@ -105,6 +105,21 @@
 				"$javac"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Build votersrights",
+			"type": "shell",
+			"command": "./votersrights/gradlew",
+			"args": [
+				"-p",
+				"votersrights",
+				"build",
+				"--console=plain"
+			],
+			"problemMatcher": [
+				"$javac"
+			],
+			"group": "build"
 		}
 	]
 }

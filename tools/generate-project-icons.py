@@ -452,12 +452,36 @@ def usefulcauldrons():
     return c
 
 
+def votersrights():
+    c = Canvas("#80dbc6", "VOTERS RIGHTS")
+    c.poly([(22, 88), (70, 79), (108, 92), (59, 101)], "#0b1326")
+    c.poly([(28, 54), (74, 42), (103, 55), (103, 86), (59, 99),
+            (28, 84)], INK)
+    c.poly([(32, 56), (74, 46), (99, 56), (58, 68)], "#7e9bab")
+    c.poly([(32, 58), (58, 71), (58, 94), (32, 82)], "#365871")
+    c.poly([(61, 71), (99, 60), (99, 83), (61, 94)], "#4b7688")
+    c.poly([(44, 57), (72, 50), (84, 55), (56, 63)], INK)
+    c.poly([(49, 56), (66, 51), (81, 56), (64, 61)], "#213547")
+    c.poly([(45, 18), (78, 22), (73, 60), (40, 56)], INK)
+    c.poly([(48, 22), (74, 25), (70, 56), (44, 53)], "#e9f1d9")
+    c.poly([(48, 25), (52, 26), (48, 50), (45, 50)], "#a5c8b9")
+    c.poly([(50, 37), (55, 42), (68, 29), (71, 34), (55, 49),
+            (47, 41)], "#267468")
+    c.poly([(51, 36), (56, 40), (67, 29), (69, 32), (55, 45),
+            (49, 39)], "#7bdd9c")
+    c.rect(69, 75, 85, 78, "#91c7ba")
+    c.rect(73, 81, 81, 83, "#74a89e")
+    c.spark(94, 28, "#f2db8d")
+    c.spark(28, 35, "#a3edcf")
+    return c
+
+
 def main():
     factories = (
         tpcost, inventorysorter, enchantcap, sleepy,
         craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
         reduceendermanworlddmg, flipdisc, phantommenace, spidereyenetherwartblock,
-        usefulcauldrons,
+        usefulcauldrons, votersrights,
     )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", choices=[factory.__name__ for factory in factories])
