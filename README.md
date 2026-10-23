@@ -38,9 +38,9 @@ Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper
 ## Project icons
 
 Project icons are saved as `assets/icon.png` inside their project folders.
-The fourteen-icon set uses 512 x 512 images. The matching
+The fifteen-icon set uses 512 x 512 images. The matching
 Minecraft-inspired pixel art is drawn from scratch, without external textures.
-Regenerate all fourteen icons with Python 3 and ImageMagick installed:
+Regenerate all fifteen icons with Python 3 and ImageMagick installed:
 
 ```sh
 python3 tools/generate-project-icons.py

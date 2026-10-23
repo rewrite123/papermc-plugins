@@ -476,12 +476,42 @@ def votersrights():
     return c
 
 
+def ihatepowderedsnow():
+    c = Canvas("#a8e3ff", "NO POWDER SNOW")
+    c.poly([(20, 88), (66, 77), (109, 91), (63, 101)], "#0b1326")
+    c.poly([(28, 49), (70, 35), (101, 51), (101, 82), (59, 98),
+            (28, 80)], INK)
+    c.poly([(32, 51), (70, 39), (97, 52), (59, 66)], "#f4fcff")
+    c.poly([(32, 54), (57, 68), (57, 92), (32, 78)], "#b2d6e8")
+    c.poly([(61, 68), (97, 56), (97, 80), (61, 92)], "#80afcc")
+    c.poly([(36, 55), (43, 59), (43, 75), (36, 71)], "#d9f0fa")
+    c.poly([(65, 72), (75, 68), (75, 72), (65, 76)], "#a9d6ed")
+    c.poly([(83, 76), (93, 72), (93, 77), (83, 81)], "#6596b7")
+    c.poly([(45, 51), (51, 48), (59, 53), (75, 43), (81, 47),
+            (59, 61)], "#3b9886")
+    c.poly([(48, 51), (51, 50), (59, 55), (76, 45), (78, 47),
+            (59, 58)], "#96edc0")
+    # A sturdy walking boot stands on top of the solid snow.
+    c.poly([(48, 17), (67, 17), (67, 33), (81, 37), (81, 46),
+            (47, 46), (43, 42), (43, 32), (48, 30)], INK)
+    c.rect(51, 20, 63, 32, "#ce9665")
+    c.rect(51, 20, 63, 24, "#f0c28c")
+    c.poly([(48, 33), (63, 33), (63, 36), (77, 40), (77, 42),
+            (48, 42)], "#8d593e")
+    c.rect(48, 43, 77, 44, "#efd5a5")
+    c.rect(53, 28, 61, 29, "#543c35")
+    c.rect(52, 34, 60, 35, "#dfb180")
+    c.spark(90, 24, "#d5f5ff")
+    c.spark(22, 57, "#a8e3ff")
+    return c
+
+
 def main():
     factories = (
         tpcost, inventorysorter, enchantcap, sleepy,
         craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
         reduceendermanworlddmg, flipdisc, phantommenace, spidereyenetherwartblock,
-        usefulcauldrons, votersrights,
+        usefulcauldrons, votersrights, ihatepowderedsnow,
     )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", choices=[factory.__name__ for factory in factories])
