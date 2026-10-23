@@ -32,6 +32,8 @@ Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper
   dye materials, harden concrete and turn organics into charcoal in cauldrons.
 - [votersrights](votersrights/README.md): player votes for restarts, timeouts,
   difficulty, time, distances and admin-defined console actions.
+- [ihatepowderedsnow](ihatepowderedsnow/README.md): replace powder snow with solid
+  snow blocks during new chunk generation, leaving existing terrain unchanged.
 
 ## Project icons
 

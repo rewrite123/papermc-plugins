@@ -1,0 +1,6 @@
+name: ihatepowderedsnow
+version: '${version}'
+main: io.github.ihormel.ihatepowderedsnow.IHatePowderedSnowPlugin
+api-version: '26.3'
+load: STARTUP
+description: Replace generated powder snow with solid snow blocks in new chunks.

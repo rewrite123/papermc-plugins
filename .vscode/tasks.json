@@ -120,6 +120,21 @@
 				"$javac"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Build ihatepowderedsnow",
+			"type": "shell",
+			"command": "./ihatepowderedsnow/gradlew",
+			"args": [
+				"-p",
+				"ihatepowderedsnow",
+				"build",
+				"--console=plain"
+			],
+			"problemMatcher": [
+				"$javac"
+			],
+			"group": "build"
 		}
 	]
 }
