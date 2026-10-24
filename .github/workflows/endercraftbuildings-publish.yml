@@ -1,0 +1,43 @@
+name: Publish endercraftbuildings to Hangar
+
+on:
+  workflow_dispatch:
+    inputs:
+      changelog:
+        description: Release changelog
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: endercraftbuildings-hangar-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: endercraftbuildings
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Test and build
+        run: ./gradlew build --no-daemon
+      - name: Publish and update description
+        env:
+          HANGAR_API_TOKEN: ${{ secrets.HANGAR_API_TOKEN }}
+          CHANGELOG: ${{ inputs.changelog }}
+        run: |
+          if [ -z "$HANGAR_API_TOKEN" ]; then
+            echo "::error::Set the HANGAR_API_TOKEN repository secret before publishing."
+            exit 1
+          fi
+          ./gradlew publishPluginPublicationToHangar syncAllPluginPublicationPagesToHangar --no-daemon \
+            "-PhangarChangelog=$CHANGELOG"

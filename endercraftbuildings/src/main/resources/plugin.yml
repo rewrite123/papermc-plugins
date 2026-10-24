@@ -1,0 +1,5 @@
+name: endercraftbuildings
+version: '${version}'
+main: io.github.ihormel.endercraftbuildings.EnderCraftBuildingsPlugin
+api-version: '26.3'
+description: Scan buildings into amethyst crystals and recall them from the End.

@@ -150,6 +150,14 @@
 				"$javac"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Build endercraftbuildings",
+			"type": "shell",
+			"command": "./endercraftbuildings/gradlew -p endercraftbuildings build --console=plain",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
 		}
 	]
 }

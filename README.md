@@ -38,13 +38,16 @@ Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper
   natural monster protection, replacement recipes and blue soul candles.
 - [betterbarrels](betterbarrels/README.md): UI-free 2,048-item single-type barrels,
   legacy inventory migration and resumable uninstall-to-chest conversion.
+- [endercraftbuildings](endercraftbuildings/README.md): scan buildings into
+  amethyst memory crystals, imprint storage crystals with materials at an ender
+  biconical taper, and recall rotated copies anywhere.
 
 ## Project icons
 
 Project icons are saved as `assets/icon.png` inside their project folders.
-The seventeen-icon set uses 512 x 512 images. The matching
+The eighteen-icon set uses 512 x 512 images. The matching
 Minecraft-inspired pixel art is drawn from scratch, without external textures.
-Regenerate all seventeen icons with Python 3 and ImageMagick installed:
+Regenerate all eighteen icons with Python 3 and ImageMagick installed:
 
 ```sh
 python3 tools/generate-project-icons.py

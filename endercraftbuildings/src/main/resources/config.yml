@@ -1,0 +1,6 @@
+# Chance (0.0 - 1.0) that an endermite slips out of the End.
+endermite-chance:
+  # When a storage crystal is imprinted at an ender biconical taper.
+  taper: 0.05
+  # When a storage crystal recalls its building into the world.
+  placement: 0.05

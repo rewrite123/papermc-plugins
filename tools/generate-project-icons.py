@@ -571,12 +571,45 @@ def betterbarrels():
     return c
 
 
+def endercraftbuildings():
+    c = Canvas("#c48cff", "ENDERCRAFT BUILDINGS")
+    c.poly([(10, 92), (40, 80), (112, 84), (118, 98), (60, 101), (12, 100)], "#0b1326")
+    # Hologram house built from light.
+    c.poly([(60, 50), (83, 28), (106, 50)], "#5be7ff33")
+    c.rect(63, 50, 103, 90, "#5be7ff26")
+    for x1, y1, x2, y2 in [(63, 50, 64, 90), (102, 50, 103, 90), (63, 89, 103, 90),
+                           (63, 50, 103, 51), (78, 70, 79, 90), (88, 70, 89, 90),
+                           (78, 70, 89, 71), (68, 58, 75, 59), (68, 65, 75, 66),
+                           (68, 58, 69, 66), (74, 58, 75, 66), (92, 58, 99, 59),
+                           (92, 65, 99, 66), (92, 58, 93, 66), (98, 58, 99, 66)]:
+        c.rect(x1, y1, x2, y2, "#8ff4ff")
+    c.poly([(60, 50), (83, 27), (85, 29), (63, 51)], "#8ff4ff")
+    c.poly([(83, 27), (106, 50), (103, 51), (81, 29)], "#8ff4ff")
+    for x, y in [(51, 48), (56, 44), (61, 40)]:
+        c.rect(x, y, x + 1, y + 1, "#d7b4ff")
+    # Amethyst storage crystal with its ender eye.
+    c.poly([(34, 26), (49, 38), (51, 84), (34, 98), (17, 84), (19, 38)], INK)
+    c.poly([(34, 30), (34, 94), (21, 82), (23, 40)], "#6a3fb0")
+    c.poly([(34, 30), (46, 40), (47, 82), (34, 94)], "#a774f0")
+    c.poly([(34, 30), (40, 36), (40, 88), (34, 94)], "#c9a3ff")
+    c.poly([(27, 38), (30, 35), (30, 70), (27, 74)], "#8d5bd8")
+    c.poly([(34, 30), (46, 40), (34, 44), (23, 40)], "#e3ccff")
+    c.rect(28, 56, 40, 68, INK)
+    c.rect(29, 57, 39, 67, "#1f8f6a")
+    c.rect(31, 59, 37, 65, "#55e0a6")
+    c.rect(33, 60, 35, 64, "#0b2a22")
+    c.spark(57, 22, "#d7b4ff")
+    c.spark(112, 66, "#8ff4ff")
+    return c
+
+
 def main():
     factories = (
         tpcost, inventorysorter, enchantcap, sleepy,
         craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
         reduceendermanworlddmg, flipdisc, phantommenace, spidereyenetherwartblock,
         usefulcauldrons, votersrights, ihatepowderedsnow, betterlanterns, betterbarrels,
+        endercraftbuildings,
     )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", choices=[factory.__name__ for factory in factories])
