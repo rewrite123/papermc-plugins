@@ -13,11 +13,32 @@ Memory (or storage) crystal + empty storage crystal + materials
 Storage crystal -> hold right-click on a block -> building appears, crystal shatters
 ```
 
-The light bouncing off a building is stored in amethyst like a hologram. Ender
-pearls find empty End space to keep the materials in, and the soul lantern's
-light makes the hologram stick. The taper splits that entangled light: one beam
-to the End, one to an empty storage crystal's ender eye, so the crystal can call
-the materials back through the hologram.
+## Lore
+
+Ender pearls don't really fly. They carry whoever throws them through the
+empty space of the End and drop them back out where the pearl lands.
+Endercrafters worked out that the same empty space could hold far more than a
+traveller, if only something could remember where everything belongs.
+
+- **Memory storage crystal.** The soul lantern gives off a special light that
+  lets amethyst hold onto an image. Light bouncing off a building is caught in
+  the crystal like a hologram, and the ender pearl finds empty End space where
+  the building's materials can later be kept. The memory crystal only
+  remembers; it never sends anything away, so it is never used up.
+- **Empty storage crystal.** Amethyst bound to an eye of ender. It has no
+  hologram yet, but the eye is ready to keep track of blocks stored in the End.
+- **Ender Biconical Taper.** Two cones of obsidian focus the hologram's light
+  and split the entangled beam in two. One beam carries the materials into
+  empty End space. The other goes into the empty crystal's ender eye, along
+  with a copy of the hologram from the memory or storage crystal. That crystal
+  now knows where the materials are stored and where every block must go.
+- **Storage crystal.** When used, it pulls the materials back out of the End,
+  through the hologram and into the world, rebuilding the structure exactly as
+  it was remembered. The crystal can't survive the strain and shatters.
+
+The End doesn't always let go cleanly. Now and then something hitches a ride
+back with the materials: an endermite, crawling out of the taper or the newly
+recalled building.
 
 ## Crafting
 
