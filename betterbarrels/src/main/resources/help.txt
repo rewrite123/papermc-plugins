@@ -1,0 +1,53 @@
+&6&lBetterBarrels&r &7- store 2,048 of one item in a barrel
+&7No menu or recipe: use a placed barrel with your main hand.
+
+&6What it does
+&7Each barrel stores up to &f2,048&7 of one exact item type.
+&7Names, lore, enchantments and item data must match.
+&7The stored count is saved in the barrel's block data.
+
+&6How to use it
+&e1. &7Right-click a barrel holding an item to store &fone&7.
+&e2. &7Sneak-right-click to store your held stack.
+&e3. &7With an empty hand, right-click to take one item.
+&e4. &7Sneak-right-click empty-handed for up to one stack.
+&7Stack size follows the item: 64, 16, or even 1.
+&7Empty the barrel fully to store a different item type.
+&7The action bar shows the item and stored count.
+
+&6Recipes
+&7There are no crafting recipes. Use a vanilla barrel.
+
+&6Mechanics and limits
+&7Capacity is &f2,048&7 items per barrel, any stack size.
+&7Barrels have no inventory menu; hoppers cannot move items.
+&7Nonempty barrels cannot be broken. Empty barrels can.
+&7Fire and explosions cannot destroy barrel storage.
+&7Locked barrels need an administrator to unlock them.
+&7Spectators cannot use barrel storage.
+&7Protection plugins can deny the normal right-click event.
+&7Existing barrels with vanilla contents convert to chests.
+&7The scan only visits generated chunks; it does not generate terrain.
+&7Only currently loaded Bukkit worlds are in scan scope.
+
+&6Commands
+&7Players have no storage commands; use right-click controls.
+&7Use &f/help betterbarrels&7 for this guide and links.
+[admin:betterbarrels.admin]
+&6Admin commands &7(permission betterbarrels.admin)
+&f/betterbarrels status &7- show scan mode and progress
+&f/betterbarrels rescan &7- restart a full scan
+&f/betterbarrels uninstall confirm &7- convert all barrels to chests
+&7All currently loaded worlds must be loaded before the scan.
+&7Back up worlds before installation or uninstall conversion.
+&7Uninstall mode is irreversible and persists across restarts.
+&7Collect overflow drops, then stop Paper before removing the JAR.
+&7Do not remove the plugin if status says RUNNING or PAUSED.
+[/admin]
+
+&6Tips and safety
+&7Keep backups of worlds and conversion-backups plugin data.
+&7A full 64-stack item barrel overflows a chest by 320 items.
+&7Overflow is ordinary dropped loot and can despawn.
+&7Removing the JAR without conversion hides stored item data.
+&7Use every relevant world before a final uninstall scan.

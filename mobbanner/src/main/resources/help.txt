@@ -1,0 +1,45 @@
+&6&lMobBanner&r &7- earn banners that suppress or attract one mob type
+&7A marked banner affects eligible spawns in its own 16x16 chunk.
+
+&6Getting a ward banner
+&7Player kills of supported mobs count separately for each player and type.
+&7Milestones: 100, 200, 300, then every 500 through 2000, then every 1000.
+&7For example, a Zombie banner and a Bat banner have separate kill counters.
+&7Supported: bat, blaze, bogged, breeze, cave_spider, creaking,
+&7creeper, drowned, elder_guardian, ender_dragon, enderman,
+&7endermite, evoker, ghast, guardian, hoglin, husk, magma_cube,
+&7parched, phantom, piglin_brute, pillager, ravager, shulker,
+&7silverfish, skeleton, slime, spider, stray, vex, vindicator,
+&7warden, witch, wither, wither_skeleton, zoglin, zombie,
+&7zombie_villager. Each banner targets one exact mob type.
+&7An admin can also give banners. Ward banners are not craftable.
+
+&6Using a banner
+&e1. &7Earn a banner or receive one from an administrator.
+&e2. &7Place it as a floor or wall banner in the chunk you want to affect.
+&e3. &7A plain banner suppresses eligible natural spawns of its marked type.
+&7The banner does not affect other mob types or neighboring chunks.
+
+&6Pyramid attraction
+&7A standing banner on a complete 5x5 / 3x3 / 1x1 base switches to attraction.
+&7All 35 blocks must be iron, gold, emerald, diamond, or netherite blocks.
+&7A matching spawn may then trigger one extra nearby spawn attempt.
+&7An ordinary matching ward in the chunk takes priority and suppresses instead.
+
+&6Spawn rules and limits
+&7Only NATURAL, CHUNK_GEN, REINFORCEMENTS, and PATROL spawns are affected.
+&7Spawners, raids, eggs, commands, existing mobs, and other chunks are untouched.
+&7Attraction is an extra attempt, not a guaranteed spawn or vanilla mob-cap change.
+&7Ward identity survives restart, breaking, and re-placement; crafting with wards
+&7is blocked to prevent copying. Use &f/help mobbanner&7 for more details.
+
+&6Permissions
+&f mobbanner.give &7(default: operators) - give ward banners to online players
+
+[admin:mobbanner.give]
+&6Admin command &7(permission: mobbanner.give)
+&f/mobbanner give <player> <mob> &7- give one marked banner
+&7Use tab completion for online players and supported mob IDs.
+&7Mob IDs ignore case; use underscores for names such as cave_spider.
+&7This grant does not change the recipient's kill count.
+[/admin]

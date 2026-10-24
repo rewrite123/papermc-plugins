@@ -60,6 +60,9 @@ hangarPublish {
         changelog.set(providers.gradleProperty("hangarChangelog").orElse(
             "Initial release: UI-free single-item barrels holding 2048 items. Right-click to store or retrieve one, sneak to transfer a held stack. Includes legacy-content conversion and a resumable full-world uninstall scan with chest overflow drops and conversion backups."
         ))
+        pages {
+            resourcePage(project.file("README.md").readText())
+        }
         platforms {
             paper {
                 jar.set(tasks.jar.flatMap { it.archiveFile })

@@ -1,0 +1,37 @@
+&6&lFlipDisc&r &7- flip eligible music discs to their B-side
+&7One fixed pair per disc; flip back anytime. No random songs.
+
+&6How to flip
+&e1. &7Open your 2x2 inventory grid or a crafting table.
+&e2. &7Put exactly one eligible disc in any slot, with no
+&7other ingredients. Take the opposite disc from the result.
+&e3. &7Craft it again to flip back, then play it in a jukebox.
+&7Recipes are added to the recipe book when you join.
+&7Normal crafting handles shift-click and inventory space.
+
+&6Permanent pairs
+&fCat &7<-> &fTears
+&fBlocks &7<-> &f11
+&fChirp &7<-> &fBounce
+&f13 &7<-> &fMellohi
+&fFar &7<-> &fStrad
+&fMall &7<-> &fStal
+&fWait &7<-> &fWard
+&7Each pair is fixed and reversible; no cross-pair cycling.
+
+&6Not flip-enabled
+&7Pigstep, Otherside, 5, Relic, Creator, Creator (Music Box),
+&7Precipice and Lava Chicken have no recipe.
+&7Discs with an overridden jukebox playback component are
+&7left unchanged so custom songs are not overwritten.
+&7New discs in later Minecraft versions are not auto-paired.
+
+&6Item data and automation
+&7Names, lore and custom item data carry across the flip.
+&7The output remains a vanilla disc for the selected song.
+&7Crafter blocks cannot use these manual flip recipes.
+&7Removing the plugin does not change existing discs.
+
+&6Commands and permissions
+&7There are no plugin commands, permissions or settings.
+&7Open this guide with /help flipdisc.

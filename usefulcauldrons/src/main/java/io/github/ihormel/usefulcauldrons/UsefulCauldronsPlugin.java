@@ -77,6 +77,7 @@ public class UsefulCauldronsPlugin extends JavaPlugin implements Listener {
         }
         displays.sync(contents, 0);
         getServer().getScheduler().runTaskTimer(this, this::tick, 10, 10);
+        HelpGuide.register(this, "usefulcauldrons");
     }
 
     @Override

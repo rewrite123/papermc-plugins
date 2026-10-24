@@ -1,0 +1,24 @@
+&6&lSpider Eye Nether Wart Block&r &7- craft compact storage
+&7Turn nine spider eyes into one ordinary nether wart block.
+
+&6Recipe
+&f top: spider eye | spider eye | spider eye
+&f middle: spider eye | spider eye | spider eye
+&f bottom: spider eye | spider eye | spider eye
+&f result: 1 nether wart block
+
+&6How to craft
+&e1. &7Use a crafting table's full 3x3 grid.
+&e2. &7Fill all nine slots with ordinary spider eyes.
+&e3. &7Take the vanilla nether wart block output.
+&7The recipe is shaped: all nine slots must be filled.
+&7It does not fit the player's 2x2 inventory grid.
+&7Fermented spider eyes are not accepted.
+&7One craft consumes 9 eyes and returns 1 block.
+&7The normal nether-wart block recipe still works.
+&7Players discover the recipe on join; it appears in the
+&7recipe book. Shift crafting uses vanilla behavior.
+
+&6Commands and permissions
+&7There are no plugin commands, permissions or settings.
+&7Open this guide with /help spidereyenetherwartblock.

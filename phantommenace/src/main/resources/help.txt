@@ -1,0 +1,54 @@
+&6&lPhantom Menace&r &7- craft repellant to guard a helmet
+
+&6What it does
+&7Phantom Menace I prevents natural phantom spawns
+&7that are associated with the player wearing it.
+&7It does not reset insomnia or stop phantom attacks.
+
+&6How to use it
+&e1. &fBrew Phantom Repellant&7 with water bottles,
+&7phantom membranes, and normal brewing fuel.
+&e2. &7Put a helmet in an enchanting table's item slot.
+&e3. &7Put Phantom Repellant in its lapis slot.
+&e4. &7Select the first offer to add Phantom Menace I.
+&7The enchantment costs one level and one repellant.
+&7No bookshelves are needed. Other enchantments stay.
+
+&6Brewing recipe
+&f water bottle + phantom membrane = Phantom Repellant
+&7Use plain water bottles; other potions do not work.
+&7Up to three bottles brew at once, as usual.
+&7Repellant looks like a glowing awkward potion,
+&7but is lapis underneath and cannot be consumed.
+
+&6Supported helmets
+&f leather, chainmail, copper, iron, golden,
+&f diamond, netherite, and turtle helmets
+&7Use a helmet without Phantom Menace already on it.
+&7Books, pumpkins, heads, and other armor do not work.
+&7The power only works while the helmet is worn.
+
+&6After enchanting
+&7A successful non-creative enchant returns one
+&7empty glass bottle above the enchanting table.
+&7Creative enchanting is free and returns no bottle.
+&7Cancelled or unsuccessful enchants return none.
+&7Repellant cannot be used as crafting lapis.
+
+&6Limits
+&7Only natural phantom pre-spawns for the wearer stop.
+&7Other players, existing phantoms, and attacks are
+&7unaffected. Command and spawner spawns still work.
+&7This does not reset the player's insomnia timer.
+&7Other plugins can cancel brewing or enchanting.
+&7Keep this plugin installed for enchanted helmets;
+&7removing its registry entry can discard the enchant.
+
+&6Commands & permissions
+&7There are no plugin commands or permissions.
+&7Read this guide with &f/help phantommenace&7.
+
+&6Server owners
+&7Requires Paper 26.3 and Java 25. Restart the server
+&7after install; custom enchantments need a full restart.
+&7No config file, client mod, or resource pack is needed.

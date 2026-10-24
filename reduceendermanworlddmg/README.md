@@ -1,90 +1,101 @@
 # Reduce Enderman World Damage
 
-![Enderman returning a grass block](assets/icon.png)
+**Let Endermen borrow blocks, not permanently rearrange your world.** They still pick blocks up normally; tracked blocks are returned to their origin when possible, with a nearby fallback if the gap stays unreachable.
 
-A standalone plugin for **Paper 26.3** and **Java 25**.
+For **Paper 26.3** and **Java 25**. No client mod, resource pack, or datapack is required.
 
-Endermen still pick up blocks normally. After each successful pickup, the plugin
-chooses a random delay from **10 through 45 seconds**. Once the delay expires,
-the Enderman walks back and replaces its block at the original position.
+![Original overview of the block return safeguards](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/reduceendermanworlddmg/docs/images/features.png)
 
-## What's new in 0.2.0
+> In-game guide: use `/help reduceendermanworlddmg` for the concise, color-coded guide. Paper's help output also provides clickable links to the full guide and issue tracker.
 
-- **Renamed** from `reduceendermanblockdmg` to `reduceendermanworlddmg` to
-  match the Hangar project. Delete the old `reduceendermanblockdmg-*.jar` when
-  upgrading. Endermen already carrying blocks keep their return records.
-- **Endermen no longer get stuck next to the gap.** Reach is measured from the
-  Enderman's eyes instead of its feet, so gaps higher up in a wall count. Any
-  visible point inside the gap counts as line of sight; before, the ray to the
-  gap's center often clipped the block above it. An Enderman standing in the
-  gap steps out of the way.
-- **10-second return window with a nearby fallback.** See below.
+## Contents
 
-## Behavior
+- [Quick start](#quick-start)
+- [How returns work](#how-returns-work)
+- [Return conditions and fallback](#return-conditions-and-fallback)
+- [Persistence, limits, and compatibility](#persistence-limits-and-compatibility)
+- [Commands, permissions, and configuration](#commands-permissions-and-configuration)
+- [Install and upgrade](#install-and-upgrade)
+- [Build and publish](#build-and-publish)
+- [Links and support](#links-and-support)
 
-- When the delay expires, the Enderman has **10 seconds** to walk back and put
-  the block in its original position. Placement needs the gap to be within 3.5
-  blocks of its eyes, with any part of the gap visible.
-- If it hasn't managed within 10 seconds, it **still puts the block back as
-  soon as it can**. Meanwhile it may instead place the block on a nearby spot
-  (within 2 blocks horizontally, from 1 block below to 2 above its feet). It
-  picks the spot closest to the original position that is empty, has a solid
-  block underneath, can hold the block, is visible, and has no entity in it.
-  If there is no such spot, it keeps carrying the block and tries again.
-- Tracked Endermen never place stolen blocks anywhere else on their own.
-- Existing blocks and liquids are never overwritten. If the original space is
-  occupied, the Enderman waits, then uses the nearby fallback.
-- Killing the Enderman cancels the return. Death drops are unchanged; the
-  plugin does not recreate a block after death.
-- Combat and disabled AI pause returns. The plugin never teleports Endermen or
-  loads chunks. If the original chunk is unloaded, the Enderman uses the nearby
-  fallback after the window.
-- The plugin respects `mobGriefing` and fires a cancellable
-  `EntityChangeBlockEvent` before every placement, including fallbacks, so
-  protection plugins can veto it. A cancelled placement is retried, or the
-  next fallback spot is tried.
-- The origin and deadline are saved on the Enderman's persistent data container
-  and restored when the entity loads, including after a normal server restart.
-  Endermen already carrying blocks before installation are unchanged because
-  their original pickup location is unknown.
+## Quick start
 
-The timer uses wall-clock time and is checked every 5 server ticks. Unloaded
-time counts toward the delay. The 10-second window starts when the return
-begins and restarts if the Enderman is reloaded.
+1. Back up the world.
+2. Install `reduceendermanworlddmg-0.3.0.jar` in the server's `plugins/` folder.
+3. Restart Paper 26.3 with Java 25. No configuration is needed.
 
-There are no commands, permissions, or configuration files.
+![The return path from block pickup to original location or fallback](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/reduceendermanworlddmg/docs/images/return-flow.png)
 
-## Build and install
+## How returns work
+
+Endermen retain their normal pickup behavior. When an Enderman picks up a block, the plugin stores that block's original state, world, coordinates, and a random **10-to-45-second wall-clock deadline** in the Enderman's persistent data. The plugin checks returns every **5 server ticks**. The delay is when an attempt can begin, not a guarantee that the block will be back by then; unloaded time counts toward the delay.
+
+When eligible to act, the Enderman walks naturally toward the original position; it is never teleported. The origin must be in the same loaded world, empty, within **3.5 blocks of the Enderman's eyes**, visible at some point inside the gap, and not overlapped by the Enderman. If the origin becomes usable after the fallback window begins, it can still receive the block.
+
+![Random delay and return window timing](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/reduceendermanworlddmg/docs/images/return-timing.png)
+
+## Return conditions and fallback
+
+The plugin never replaces an existing block or liquid. A cancellable `EntityChangeBlockEvent` is fired before every original or fallback placement so protection plugins can veto it. The plugin also rechecks that the target is empty and the Enderman is still carrying the tracked block after event handlers run. A cancelled or invalidated placement is retried.
+
+| Behavior | Details |
+| --- | --- |
+| Original return window | The Enderman gets 10 seconds to complete a return after attempts become eligible |
+| Nearby fallback area | Within 2 blocks on each horizontal axis; from 1 block below to 2 above its feet |
+| Fallback spot checks | Empty, solid ground below, block can be placed, reachable, visible, no overlap, no nearby entities |
+| Fallback order | Candidate spots are tried nearest to the original pickup coordinates |
+| No valid spot | The Enderman keeps carrying the block and tries again later |
+| `mobGriefing` disabled | Return placement is paused in that world |
+
+If the original chunk is unloaded, the plugin never loads it. The nearby fallback may be used after the return window. If the Enderman is in combat or has AI disabled, return attempts pause; the return window may elapse while it is unable to act. Death cancels restoration and leaves vanilla death drops unchanged. If another action changes the carried block to a different material, the saved return is abandoned.
+
+## Persistence, limits, and compatibility
+
+The origin and deadline are stored in the Enderman's persistent data container, so they survive normal entity unload/reload and server restarts. Records from the earlier `reduceendermanblockdmg` plugin namespace are migrated when loaded. Invalid records are removed without altering the carried block. Disabling the plugin clears in-memory tracking but leaves saved entity data available for a later enable.
+
+Endermen already carrying blocks before the plugin first tracks them are unchanged because their original pickup location is unknown. The plugin does not change the normal pickup itself, force chunks to load, or guarantee a nearby spot exists.
+
+| Item | Behavior |
+| --- | --- |
+| Paper | 26.3 |
+| Java | 25 |
+| Configuration | None |
+| Commands / permissions | None |
+| Extra plugins | Not required; protection plugins can cancel placement events |
+
+## Commands, permissions, and configuration
+
+There are no plugin commands, permissions, or configuration settings. Use `/help reduceendermanworlddmg` for the in-game guide. The plugin respects the per-world `mobGriefing` game rule.
+
+## Install and upgrade
+
+1. Back up the world.
+2. Download `reduceendermanworlddmg-0.3.0.jar` from the [Hangar project](https://hangar.papermc.io/rewrite123/reduceendermanworlddmg).
+3. Place it in `plugins/` and restart Paper 26.3 on Java 25.
+
+When upgrading from `reduceendermanblockdmg` 0.1.x, remove the old JAR before installing this plugin. Endermen already carrying blocks retain their saved origin records. To uninstall, stop the server, remove this JAR, and restart.
+
+## Build and publish
+
+Build from this plugin directory with:
 
 ```sh
-./gradlew build
+./gradlew build --console=plain
 ```
 
-Copy `build/libs/reduceendermanworlddmg-0.2.0.jar` into the server's `plugins/`
-directory and restart Paper. Back up your world before installing new plugins.
+The JAR is written to `build/libs/reduceendermanworlddmg-0.3.0.jar`. To regenerate the original documentation diagrams from the repository root, run `python3 tools/docs/reduceendermanworlddmg.py`.
 
-Unit tests cover return deadlines, movement, reach and line of sight into wall
-gaps, the 10-second window and nearby fallback, empty-only placement,
-protection cancellation, death, carried-block changes, persistent state
-recovery, and migration from the old plugin name.
-
-## Publish to Hangar
-
-The publication targets
-[rewrite123/reduceendermanworlddmg](https://hangar.papermc.io/rewrite123/reduceendermanworlddmg),
-the `Release` channel, and Paper `26.3`.
-
-Create the Hangar project first and supply a token with `create_version`
-permission through `HANGAR_API_TOKEN`. Never commit credentials.
+The Hangar publication targets `rewrite123/reduceendermanworlddmg`, the `Release` channel, and Paper 26.3. It syncs this README as the Hangar resource page. Create the Hangar project and provide a token with `create_version` permission through `HANGAR_API_TOKEN`, then run:
 
 ```sh
 ./gradlew build publishPluginPublicationToHangar syncAllPluginPublicationPagesToHangar --console=plain
 ```
 
-For later releases, set an unused version in `gradle.properties` and supply
-release notes with `-PhangarChangelog="..."`. Normal builds do not publish.
+For later releases, set an unused version in `gradle.properties` and provide release notes with `-PhangarChangelog="..."`. Normal builds do not publish. Never commit credentials. Generate the original project icon from the repository root with `python3 tools/generate-project-icons.py --project reduceendermanworlddmg`; icon generation does not upload it.
 
-The Hangar project page is synced from [assets/hangar-description.md](assets/hangar-description.md).
-Regenerate the original 512 x 512 project icon from the repository root with
-`python3 tools/generate-project-icons.py --project reduceendermanworlddmg`.
-Generating the icon does not upload it.
+## Links and support
+
+- [GitHub source and documentation](https://github.com/rewrite123/papermc-plugins/tree/main/reduceendermanworlddmg)
+- [Hangar project](https://hangar.papermc.io/rewrite123/reduceendermanworlddmg)
+- [Report a bug or request help](https://github.com/rewrite123/papermc-plugins/issues)

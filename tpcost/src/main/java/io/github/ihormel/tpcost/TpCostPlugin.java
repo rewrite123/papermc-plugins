@@ -42,6 +42,7 @@ public class TpCostPlugin extends JavaPlugin {
         admin.setExecutor(this);
         admin.setTabCompleter(this);
         getServer().getScheduler().runTaskTimer(this, commands::expireRequests, 20L, 20L);
+        HelpGuide.register(this, "tpcost");
     }
 
     @Override

@@ -1,0 +1,39 @@
+&6&lInventorySorter&r &7- combine and sort your storage
+&7Sort items by category and material, combining
+&7matching partial stacks first. Items never cross
+&7between your inventory and a container.
+
+&6How to sort
+&e1. &7Empty your cursor and find an empty slot.
+&e2. &7Hold Shift and click that same slot twice
+&7within half a second (left or right click).
+&e3. &7Keep the same inventory screen open; sorting
+&7runs on the next server tick.
+&7Use &f/sort&7 if you cannot find an empty slot.
+
+&6What gets sorted
+&7Your inventory: the 27 main storage slots only.
+&7Hotbar, armor, offhand and crafting slots stay put.
+&7Chest, double chest, barrel, placed shulker box
+&7and your ender chest: the whole container.
+&7Other screens: double-click your own storage slots.
+&7The screen's special slots are never sorted.
+
+&6Commands
+&f/sort &7- sort container, or your storage otherwise
+&f/sort player &7- sort your 27 storage slots
+&f/sort container &7- sort an open supported container
+&7Commands require an empty cursor. Container mode
+&7needs a chest, barrel, shulker or ender chest open.
+
+&6Ordering and safety
+&7Groups and item material names sort alphabetically.
+&7Matching stacks combine up to their stack limit;
+&7custom names and other different metadata stay apart.
+&7Empty slots move to the end; item counts and metadata
+&7are preserved. Spectators cannot sort.
+&7Permission: &finventorysorter.use &7(default: everyone).
+&7Cancelled clicks, closing the screen or disconnecting
+&7reset the double-click. Changes are rechecked before
+&7the delayed sort is applied.
+&7Type /help inventorysorter for this guide.

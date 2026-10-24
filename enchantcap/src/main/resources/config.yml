@@ -1,4 +1,5 @@
 # Extra levels obtainable by combining compatible enchantments in an anvil.
 # 0 = vanilla limits; 1 allows Unbreaking IV, Efficiency VI, etc.
-# Restart the server after changing this. Maximum resulting level is 255.
+# Restart after manual edits, or use /enchantcap max-additional-enchantment-levels <value>.
+# Maximum resulting level is 255.
 max-additional-enchantment-levels: 0

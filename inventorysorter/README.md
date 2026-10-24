@@ -1,109 +1,139 @@
 # inventorysorter
 
-Inventory sorting for **Paper 26.3 / Java 25**, with no runtime dependencies.
+**Combine matching partial stacks and sort your storage with a quick double Shift-click.** Choose the player-storage section or a supported container; items never move between them.
 
-**Latest release:** [inventorysorter 0.2.0 on Hangar](https://hangar.papermc.io/rewrite123/inventorysorter/versions/0.2.0).
+Built for **Paper 26.3 / Java 25**, with no runtime dependencies. Configured project version: **0.3.0**.
 
-**What's new in 0.2.0:** sorting now combines matching partial stacks (for
-example, 40 + 40 stone becomes 64 + 16). You can also sort your inventory while a
-crafting table, furnace, anvil, enchanting table, or any other screen is open.
+![InventorySorter features](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/inventorysorter/docs/images/features.png)
 
-## Usage
+> **In game:** use `/help inventorysorter` for the full guide. The guide includes the available command and a clickable link to this page and the issue tracker.
 
-Hold Shift and left- or right-click the **same empty inventory slot twice within
-half a second** while your cursor is empty. The inventory section you clicked is
-sorted on the next server tick, and matching stacks are combined first:
+## Contents
 
-- Player inventory: the 27 main storage slots only. Hotbar, armor, offhand, and
-  crafting slots are never moved.
-- Chest or double chest: the entire chest.
-- Shulker box, barrel, or your ender chest: the entire container.
-- Clicking player storage while a container is open sorts only player storage;
-  clicking the container sorts only that container. Items never cross between them.
-- Crafting table, furnace, smoker, blast furnace, anvil, enchanting table,
-  brewing stand, villager trade, hopper, and other screens: click your own
-  storage slots to sort them. The slots of the screen itself (crafting grid,
-  furnace input/fuel/output, and so on) are never touched, because they have
-  special meanings.
+- [Quick start](#quick-start)
+- [What gets sorted](#what-gets-sorted)
+- [Sorting and stack merging](#sorting-and-stack-merging)
+- [Commands](#commands)
+- [Permission](#permission)
+- [Configuration](#configuration)
+- [Install](#install)
+- [Links and support](#links-and-support)
 
-Open a placed shulker box to sort its contents; the plugin does not change the
-contents of shulker-box items carried inside another inventory. Custom plugin
-menus are never sorted, but your own storage below them can be (unless the menu
-plugin cancels the click).
+## Quick start
 
-The `inventorysorter.use` permission is granted to everyone by default.
-Spectators cannot sort. Cancelled inventory clicks are respected. Closing the
-inventory, disconnecting, or clicking another kind of slot resets the gesture.
-The delayed sort checks that the same view remains open and the clicked slot and
-cursor are still empty before changing anything.
+![Double Shift-click sorting flow](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/inventorysorter/docs/images/double-click-flow.png)
 
-Optional command alternatives (also useful when the inventory is completely full):
+1. Open your inventory or a supported container.
+2. Make sure your cursor is empty and identify an empty slot in the section to sort.
+3. Hold **Shift** and left- or right-click that **same empty slot twice within half a second**.
+4. Keep the same screen open. Sorting is applied on the next server tick; matching stacks are combined first.
 
-| Command | Action |
+![Example before and after sorting](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/inventorysorter/docs/images/example-sort.png)
+
+If your inventory is full, use `/sort` instead. The optional command can also target player storage or a supported container directly.
+
+## What gets sorted
+
+| Where you click or command | Slots that are sorted | Notes |
+| --- | --- | --- |
+| Player inventory | The 27 main storage slots (slots 9–35) | Hotbar, armor, offhand, and crafting slots are never moved. |
+| Chest or double chest | The entire chest | Clicking your own storage while the chest is open sorts only your storage. |
+| Barrel, placed shulker box, or your ender chest | The entire container | Shulker boxes carried as items are not opened or modified. |
+| Other inventory screens | Your own main storage, when you click those slots | Includes crafting table, furnace, smoker, blast furnace, anvil, enchanting table, brewing stand, villager trade, hopper, and similar screens. Their special slots are not sorted. |
+| Custom plugin menu | Only supported physical containers are sorted | Your own storage below a custom menu can be sorted unless the menu plugin cancels the click. |
+
+A placed shulker box must be open as a container to sort its contents. The plugin never moves items between the player inventory and a container.
+
+## Sorting and stack merging
+
+![Stack combining and category ordering example](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/inventorysorter/docs/images/example-sort.png)
+
+The sort order is alphabetical by **category**, then by the English Minecraft material identifier (not custom names or translated client labels):
+
+| Category | Examples |
 | --- | --- |
-| `/sort` | Sort the open storage container, or player storage otherwise (including under a crafting table, furnace, etc.) |
-| `/sort player` | Sort the 27 player storage slots |
-| `/sort container` | Sort the open supported container |
+| Armor | Helmets, chestplates, leggings, boots, elytra |
+| Brewing | Potions, cauldrons, glass bottles, brewing stands |
+| Building Blocks | Blocks not matched by a more specific category |
+| Decoration | Dyes, banners, music discs, pottery sherds |
+| Enchanting | Enchanted books, enchanting tables, experience bottles, anvils |
+| Food | Edible items |
+| Minerals | Ores, ingots, nuggets, raw materials, and listed minerals |
+| Miscellaneous | Items not matched by another category |
+| Mob Drops | Bones, string, rotten flesh, and listed drops |
+| Plants | Flowers, crops, saplings, leaves, and other listed plants |
+| Redstone | Redstone parts, buttons, pressure plates, and rails |
+| Spawn Eggs | All spawn eggs |
+| Storage | Chests, barrels, shulker boxes, bundles, and buckets |
+| Tools | Tools, pickaxes, axes, shovels, hoes, and listed utility items |
+| Transport | Boats, rafts, minecarts, saddles, and horse armor |
+| Weapons | Swords, bows, crossbows, tridents, spears, arrows, and shields |
 
-If another plugin owns `/sort`, use `/inventorysorter:sort`.
+Each category has fixed precedence in the implementation. For example, edible mob drops are Food, ores are Minerals rather than Building Blocks, and hopper is Redstone. Items within each category are ordered by their material names.
 
-## Ordering
+Before sorting, similar stacks combine up to the inventory's maximum stack size. Only stacks that vanilla considers similar merge: renamed, enchanted, damaged, or otherwise different item metadata prevents a merge. The total item count and metadata are preserved; empty slots move to the end. When stacks are combined, the resulting order follows the sorted pile sequence. Existing overstacked items are left intact rather than normalized.
 
-Groups are sorted alphabetically, then material names alphabetically within each
-group (the English Minecraft material identifiers, not custom names or translated
-client labels). The groups are:
+## Commands
 
-Armor, Brewing, Building Blocks, Decoration, Enchanting, Food, Minerals,
-Miscellaneous, Mob Drops, Plants, Redstone, Spawn Eggs, Storage, Tools, Transport,
-Weapons.
+| Command | Description |
+| --- | --- |
+| `/sort` | Sort the open supported container, or your 27 main storage slots if no supported container is open. Also sorts player storage while other screens are open. |
+| `/sort player` | Sort the 27 main player-storage slots. |
+| `/sort container` | Sort an open chest, barrel, placed shulker box, or ender chest. |
+| `/inventorysorter:sort` | Namespaced alternative if another plugin also registers `/sort`; add the same optional argument if needed. |
 
-Examples: carrots and cooked beef are Food; bones and string are Mob Drops;
-flowers and saplings are Plants; axes and pickaxes are Tools. Items matching
-multiple categories have a fixed precedence in `ItemGroups`: edible items are
-Food even if they also drop from mobs; ores are Minerals rather than Building
-Blocks. Unclassified blocks go to Building Blocks, and remaining items go to
-Miscellaneous.
+Commands are player-only and require an empty cursor. `/sort container` needs a supported container open. The plugin reports a missing container rather than sorting an unrelated screen. Invalid arguments show the command usage. The command is useful when the inventory has no empty slot for the double-click gesture.
 
-Before sorting, partial stacks of **identical** items are combined into full
-stacks (up to the item's stack size: 64 for stone, 16 for ender pearls, 1 for
-tools). Only items that would stack in vanilla are combined; a renamed or
-enchanted item never merges with a plain one. Total item counts never change.
-Empty slots move to the end. Stacks of the same material retain their relative
-order. Enchantments, names, durability, container contents, and all other item
-metadata are preserved.
+## Permission
 
-## Build and install
+| Permission | Default | Grants |
+| --- | --- | --- |
+| `inventorysorter.use` | Everyone | Use the sort command and double-click gesture. |
 
-From this directory:
+Players who are offline, dead, or in spectator mode cannot sort. Operators do not get a separate sorting mode.
+
+## Configuration
+
+There is no `config.yml` and no configurable sorting behavior.
+
+## Install
+
+1. Download the plugin jar from [Hangar](https://hangar.papermc.io/rewrite123/inventorysorter).
+2. Place it in the server's `plugins/` directory and restart. Run the server on Java 25 and Paper 26.3.
+3. Players with `inventorysorter.use` can sort immediately; it is granted to everyone by default.
+
+The plugin has no runtime dependencies. Closing an inventory, disconnecting, or making another kind of click resets a pending double-click. Cancelled clicks are respected. Before applying a scheduled sort, the plugin checks that the player can still sort, the same view remains open, and the cursor and clicked slot are still empty.
+
+<details>
+<summary>Build from source and publish</summary>
+
+Run from this plugin directory:
 
 ```sh
 ./gradlew build
 ```
 
-Gradle runs on Java 17+ and provisions a Java 25 toolchain if needed. Windows users
-can use `gradlew.bat`. Copy `build/libs/inventorysorter-0.2.0.jar` to the Paper
-server's `plugins/` directory and restart the server (running Java 25).
+Gradle runs on Java 17+ and provisions a Java 25 toolchain if needed. Windows users can use `gradlew.bat`. The jar is written to `build/libs/`. Tests cover item grouping, stack combination and metadata, click timing, supported targets, command handling, and event behavior. The tests use MockBukkit's available Paper 26.2 registry harness; production compiles against Paper 26.3. Verify the gesture on a Paper 26.3 test server before deploying.
 
-Run `./gradlew test` for the grouping, stack combining, metadata preservation, gesture, inventory
-target, and event handling tests. Behavioral tests use MockBukkit's available
-26.2 registry harness; production code compiles against Paper 26.3. Verify the
-gesture with your Minecraft client on a Paper 26.3 test server before deploying
-to production.
+This README is also used as the Hangar project description. The Gradle publication is configured to use `README.md` as its resource page. Images use absolute raw GitHub URLs so they render on both GitHub and Hangar. To regenerate the original diagrams, run this from the repository root:
 
-## Publish to Hangar
+```sh
+python3 tools/docs/inventorysorter.py
+```
 
-Releases are published to [rewrite123/inventorysorter](https://hangar.papermc.io/rewrite123/inventorysorter)
-using [HangarMC's official Gradle plugin](https://github.com/HangarMC/hangar-publish-plugin).
-Supply a Hangar API key with `create_version` permission through the
-`HANGAR_API_TOKEN` environment variable; never commit API keys.
-
-Set a unique `version` in `gradle.properties`, then run:
+To publish, set a unique version in `gradle.properties` and provide a Hangar API key with `create_version` permission through `HANGAR_API_TOKEN` (never commit the key):
 
 ```sh
 ./gradlew build publishPluginPublicationToHangar \
   -PhangarChangelog="Describe the changes in this release."
 ```
 
-The default channel is `Release` and declared compatibility is Paper `26.3`.
-Override with `-PhangarProject=your-slug`, `-PhangarChannel=Snapshot`, or
-`-Pversion=0.2.1` as needed. Custom channels must exist on Hangar first.
+The default channel is `Release`, and the declared compatibility is Paper `26.3`. Override with `-PhangarProject=your-slug`, `-PhangarChannel=Snapshot`, or `-Pversion=0.3.1` as needed. Custom channels must exist on Hangar first. See [HangarMC's Gradle publishing plugin](https://github.com/HangarMC/hangar-publish-plugin).
+
+</details>
+
+## Links and support
+
+- **Source and full guide:** [GitHub](https://github.com/rewrite123/papermc-plugins/tree/main/inventorysorter)
+- **Download:** [Hangar](https://hangar.papermc.io/rewrite123/inventorysorter)
+- **Report a bug or request a feature:** [GitHub issues](https://github.com/rewrite123/papermc-plugins/issues)

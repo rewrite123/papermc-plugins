@@ -1,0 +1,48 @@
+&6&lEnchantCap&r &7- keep valid anvil work under 40 levels
+&7Removes the anvil cutoff and charges at most &f39 levels&7.
+&7Valid results, ingredients, conflicts and prior-work rules stay vanilla.
+
+&6How to use it
+&e1. &7Use an anvil as usual: repair, rename, or combine items/books.
+&e2. &7The preview appears even when vanilla would say "Too Expensive".
+&e3. &7You still need the displayed levels and any normal ingredients.
+&7The limit applies to all players and normal anvil operations.
+
+&6Costs and repair materials
+&7All valid operations cap at &f39 levels&7; positive costs stay positive.
+&7Material repairs scale by consumed materials / item crafting count.
+&fPickaxe/axe 3 | sword/hoe 2 | shovel 1
+&fHelmet 5 | chestplate 8 | leggings 7 | boots 4
+&7Fractions round up. Other repairs and renames use capped vanilla cost.
+
+&6Enchantments
+&7Vanilla enchantment maximums apply unless an admin opts in below.
+&7Compatible merges and conflicts still follow vanilla rules.
+&7No enchanting-table, loot, trade, or existing-item changes.
+
+&6Commands
+&7Anvil use requires no permission.
+
+&6Permission
+&7&fenchantcap.admin &7(default: operators) manages the setting.
+&7Other players can use anvils normally; no permission is required.
+
+[admin:enchantcap.admin]
+&6Admin command
+&f/enchantcap max-additional-enchantment-levels &7- show limit
+&f/enchantcap max-additional-enchantment-levels <0-254> &7- set limit
+
+&6Admin setting
+&fmax-additional-enchantment-levels: &e0&7 (default)
+&70 keeps vanilla maximums; &f1&7 allows max + 1, and so on.
+&7Range: &f0-254&7; resulting levels cannot exceed &f255&7.
+&7Examples: Unbreaking IV or Efficiency VI with value &f1&7.
+&7The command saves and applies immediately; manual edits need restart.
+&7Changing the value closes open anvils so players can reopen previews.
+&7Existing higher levels remain, but cannot be raised past the new limit.
+[/admin]
+
+&6Limits and tips
+&7Other anvil plugins may replace costs or results after EnchantCap.
+&7Restart after installing/removing plugins; do not hot-reload.
+&7Use &f/help enchantcap &7for this guide and clickable project links.

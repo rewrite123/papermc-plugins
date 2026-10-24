@@ -1,108 +1,125 @@
 # sleepy
 
-Skip the night when **50% of players** or a **minimum number of players** in a
-world are sleeping, whichever happens first.
+**Skip the night when enough players sleep—by percentage, a minimum count, or whichever needs fewer sleepers.** Every world gets its own live-adjusted Minecraft sleeping gamerule.
+
 For **Paper 26.3 / Java 25**, with no runtime dependencies.
 
-**Latest release:** [sleepy 0.2.0 on Hangar](https://hangar.papermc.io/rewrite123/sleepy/versions/0.2.0).
+![Sleepy features](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/sleepy/docs/images/features.png)
 
-**What's new in 0.2.0:** admins can change the sleeping percentage and set a
-minimum number of sleeping players in game. Meeting **either** one skips the night.
-On a busy server you can make 10 sleepers enough even when 50% would be 25 people.
-On a small server the percentage still works when fewer than 10 players are online.
+> **In game:** use `/help sleepy` for the player guide. Players see status and normal usage; users with `sleepy.admin` also see the admin settings. The guide includes clickable links to GitHub and the issue tracker.
 
-## Behavior
+## Contents
 
-Night is skipped in a world when either condition is met:
+- [Quick start](#quick-start)
+- [How the sleeper target works](#how-the-sleeper-target-works)
+- [Commands](#commands)
+- [Permissions](#permissions)
+- [Configuration](#configuration)
+- [World behavior and limits](#world-behavior-and-limits)
+- [Upgrading from 0.2.0](#upgrading-from-020)
+- [Install](#install)
+- [Links and support](#links-and-support)
 
-- **Percentage** (default **50%**): this share of the world's non-spectator
-  players are sleeping, rounded up. At 50% that is 1 of 2, 2 of 3, 2 of 4, or 3 of 5.
-- **Minimum players** (default **off**): this many players are sleeping,
-  regardless of how many are online.
+## Quick start
 
-Examples with 50% and a minimum of 10:
+![Sleepy update cycle](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/sleepy/docs/images/sleep-flow.png)
 
-| Players in world | 50% needs | Minimum needs | Sleepers required |
-|---|---|---|---|
-| 4 | 2 | 10 | **2** |
-| 20 | 10 | 10 | **10** |
-| 30 | 15 | 10 | **10** |
-| 60 | 30 | 10 | **10** |
+1. Install the plugin and restart the Paper server. The default rule requires **50%** of non-spectator players in each world to sleep.
+2. Players use beds as usual. Normal Minecraft restrictions still apply.
+3. Run `/sleepy` or `/sleepy status` to see the active settings and, in game, how many sleepers are needed in your world.
+4. Operators can optionally set a fixed sleeper floor, for example `/sleepy minplayers 10`.
 
-Sleepy works through Minecraft's built-in `playersSleepingPercentage` gamerule.
-It keeps each world's gamerule at the value that requires exactly the number of
-sleepers in the table. It recalculates every second, when a player gets into
-bed, and when a world loads. Minecraft still handles the bed delay, the "X/Y
-players sleeping" message (which shows the real requirement), the morning
-transition, weather, and waking players.
+## How the sleeper target works
 
-The requirement is per world, not across the whole server. Spectators do not
-count. Normal bed restrictions remain, including unsafe beds in the Nether and
-End. Other time or sleep gamerules are not changed. In the rare case of more than
-100 players in one world, the gamerule's whole-percent steps may make the
-minimum one or two players easier than configured, never harder.
+![Sleeper targets at 50 percent and a minimum of 10](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/sleepy/docs/images/sleeper-targets.png)
+
+Sleepy compares two targets in each world and uses the one that needs fewer sleepers:
+
+- **Percentage target:** the configured share of non-spectator players, rounded up. Default: **50%**.
+- **Minimum-player target:** a fixed number of sleeping players, default **off** (`0`). When enabled, it is an alternate target, not an additional requirement.
+
+For example, at 50% with a minimum of 10, 4 active players need 2 sleepers; 20 need 10; and 30 need 10. Spectators are excluded. Minecraft always requires at least one sleeper, so `0%` does **not** mean the night skips with nobody in bed.
+
+Sleepy calculates the effective whole-number gamerule value that makes Minecraft's built-in night-skip logic use the intended requirement. Minecraft still handles the bed delay, the sleeping-count message, morning transition, weather, and waking players.
 
 ## Commands
 
-| Command | Who | Action |
-|---|---|---|
-| `/sleepy` or `/sleepy status` | everyone | Show the current rules and how many sleepers your world needs |
-| `/sleepy percent <0-100>` | admins | Set the sleeping percentage |
-| `/sleepy minplayers <number\|off>` | admins | Set the minimum sleeping players (`off` or `0` disables it) |
+| Command | Who | What it does |
+| --- | --- | --- |
+| `/sleepy` or `/sleepy status` | Everyone | Show the current percentage/minimum and, for a player, this world's required sleeper count. |
+| `/sleepy percent <0-100>` | `sleepy.admin` | Change the percentage and save it immediately. |
+| `/sleepy minplayers <number\|off>` | `sleepy.admin` | Change the minimum; `off` or `0` disables this target. |
+| `/help sleepy` | Everyone | Open the in-game guide and clickable source/support links. |
 
-Admin commands need the `sleepy.admin` permission (operators by default). Changes
-apply immediately and are saved to `plugins/sleepy/config.yml`:
+Commands are registered with the `/sleepy` name. The status subcommand is optional; `/sleepy` alone displays the same status.
+
+## Permissions
+
+| Permission | Default | Grants |
+| --- | --- | --- |
+| `sleepy.admin` | Operators | Change the sleeping percentage and minimum; view the admin help section. |
+
+The status command is available to all players. Admin commands save into `plugins/sleepy/config.yml`, apply immediately to loaded worlds, and are reapplied as worlds load. Changes also refresh on bed entry and every second so joins, quits, deaths, and game-mode changes are reflected.
+
+## Configuration
+
+The plugin creates this file on first start:
+
+| Key | Default | Valid values | Description |
+| --- | ---: | --- | --- |
+| `sleeping-percentage` | `50` | Whole number `0–100` | Percentage of non-spectator players who must sleep. Minecraft still requires at least one sleeper. |
+| `min-sleeping-players` | `0` | Whole number `0` or greater | Alternate fixed sleeper target; `0` disables it. |
+
+Example:
 
 ```yaml
 sleeping-percentage: 50
 min-sleeping-players: 0
 ```
 
-You can also edit the file and restart. Out-of-range values fall back to the
-defaults with a warning in the console.
+Use `/sleepy percent <0-100>` and `/sleepy minplayers <number|off>` for immediate saved changes. If an out-of-range value is present at startup, Sleepy logs a warning and uses the default for that value. Manual changes can also be applied by restarting the server.
 
-## Upgrading from 0.1.0
+## World behavior and limits
 
-Replace the JAR and restart. A default `config.yml` (50%, minimum off) is
-created, so behavior is unchanged until an admin sets a minimum.
+- The requirement is **per world**, not pooled across the server. Spectators do not count; all other game modes count as active players.
+- Sleepy manages only the vanilla `playersSleepingPercentage` gamerule. It does not change weather or other game rules. Other plugins that modify the same gamerule may conflict.
+- Values are refreshed on world load, after a bed-entry event, and once per second.
+- For more than 100 active players in one world, the gamerule's whole-percent steps may make the configured minimum one or two players easier to reach, never harder.
+- Normal Minecraft bed rules remain in effect, including unsafe beds in the Nether and End.
+- Minecraft saves each world's gamerule. After removing Sleepy, its last value remains; to restore vanilla behavior, remove the plugin and set `playersSleepingPercentage` to `100` in each world. While Sleepy is enabled it manages this gamerule, so use `/sleepy percent` rather than `/gamerule`.
 
-## Removing the plugin
+## Upgrading from 0.2.0
 
-The gamerule is saved with each world and keeps its last value after you remove
-the plugin. To restore vanilla behavior, remove the plugin and set
-`playersSleepingPercentage` back to 100 in each world. While the plugin is
-enabled, it manages that gamerule, so use `/sleepy percent` instead of `/gamerule`.
+Stop the server, replace the old JAR with `sleepy-0.3.0.jar`, and restart. The `plugins/sleepy/config.yml` settings remain compatible; no migration is needed. Existing settings continue to apply.
 
-## Build and install
+## Install
+
+1. Download `sleepy` from [Hangar](https://hangar.papermc.io/rewrite123/sleepy).
+2. Place `sleepy-0.3.0.jar` in the server's `plugins/` directory and restart.
+3. Run Paper 26.3 with Java 25. Give `sleepy.admin` only to users who should change server-wide sleep behavior.
+
+## Links and support
+
+- **Source and full guide:** [GitHub repository](https://github.com/rewrite123/papermc-plugins/tree/main/sleepy)
+- **Download:** [Hangar project](https://hangar.papermc.io/rewrite123/sleepy)
+- **Report a bug or request a feature:** [GitHub issues](https://github.com/rewrite123/papermc-plugins/issues)
+
+<details>
+<summary>Build from source and publish</summary>
 
 ```sh
-./gradlew build
+./gradlew build --console=plain
 ```
 
-Gradle runs on Java 17+ and provisions Java 25 for compilation if needed.
-Windows users can use `gradlew.bat`. Copy `build/libs/sleepy-0.2.0.jar` into
-your Paper server's `plugins/` directory and restart with Java 25.
+Copy the resulting jar from `build/libs/`. Gradle runs on Java 17+ and provisions a Java 25 toolchain if needed. Tests use MockBukkit's available 26.2 registry harness while production compiles against Paper 26.3; test runs do not replace an in-game smoke test on Paper 26.3.
 
-Run `./gradlew test` to test vanilla-matching rounding, that the gamerule
-requires exactly the intended sleepers for every percentage, minimum, and player
-count up to 100, plus commands, permissions, validation, saved settings, and
-player-count changes.
-Tests use MockBukkit's available 26.2 registry harness, while production compiles
-against Paper 26.3. The night transition itself is provided by Minecraft and
-should be smoke-tested on your Paper 26.3 server.
-
-## Publish to Hangar
-
-Releases are published to [rewrite123/sleepy](https://hangar.papermc.io/rewrite123/sleepy)
-using [HangarMC's official Gradle publishing plugin](https://github.com/HangarMC/hangar-publish-plugin).
-Supply a key with `create_version` permission through `HANGAR_API_TOKEN`, then run:
+Publishing uses [HangarMC's Gradle publishing plugin](https://github.com/HangarMC/hangar-publish-plugin). Set a unique `version` in `gradle.properties` and provide a Hangar key with `create_version` and `edit_page` permissions through `HANGAR_API_TOKEN`. Never commit API keys.
 
 ```sh
 ./gradlew build publishPluginPublicationToHangar syncAllPluginPublicationPagesToHangar \
-  -PhangarChangelog="Describe the changes in this release."
+  -PhangarChangelog="Describe this release"
 ```
 
-Set a unique `version` in `gradle.properties` for each release. The default channel
-is `Release`, and compatibility is Paper `26.3`. The project slug can be overridden
-with `-PhangarProject=your-slug`. This README is synced as the Hangar project
-page. Never commit API keys. A normal build does not upload anything to Hangar.
+This README is synced as the Hangar project page. Regenerate its original diagrams from the repository root with `python3 tools/docs/sleepy.py`. A normal build does not publish anything.
+
+</details>

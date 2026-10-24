@@ -21,6 +21,7 @@ public final class PhantomMenacePlugin extends JavaPlugin {
             throw new IllegalStateException("Could not register phantom repellant brewing recipe");
         }
         getServer().getPluginManager().registerEvents(new MenaceListener(enchantment, this), this);
+        HelpGuide.register(this, "phantommenace");
     }
 
     @Override

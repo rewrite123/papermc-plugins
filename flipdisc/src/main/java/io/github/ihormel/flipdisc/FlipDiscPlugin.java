@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class FlipDiscPlugin extends JavaPlugin implements Listener {
+public class FlipDiscPlugin extends JavaPlugin implements Listener {
     private final Set<NamespacedKey> registered = new HashSet<>();
 
     @Override
@@ -35,6 +35,7 @@ public final class FlipDiscPlugin extends JavaPlugin implements Listener {
                 item -> item.isDataOverridden(DataComponentTypes.JUKEBOX_PLAYABLE)), this);
         getServer().getPluginManager().registerEvents(this, this);
         for (var player : getServer().getOnlinePlayers()) player.discoverRecipes(registered);
+        HelpGuide.register(this, "flipdisc");
     }
 
     @EventHandler

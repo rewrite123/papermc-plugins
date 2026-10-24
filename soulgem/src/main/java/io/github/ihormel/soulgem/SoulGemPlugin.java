@@ -11,6 +11,7 @@ public class SoulGemPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(recipes, this);
         getServer().getPluginManager().registerEvents(new GemCharging(gems), this);
         getServer().getPluginManager().registerEvents(new EnchantingListener(gems), this);
+        HelpGuide.register(this, "soulgem");
     }
 
     @Override

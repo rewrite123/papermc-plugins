@@ -24,6 +24,7 @@ public class BetterLanternsPlugin extends JavaPlugin implements Listener {
         });
         getServer().getScheduler().runTaskTimer(this, engine::tick, 1L, 1L);
         getServer().getOnlinePlayers().forEach(player -> player.discoverRecipes(recipes.keys()));
+        HelpGuide.register(this, "betterlanterns");
     }
 
     @EventHandler

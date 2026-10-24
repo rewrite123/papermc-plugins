@@ -1,0 +1,30 @@
+&6&lBottle Experience&r &7- turn bottles and XP into throwables
+&7Convert one glass bottle into one Bottle o' Enchanting for &f11 XP points&7.
+&7No player commands or configuration are needed; use the table steps below.
+
+&6How to bottle experience
+&e1. &7Hold glass bottles in your main hand (hotbar).
+&e2. &7Right-click an enchanting table to open the menu.
+&e3. &7Click &fBottle Experience&7; each click bottles one item.
+&7Keep bottles in the same hotbar slot used to open the menu.
+&7Lapis and bookshelves are not required; other table use is unchanged.
+
+&6Cost and output
+&7Each bottle costs &f11 raw XP points&7, not 11 levels.
+&7Your total XP decreases by 11; partial progress to your next level counts.
+&7One glass bottle is consumed and one experience bottle is returned.
+&7Output merges with matching stacks or uses an empty inventory slot.
+&7No XP, bottle, or item changes if you lack XP or inventory space.
+
+&6Throwing bottles
+&7When an experience bottle breaks, one glass bottle drops at impact.
+&7Normal vanilla XP drops remain; cancelled impacts do not return a bottle.
+&7The drop uses normal item physics and can be lost to hazards.
+
+&6Permission and limits
+&7&fcraftablebottleofenchanting.use &7(default: everyone) allows bottling.
+&7Dead or spectator players cannot use the menu; all other game modes pay.
+&7The menu blocks dragging, shift-click, number keys, and taking its display.
+&7Stay within six blocks of the same intact table while clicking.
+&7An empty cursor is required. Dispenser-thrown bottles also return glass.
+&7Use &f/help craftablebottleofenchanting &7for project links.

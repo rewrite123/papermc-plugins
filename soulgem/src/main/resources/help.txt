@@ -1,0 +1,41 @@
+&6&lSoulGem&r &7- charge gems with XP and enchant at a table
+&7Replace lapis fuel with charged Soul Gems or Echo Soul Gems.
+&7No player commands; use the recipes and table steps below.
+&7Permission &fsoulgem.use &7defaults on.
+
+&6Crafting recipes (shapeless)
+&f1 lapis lazuli + 1 amethyst shard = 1 Soul Gem
+&f1 lapis lazuli + 1 echo shard = 1 Echo Soul Gem
+&7Gems cannot be used as crafting ingredients.
+
+&6Charge a gem
+&e1. &7Hold one uncharged gem in your off-hand.
+&e2. &7Earn XP; the gem absorbs new XP toward one full level.
+&e3. &7Use the charged, glowing gem in the table's lapis slot.
+&7The charge target locks when it first absorbs XP; your bar XP is kept.
+&7Partial charge persists. Only the off-hand gem charges; no stacks.
+&7Excess XP from the last award goes to you. Both gem kinds cost equal XP.
+
+&6Enchanting table
+&7Put gear or a book in the item slot and charged gems in the fuel slot.
+&7Pick an offer normally. Offer costs use vanilla levels and gem counts:
+&fOffer 1: 1 gem, 1 level | Offer 2: 2 gems, 2 levels
+&fOffer 3: 3 gems, 3 levels
+&7Amethyst gems give normal rolls. Echo gems boost each roll by +1,
+&7up to vanilla maximum +1. Preview shows the boosted level.
+&7Enchanted gear can be upgraded; only improvements apply.
+&7Conflicts and lower rolls are skipped. Empty/no-improvement offers cost none.
+&7Plain lapis is refused. Creative players may enchant with an empty slot.
+
+&6Permission and limits
+&fsoulgem.use &7(default: everyone) allows charging and table enchanting.
+&7Without it, you cannot use enchanting tables. Spectators and dead players
+&7cannot use SoulGem. Enchanted books cannot be re-enchanted.
+&7Treasure enchantments are not added to the vanilla offer pool.
+&7Other plugins still see native prepare/enchant events.
+
+&6Compatibility
+&7With PhantomMenace enabled, its marked phantom repellant is left alone.
+&7Old charged gems from 0.1.x convert when you join or open an inventory.
+&7No resource pack, datapack, client mod, or configuration is required.
+&7Use &f/help soulgem &7for this guide and clickable project links.

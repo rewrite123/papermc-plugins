@@ -4,7 +4,7 @@ import java.util.Objects;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class MobBannerPlugin extends JavaPlugin {
+public class MobBannerPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         BannerItems items = new BannerItems(new NamespacedKey(this, "mob"));
@@ -17,5 +17,6 @@ public final class MobBannerPlugin extends JavaPlugin {
         manager.registerEvents(new WardSpawns(items,
                 task -> getServer().getScheduler().runTask(this, task), new SpawnBoost()), this);
         manager.registerEvents(new WardBlocks(items, getLogger()), this);
+        HelpGuide.register(this, "mobbanner");
     }
 }

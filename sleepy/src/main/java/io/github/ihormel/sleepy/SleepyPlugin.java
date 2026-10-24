@@ -26,6 +26,7 @@ public class SleepyPlugin extends JavaPlugin implements Listener {
         // Player counts change through joins, quits, deaths, world and game-mode changes;
         // vanilla needs 100 ticks of deep sleep, so a once-per-second refresh is always in time.
         getServer().getScheduler().runTaskTimer(this, this::applyAll, 20L, 20L);
+        HelpGuide.register(this, "sleepy");
     }
 
     SleepingRule rule() {

@@ -49,7 +49,7 @@ hangarPublish {
         channel.set("Release")
         apiKey.set(providers.environmentVariable("HANGAR_API_TOKEN"))
         changelog.set(providers.gradleProperty("hangarChangelog")
-            .orElse("Initial release: craft one nether wart block from nine spider eyes in a full 3x3 crafting grid."))
+            .orElse("Adds an in-game /help guide and expanded README/Hangar documentation."))
         pages { resourcePage(project.file("README.md").readText()) }
         platforms {
             paper {

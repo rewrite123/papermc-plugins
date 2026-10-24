@@ -1,99 +1,110 @@
-# phantommenace
+# Phantom Menace
 
-![Phantom above an enchanted helmet protected by a glowing ward](assets/icon.png)
+**Brew Phantom Repellant, enchant a helmet, and stop insomnia-driven phantom spawns for its wearer.**
 
-Brew **Phantom Repellant** and enchant a helmet with **Phantom Menace** to stop
-phantoms spawning because you have not slept. For **Paper 26.3 / Java 25**.
-No client mod, resource pack, or datapack is required.
+For **Paper 26.3** and **Java 25**. No client mod, resource pack, or datapack is required.
 
-**Latest release:** [PhantomMenace 0.1.1 on Hangar](https://hangar.papermc.io/rewrite123/phantommenace/versions/0.1.1).
+![Original Phantom Menace feature overview](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/phantommenace/docs/images/features.png)
 
-**What's new in 0.1.1:** Repellant now looks like a glowing awkward
-potion, and successful survival enchanting drops an empty bottle at the table.
+> In-game guide: use `/help phantommenace` for the concise, color-coded guide. Paper's help output also provides clickable links to the full guide and issue tracker.
 
-## Brewing
+## Contents
 
-1. Put up to three **water bottles** in a brewing stand.
-2. Put a **phantom membrane** in the ingredient slot.
-3. Supply **blaze powder** as normal brewing fuel.
-4. After the normal brewing cycle, each water bottle becomes one repellant.
+- [Quick start](#quick-start)
+- [Brewing Phantom Repellant](#brewing-phantom-repellant)
+- [Enchanting a helmet](#enchanting-a-helmet)
+- [What Phantom Menace changes](#what-phantom-menace-changes)
+- [Compatibility and limits](#compatibility-and-limits)
+- [Commands, permissions, and configuration](#commands-permissions-and-configuration)
+- [Install and upgrade](#install-and-upgrade)
+- [Build and publish](#build-and-publish)
+- [Links and support](#links-and-support)
 
-One membrane makes up to three repellants, depending on how many water bottles
-you use. The filled bottles become repellant; each consumed repellant returns
-an empty bottle when used for enchanting. Awkward potions and other potion types do not
-work. Use plain water bottles without custom names or effects. Brewing uses
-Paper's native brewing recipe system, including normal fuel,
-ingredient consumption, hoppers, and cancellable brewing events.
+## Quick start
 
-Repellant looks like an **enchanted awkward potion** but is **lapis lazuli
-underneath**, so it cannot be drunk and the vanilla enchanting table accepts it
-in its fuel slot. The potion model, awkward potion contents, and glint are visual;
-they do not make it a drinkable potion. It has its own name and
-persistent identity; renamed potions or lapis do not work. Vanilla cost
-tooltips can still call it lapis. Repellant cannot be used as crafting lapis.
-Previously brewed charcoal-model repellant still works and also returns bottles.
+1. Install the plugin JAR on Paper 26.3 running Java 25 and fully restart the server.
+2. Brew Phantom Repellant from plain water bottles and phantom membranes.
+3. Put an eligible helmet in an enchanting table and repellant in the lapis slot.
+4. Select the first offer. It adds Phantom Menace I for one player level and consumes one repellant.
+5. Wear the helmet. Natural phantom pre-spawns associated with that player are cancelled.
 
-## Enchanting
+![Brewing process from water bottles to repellant](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/phantommenace/docs/images/brewing-recipe.png)
 
-Open an enchanting table, put a helmet in the item slot, and repellant in the
-lapis slot. Select the first offer to add **Phantom Menace I** for **one
-repellant and one player level**. No bookshelves are needed. Creative mode uses
-vanilla's free enchanting behavior.
+![Steps for enchanting and using a protected helmet](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/phantommenace/docs/images/enchanting-flow.png)
 
-After a successful non-creative enchantment, **one empty glass bottle drops
-above the enchanting table**. Cancelled or unsuccessful enchanting returns
-nothing; creative enchanting does not generate bottles because it consumes no
-repellant.
+## Brewing Phantom Repellant
 
-Leather, copper, chainmail, iron, golden, diamond, netherite, and turtle helmets
-are supported. Already-enchanted helmets work, and keep their enchantments,
-name, durability, and other metadata. Helmets already carrying Phantom Menace
-cannot buy it again. Books, pumpkins, mob heads, and non-helmet armor do not work.
+Use the brewing stand normally. Put up to three **plain water bottles** in bottle slots, one **phantom membrane** in the ingredient slot, and provide normal blaze-powder fuel. The registered brewing recipe converts each water bottle to one Phantom Repellant. Other potion types, splash or lingering potions, glass bottles, and water potions with custom effects do not match.
 
-This is a real, persistent custom enchantment registered using Paper's bootstrap
-registry API, not a lore label. It is not added to random enchanting, loot, or
-villager enchantment pools. Vanilla anvils and grindstones handle it as an
-enchantment; protection only works while the enchanted helmet is worn.
+| Input | Result | Notes |
+| --- | --- | --- |
+| Water potion + phantom membrane | Phantom Repellant per bottle | Up to three bottles per brewing cycle; normal brewing fuel is required |
+| Awkward or other potion | No repellant | Only plain water bottles are accepted |
 
-The plugin cancels natural phantom pre-spawns associated with the wearer.
-It does not reset insomnia, affect other players' spawning, remove existing
-phantoms, make the player immune to attacks, or block command/spawner phantoms.
+Repellant appears as a glowing awkward potion, but its underlying item is **lapis lazuli**. It cannot be drunk. The potion appearance and contents are visual; the item has a persistent marker so ordinary lapis or renamed potions cannot impersonate it. Vanilla enchanting UI may still describe the fuel as lapis. Repellant is blocked from crafting recipes that use lapis.
 
-### SoulGem compatibility
+## Enchanting a helmet
 
-If SoulGem is installed, use **SoulGem 0.2.1 or newer** (the compatibility update
-in this repository). Older SoulGem versions reject repellant as ordinary lapis.
-Repellant only adds Phantom Menace; soul gems keep their own enchanting behavior.
-Other plugins can still cancel native enchanting and brewing events.
+Place the helmet in an enchanting table's item slot and Phantom Repellant in its lapis slot. The plugin replaces the offers with one valid offer in the first slot: **Phantom Menace I** for **one player level**. No bookshelves are required. Other enchantments, names, durability, and item metadata already on the helmet are retained.
 
-## Build and install
+| Supported helmet materials | Not supported |
+| --- | --- |
+| Leather, chainmail, copper, iron, golden, diamond, netherite, turtle | Books, enchanted books, pumpkins, mob heads, and non-helmet armor |
+
+A helmet already carrying Phantom Menace cannot receive it again. After a successful non-creative enchant, one empty glass bottle drops above the enchanting table. Cancelled or unsuccessful enchanting returns no bottle. Creative enchanting follows vanilla's free-enchant behavior and does not create a bottle because it consumes no repellant. A helmet with the enchantment works only while worn.
+
+## What Phantom Menace changes
+
+Phantom Menace is a persistent custom enchantment registered through Paper's bootstrap registry API. It is supported on the helmets listed above, has one level, and is not injected into random enchanting, loot, or villager enchantment pools. Vanilla anvils and grindstones handle it as an enchantment.
+
+The plugin cancels **natural phantom pre-spawns associated with the wearer** when that player has an enchanted helmet equipped. It does not reset insomnia, remove existing phantoms, protect against attacks, or affect command- or spawner-triggered phantoms. Other plugins may still cancel native brewing or enchanting events.
+
+## Compatibility and limits
+
+| Item | Behavior |
+| --- | --- |
+| Paper | 26.3 |
+| Java | 25 |
+| Configuration | None |
+| Commands / permissions | None |
+| Client changes | None |
+
+**SoulGem:** use SoulGem **0.2.1 or newer**. Older versions treat Phantom Repellant as ordinary lapis and reject the special fuel. Repellant adds only Phantom Menace; SoulGem keeps its own enchanting behavior. Other plugins can still cancel the normal Paper events.
+
+Keep the plugin installed while retaining items with Phantom Menace. Removing its registry entry can cause Minecraft to discard the custom enchantment. A full server restart is required after installing because the enchantment is registered during bootstrap; do not hot-load it.
+
+## Commands, permissions, and configuration
+
+There are no plugin commands, permissions, or configuration settings. Use `/help phantommenace` for the in-game guide.
+
+## Install and upgrade
+
+1. Back up the world.
+2. Download `phantommenace-0.2.0.jar` from the [Hangar project](https://hangar.papermc.io/rewrite123/phantommenace).
+3. Place it in `plugins/` and fully restart Paper 26.3 on Java 25.
+
+No special upgrade migration is required for this release. Keep the plugin present for as long as the world contains its custom-enchanted items.
+
+## Build and publish
+
+Build from this plugin directory with:
 
 ```sh
-./gradlew build
+./gradlew build --console=plain
 ```
 
-Install `build/libs/phantommenace-0.1.1.jar` in your server's `plugins/` folder
-and restart Paper with Java 25. Registry registration requires a full restart;
-do not hot-load this plugin. No configuration, commands, or permissions.
+The JAR is written to `build/libs/phantommenace-0.2.0.jar`. To regenerate the original documentation diagrams from the repository root, run `python3 tools/docs/phantommenace.py`.
 
-Back up your world before installing or removing custom-enchantment plugins.
-Keep the plugin installed while retaining items with its custom enchantment;
-removing the registry entry can cause Minecraft to discard that enchantment.
-
-## Publishing
-
-Create the `rewrite123/phantommenace` Hangar project, then provide a token through
-`HANGAR_API_TOKEN` and run:
+The Hangar publication targets `rewrite123/phantommenace` and syncs this README as its resource page. To publish, create the Hangar project and provide a token in `HANGAR_API_TOKEN`, then run:
 
 ```sh
 ./gradlew build publishPluginPublicationToHangar syncAllPluginPublicationPagesToHangar
 ```
 
-The official Hangar publishing plugin uploads the JAR and syncs this README.
-Never commit API tokens.
+Never commit the API token. The project icon is generated separately with `python3 tools/generate-project-icons.py --project phantommenace` from the repository root.
 
-Regenerate the original 512 x 512 project icon from the repository root:
+## Links and support
 
-```sh
-python3 tools/generate-project-icons.py --project phantommenace
-```
+- [GitHub source and documentation](https://github.com/rewrite123/papermc-plugins/tree/main/phantommenace)
+- [Hangar project](https://hangar.papermc.io/rewrite123/phantommenace)
+- [Report a bug or request help](https://github.com/rewrite123/papermc-plugins/issues)

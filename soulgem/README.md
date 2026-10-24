@@ -1,134 +1,124 @@
-# soulgem
+# SoulGem
 
-Craft soul gems, charge them with newly earned XP, and use them instead of lapis
-to enchant or upgrade gear. For **Paper 26.3 / Java 25**, with no runtime
-dependencies or required resource pack.
+**Charge crafted soul gems with new XP, then use them in the vanilla enchanting table to enchant or upgrade gear.** Echo gems boost new rolls by one level.
 
-**Latest release:** [SoulGem 0.2.1 on Hangar](https://hangar.papermc.io/rewrite123/soulgem/versions/0.2.1).
+Built for **Paper 26.3 / Java 25**. No runtime dependencies or required resource pack.
 
-**What's new in 0.2.1:** PhantomMenace compatibility.
+![Features at a glance](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/soulgem/docs/images/features.png)
 
-## Crafting and charging
+> **In game:** type `/help soulgem` for a full guide to crafting, charging, and enchanting. It ends with clickable links to this page and the [issue tracker](https://github.com/rewrite123/papermc-plugins/issues).
 
-Both recipes are shapeless and produce **one uncharged gem**:
+## Contents
 
-| Ingredients | Result | Appearance |
-|---|---|---|
-| 1 lapis lazuli + 1 amethyst shard | Soul Gem | Amethyst shard |
-| 1 lapis lazuli + 1 echo shard | Echo Soul Gem | Echo shard |
+- [Quick start](#quick-start)
+- [Crafting recipes](#crafting-recipes)
+- [Charging](#charging)
+- [Enchanting and upgrading](#enchanting-and-upgrading)
+- [Permissions](#permissions)
+- [Compatibility and limits](#compatibility-and-limits)
+- [Install](#install)
+- [Links and support](#links-and-support)
 
-Hold one uncharged gem in your **off-hand** and earn XP. The gem absorbs newly
-earned XP until it contains the full amount needed to advance from your current
-level to the next (for example, 7 points at level 0 or 112 at level 30).
-The target is fixed when that gem first absorbs XP; existing progress in your
-player XP bar does not reduce the cost. Your existing XP is not removed.
+## Quick start
 
-Partial progress stays on the gem across swapping, trading, death drops, and
-server restarts. Uncharged gems do not stack, so partial progress cannot be
-duplicated by splitting a stack. Charged gems glow and stack up to 64.
-Only the one off-hand gem charges; excess XP from the completing pickup goes
-to the player. Swap another uncharged gem into your off-hand to charge more.
-Both kinds have the same charging cost.
+![From shards to enchanting](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/soulgem/docs/images/soulgem-flow.png)
 
-Charging handles positive `PlayerExpChangeEvent` awards, including normal XP
-pickups after vanilla Mending processing. It does not intercept `/xp`, direct
-plugin XP setters, or XP already spent repairing gear. Other plugins that alter
-XP awards after SoulGem's highest-priority listener can affect the remainder.
-Ordinary renamed shards are not gems. Gems cannot be recycled through crafting
-recipes as if they were ordinary shards.
+1. Craft a Soul Gem or Echo Soul Gem.
+2. Hold one uncharged gem in your **off-hand** and earn XP. It absorbs new XP until it contains the full amount needed to advance from your current level to the next.
+3. Put the charged gem in an enchanting table's lapis slot and use a vanilla offer.
+
+No commands, configuration, resource pack, datapack, or client mod are required.
+
+## Crafting recipes
+
+Both recipes are shapeless and make **one uncharged gem**:
+
+| Ingredients | Result | Appearance before charging |
+| --- | --- | --- |
+| 1 lapis lazuli + 1 amethyst shard | 1 Soul Gem | Amethyst shard |
+| 1 lapis lazuli + 1 echo shard | 1 Echo Soul Gem | Echo shard |
+
+![Soul Gem crafting recipe](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/soulgem/docs/images/amethyst-recipe.png)
+
+![Echo Soul Gem crafting recipe](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/soulgem/docs/images/echo-recipe.png)
+
+Gems are identified by plugin data, not by their displayed name, and cannot be recycled as normal shards or used as crafting ingredients. An ordinary renamed shard is not a gem.
+
+## Charging
+
+![Charging flow](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/soulgem/docs/images/charging-flow.png)
+
+Hold **one uncharged gem** in your off-hand and earn XP. The gem stores the amount needed to advance one full level, fixed when it first absorbs XP. For example, the amount is 7 points at level 0 and 112 points at level 30. XP already in your progress bar does not reduce this cost, and your existing XP is not removed.
+
+Partial progress is stored on the item and survives swapping, trading, death drops, and restarts. Uncharged gems do not stack, preventing partial charge from being duplicated by splitting a stack. Only the off-hand gem charges. The excess from an XP award that completes a gem goes to the player; then swap in another uncharged gem if you want to charge more. Both gem types have the same XP cost. Charged gems glow and stack up to 64.
+
+Charging applies to positive `PlayerExpChangeEvent` awards, including ordinary XP pickups after vanilla Mending processing. It does not intercept `/xp`, direct plugin XP setters, or XP already spent repairing gear. Plugins that alter awards after SoulGem's highest-priority listener can change the remainder.
 
 ## Enchanting and upgrading
 
-SoulGem uses the **normal vanilla enchanting table screen**. Put your gear or
-book in the item slot and **charged soul gems in the lapis slot**, then pick
-an offer exactly as in vanilla. Offers, bookshelf power, previews, and seeds
-are all vanilla:
+SoulGem keeps the **vanilla enchanting table screen**. Put a gear item or book in the item slot and charged gems in the lapis slot, then select an offer. Offers, bookshelf power, previews, and seeds remain vanilla:
 
 | Offer | Charged gems consumed | Player levels consumed |
-|---|---|---|
+| ---: | ---: | ---: |
 | 1 | 1 | 1 |
 | 2 | 2 | 2 |
 | 3 | 3 | 3 |
 
-Plain lapis lazuli no longer produces offers; the action bar explains that
-soul gems are needed. In creative mode, an empty fuel slot still works as in
-vanilla. Don't mix gem kinds: the fuel slot holds one stack.
+Plain lapis no longer produces offers; the player is told that charged gems are needed. In creative mode an empty fuel slot still works as in vanilla. The fuel slot holds one stack, so do not mix gem kinds.
 
-**Amethyst gems** give the normal vanilla roll. **Echo gems** raise each rolled
-enchantment by one, up to its vanilla maximum +1 (Sharpness V becomes
-Sharpness VI, Protection IV becomes Protection V, and level-I-only enchantments
-can become II). The hover preview already shows the boosted level. Treasure
-enchantments such as Mending are not added to the pool, and some enchantments
-have little extra effect above their vanilla maximum.
+- **Soul Gem (amethyst):** normal vanilla enchantment roll.
+- **Echo Soul Gem:** each rolled enchantment gains **+1**, up to its vanilla maximum +1. For example, Sharpness V can become VI and Protection IV can become V; level-I-only enchantments can become II. The hover preview shows the boosted level.
 
-**Already-enchanted gear can be upgraded**: vanilla greys out the table for
-enchanted items, but SoulGem re-enables it. Existing enchantments, names,
-durability, and lore are kept. Only rolled enchantments that raise a level and
-don't conflict with what the item already has are applied; lower rolls never
-reduce a level. If an offer would not improve the item, the click is refused
-and nothing is consumed. Pick another offer or change your bookshelves to
-reroll. Echo gems only boost new rolls, never existing levels, so repeated
-enchanting cannot climb indefinitely. Enchanted books can't be re-enchanted
-(vanilla doesn't allow it).
+Vanilla does not add treasure enchantments such as Mending to its offer pool. Some enchantments have little or no extra effect beyond their vanilla maximum.
 
-### Why charged gems are lapis underneath
+### Upgrading enchanted gear
 
-The vanilla table's fuel slot only accepts lapis lazuli, and the client
-enforces that too, so no plugin can make it take amethyst or echo shards. A
-charged gem is therefore a lapis lazuli item that keeps the amethyst or echo
-shard **model**, name, glint, and lore. In the inventory it still looks like a
-shard. The client may show "Lapis Lazuli" in places that read the base item,
-such as the table's "x Lapis Lazuli" cost tooltip. Uncharged gems are still
-real shards. Gems can't be used as crafting lapis. Ordinary lapis renamed to
-"Soul Gem" is not a gem.
+SoulGem re-enables table offers for already-enchanted gear (the vanilla table normally greys it out). Existing enchantments, names, durability, and lore are retained. Only rolled enchantments that increase an existing level or add a non-conflicting enchantment are applied. Lower rolls do not reduce levels. If an offer would not improve the item, it is refused without consuming anything; select a different offer or change bookshelves to reroll. Echo gems boost new rolls only and cannot repeatedly raise existing levels. Enchanted books cannot be re-enchanted because vanilla does not allow it.
 
-Upgrading from 0.1.x: old charged gems (charged shards) are converted
-automatically when the holder joins or opens any inventory, keeping their
-count. 0.2.0 removes the custom chest menu, so you no longer hold gear and
-gems in your hands.
+### Charged gem appearance and legacy items
 
-## Compatibility
+The vanilla table fuel slot accepts lapis lazuli only, enforced by both server and client. A charged gem is therefore a lapis lazuli item that retains the amethyst or echo shard model, name, glint, and lore. Inventory appearance is still a shard, though the table's cost tooltip may identify its base material as lapis. Uncharged gems remain real shards. Gems cannot serve as crafting lapis.
 
-- SoulGem 0.2.1 recognizes PhantomMenace's marked phantom repellant and leaves
-  its helmet-enchanting offers and purchases to that plugin. Ordinary lapis is
-  still rejected. Both plugins must be installed for this exception to apply.
+Charged gems from 0.1.x (which were charged shards) are converted automatically when the holder joins or opens an inventory, preserving their count. Version 0.2.0 removed the custom chest menu; enchanting now happens in the normal table.
 
-- `soulgem.use` defaults to everyone and permits charging and enchanting.
-  Players without it cannot enchant at tables at all.
-- Enchanting fires the native `PrepareItemEnchantEvent` and `EnchantItemEvent`,
-  so protection, logging, and enchant-modifying plugins keep working. SoulGem
-  validates at `HIGH` priority. Plugins that edit enchantments at `HIGHEST`
-  can still change the result.
-- Anvils, loot, villagers, and enchanted books used outside the table are not
-  modified. `craftablebottleofenchanting` works independently.
-- No resource pack, datapack, or client mod is required.
+## Permissions
 
-## Build and install
+| Permission | Default | Grants |
+| --- | --- | --- |
+| `soulgem.use` | Everyone | Charge soul gems and enchant at tables. |
+
+Players without `soulgem.use` cannot enchant at tables at all. Dead players and spectators cannot use SoulGem's charging/enchanting behavior.
+
+## Compatibility and limits
+
+- When **PhantomMenace** is enabled, its marked phantom repellant is recognized and its helmet-enchanting offers and purchases are left to that plugin. Ordinary lapis remains rejected. Both plugins must be installed for the exception.
+- Enchanting fires native `PrepareItemEnchantEvent` and `EnchantItemEvent`. Protection, logging, and enchant-modifying plugins can still participate; plugins modifying enchantments at `HIGHEST` priority may change the result.
+- Anvils, loot, villager trades, and enchanted books used outside the table are not modified. `craftablebottleofenchanting` works independently.
+- Tests use a MockBukkit registry harness targeting Paper 26.2; production compiles against Paper 26.3. Smoke-test enchanting, upgrades, XP orbs with Mending, and protection plugins on the target server.
+
+## Install
+
+1. Download the latest jar from [Hangar](https://hangar.papermc.io/rewrite123/soulgem).
+2. Put `soulgem-0.3.0.jar` in the server's `plugins/` directory and restart Paper 26.3 on Java 25.
+3. No configuration is required.
+
+Build and run the tests with `./gradlew build --console=plain` from the plugin folder. Gradle runs on Java 17+ and provisions Java 25; Windows users can run `gradlew.bat`. Tests cover gem identity, legacy conversion, recipes, charging accounting, lapis refusal, echo boosts, and upgrade merging.
+
+<details>
+<summary>Build from source and publish</summary>
+
+Create the `soulgem` Hangar project and set `HANGAR_API_TOKEN` with version and page editing permissions. Never commit the token or a `hangarkey` file.
 
 ```sh
-./gradlew build
+./gradlew build publishPluginPublicationToHangar syncAllPluginPublicationPagesToHangar --console=plain
 ```
 
-Copy `build/libs/soulgem-0.2.1.jar` into your server's `plugins/` directory and
-restart Paper 26.3 using Java 25. Gradle runs on Java 17+ and provisions Java 25;
-Windows users can run `gradlew.bat`. No configuration is required.
+This README is synced as the Hangar resource page. Generate or refresh its original diagrams from the repository root with `python3 tools/docs/soulgem.py`; the README uses absolute raw GitHub image URLs so they also display on Hangar.
 
-Tests cover gem identity, legacy conversion, recipes, charging accounting,
-lapis refusal, echo boosts, and upgrade merging. The MockBukkit
-registry harness targets Paper 26.2; production compiles against Paper 26.3.
-Before production deployment, smoke-test the table with gems, enchanted-gear
-upgrades, XP orbs with Mending, and your protection plugins on an actual
-Paper 26.3 server.
+</details>
 
-## Publish to Hangar
+## Links and support
 
-Create the `soulgem` project under your Hangar account, then:
-
-```sh
-export HANGAR_API_TOKEN='your-token'
-./gradlew build publishPluginPublicationToHangar
-```
-
-Uses the official Hangar publishing Gradle plugin. The token needs version and
-page editing permissions. Publication includes this README as the resource
-page. Never commit the token or a `hangarkey` file.
+- **Source and full guide:** [github.com/rewrite123/papermc-plugins/tree/main/soulgem](https://github.com/rewrite123/papermc-plugins/tree/main/soulgem)
+- **Download:** [hangar.papermc.io/rewrite123/soulgem](https://hangar.papermc.io/rewrite123/soulgem)
+- **Report a bug or request a feature:** [GitHub issues](https://github.com/rewrite123/papermc-plugins/issues)

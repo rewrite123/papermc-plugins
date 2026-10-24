@@ -52,6 +52,7 @@ public class VotersRightsPlugin extends JavaPlugin implements Listener {
         Objects.requireNonNull(getCommand("votersrights")).setTabCompleter(admin);
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getScheduler().runTaskTimer(this, this::tick, 20L, 20L);
+        HelpGuide.register(this, "votersrights");
     }
 
     @Override

@@ -1,0 +1,53 @@
+&6&lBetterLanterns&r &7- better lanterns, soul candles and mob wards
+
+&6What it does
+&7Craft lanterns with candles, add invisible light around lanterns,
+&7and block nearby natural hostile spawns with clear line of sight.
+&7Craft soul candles for blue flames and small nearby light.
+
+&6Recipes
+&7Lantern (makes 1):
+&f top: gold nugget . candle . gold nugget
+&f mid: iron nugget . glass pane . iron nugget
+&f bot: iron nugget iron nugget iron nugget
+&7Soul candle (makes 4):
+&f top: . candle .
+&f mid: candle candle candle
+&f bot: . soul sand .
+&7Soul lantern (makes 1): use the lantern recipe with a soul
+&7candle. Vanilla lantern and soul lantern recipes are replaced.
+&7Recipes are visible in the recipe book.
+
+&6How to use
+&e1. &7Craft and place either lantern for the light halo and ward.
+&e2. &7Craft soul candles; place on a solid surface, not a cake.
+&e3. &7Light with flint and steel or a fire charge. Right-click
+&7with an empty hand (without sneaking) to extinguish.
+
+&6Light spread
+&7Lanterns add invisible level-15 light through air up to 3
+&7orthogonal block steps. Walls block paths; light bends around
+&7corners. Occupied blocks and player lights are not overwritten.
+&7Soul lanterns keep their own vanilla level-10 light; halo is the
+&7same. Soul candles add light levels 2, 5, 8 or 11 to
+&7adjacent air for 1, 2, 3 or 4 candles. Light stays white.
+
+&6Spawn blocking
+&7Lanterns block natural hostile mob spawns within &f24 blocks&7
+&7in a sphere, only with direct line of sight. Solid shapes,
+&7including glass, block sight. This does not affect other spawn
+&7reasons, animals, existing mobs, or soul candles.
+&7Only loaded and discovered lanterns count; no chunk is forced.
+
+&6Commands, permissions and settings
+&7This plugin has no commands, permissions, or config.yml.
+&f/help betterlanterns &7- show this guide and GitHub links
+
+&6Limits and maintenance
+&7Existing loaded chunks are scanned incrementally (one chunk per
+&7tick); recalculation handles up to 8 sources per tick.
+&7Invisible lights and candle states persist in chunk data.
+&7Disabling restores lights in loaded chunks; unloaded chunks are
+&7cleaned when loaded again with this plugin. Before uninstalling,
+&7load affected chunks while enabled and disable cleanly.
+&7Soul candles cannot mix with normal candles or sit on cakes.

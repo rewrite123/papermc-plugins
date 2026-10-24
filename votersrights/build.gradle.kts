@@ -47,7 +47,7 @@ hangarPublish {
         id.set(providers.gradleProperty("hangarProject"))
         channel.set(providers.gradleProperty("hangarChannel").orElse("Release"))
         apiKey.set(providers.environmentVariable("HANGAR_API_TOKEN"))
-        changelog.set(providers.gradleProperty("hangarChangelog").orElse("Initial release: player votes and admin controls."))
+        changelog.set(providers.gradleProperty("hangarChangelog").orElse("See the project README for release notes and usage."))
         pages { resourcePage(project.file("README.md").readText()) }
         platforms {
             paper {

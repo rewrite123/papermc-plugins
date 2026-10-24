@@ -58,7 +58,7 @@ hangarPublish {
         channel.set(providers.gradleProperty("hangarChannel").orElse("Release"))
         apiKey.set(providers.environmentVariable("HANGAR_API_TOKEN"))
         changelog.set(providers.gradleProperty("hangarChangelog").orElse("See the project README for features and usage."))
-        pages.resourcePage(project.file("README.md").readText())
+        pages { resourcePage(project.file("README.md").readText()) }
         platforms {
             paper {
                 jar.set(tasks.jar.flatMap { it.archiveFile })

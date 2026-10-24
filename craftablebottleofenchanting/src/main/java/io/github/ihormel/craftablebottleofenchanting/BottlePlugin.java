@@ -7,6 +7,7 @@ public final class BottlePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(new BottleListener(this), this);
+        HelpGuide.register(this, "craftablebottleofenchanting");
     }
 
     @Override

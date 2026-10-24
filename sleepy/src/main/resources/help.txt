@@ -1,0 +1,39 @@
+&6&lSleepy&r &7- skip the night with a percentage or sleeper minimum
+&7Each world skips when either configured sleeper target is reached.
+
+&6How it works
+&7The percentage is rounded up among non-spectator players in that world.
+&7The optional minimum is an alternate target. Whichever needs fewer sleepers
+&7wins. With defaults, half of the active players must sleep.
+&7Example: at 50% with a minimum of 10, 30 players need 10 sleepers.
+&7With only 4 players, 2 sleepers meet the percentage first.
+&7At least one sleeper is always required, even when percent is 0.
+
+&6Using Sleepy
+&e1. &7Go to a bed and sleep as usual; normal Minecraft bed restrictions apply.
+&e2. &7Check the displayed sleeping count. When enough active players in that
+&7   world sleep, Minecraft completes the night transition.
+&e3. &f/sleepy &7or &f/sleepy status &7shows the rules and your world's target.
+
+&6World rules and limits
+&7Requirements are per world. Spectators do not count; other game modes do.
+&7Sleepy changes only playersSleepingPercentage, not weather or other rules.
+&7It refreshes every second, on bed entry, and when a world loads.
+&7For over 100 active players, whole-percent gamerule steps can make a minimum
+&7one or two sleepers easier, never harder. Other plugins may change this rule.
+
+&6Permissions
+&f sleepy.admin &7(default: operators) - change sleep settings
+&7The status command is available to everyone. Need more? Use /help sleepy.
+
+[admin:sleepy.admin]
+&6Admin controls &7(permission: sleepy.admin)
+&f/sleepy percent <0-100> &7- set the percentage
+&f/sleepy minplayers <number|off> &7- set the minimum; off or 0 disables it
+&7Changes apply immediately and save in plugins/sleepy/config.yml.
+&7Settings: sleeping-percentage (default 50, range 0-100);
+&7min-sleeping-players (default 0/off, whole number 0 or greater).
+&7Invalid file values fall back to defaults with a console warning.
+&7On removal, the gamerule retains its last value; restore 100 manually
+&7to return a world to vanilla night-skip behavior.
+[/admin]

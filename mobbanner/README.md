@@ -1,187 +1,164 @@
 # mobbanner
 
-Earn enchanted-looking, mob-themed ward banners by killing mobs. Placing a ward
-suppresses that exact mob type's natural spawning throughout its **16x16 chunk**,
-at every height. For **Paper 26.3 / Java 25**, with no runtime dependencies.
-On a complete valuable-block pyramid, the same banner attracts its mob instead.
+**Earn mob-themed ward banners that suppress a mob in one chunk—or attract it with a complete valuable-block pyramid.** Kill rewards are tracked per player and mob type.
 
-**Latest release:** [mobbanner 0.2.0 on Hangar](https://hangar.papermc.io/rewrite123/mobbanner/versions/0.2.0).
+For **Paper 26.3 / Java 25**, with no runtime dependencies.
 
-## What's new in 0.2.0
+![MobBanner features](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/mobbanner/docs/images/features.png)
 
-- **Enderman banners:** earn them at the same kill milestones or use
-  `/mobbanner give Alex enderman`. There are now **38 supported mob types**.
-- **Pyramid attraction:** a complete 5x5 / 3x3 / 1x1 valuable-block base switches
-  a standing banner from suppression to one extra spawn attempt per eligible
-  spawn. Duplicate attractors do not stack; an ordinary matching ward overrides them.
-- **Compatible upgrade:** existing banners and kill progress are preserved.
+> **In game:** use `/help mobbanner` for the player guide and details. Users with `mobbanner.give` also see the admin give command. The guide ends with clickable links to GitHub and the issue tracker.
 
-## Rewards
+## Contents
 
-Kills are tracked separately **per player and per mob type**. Banners are awarded
-at 100, 200, 300, 500, 1000, 1500, 2000, then 3000, 4000, and every further 1000
-kills. Nothing is awarded at 400, 800, 2500, etc. Progress begins when this plugin
-is installed; historical Minecraft statistics are not imported.
+- [Quick start](#quick-start)
+- [Kill rewards](#kill-rewards)
+- [Get a banner](#get-a-banner)
+- [Supported mobs](#supported-mobs)
+- [Place and use wards](#place-and-use-wards)
+- [Pyramid attraction](#pyramid-attraction)
+- [Spawn behavior and limits](#spawn-behavior-and-limits)
+- [Commands and permissions](#commands-and-permissions)
+- [Install](#install)
+- [Links and support](#links-and-support)
 
-A kill counts when Paper credits that player as the mob's killer, including
-projectile kills credited by the server. Environmental kills with no player
-credit do not count. Kills of spawner/raid/command-spawned mobs still count.
-Rewards go into the killer's inventory; leftovers drop at their feet if full.
-There is no operator or game-mode bypass. Kill counts are stored in player
-persistent data and saved with the server's normal player saves.
-Each milestone also sends the killer a message, for example:
-`You earned a mob banner for killing 100 mobs of type Zombie!`
+## Quick start
 
-## Admin give command
+![From kill reward to ward behavior](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/mobbanner/docs/images/ward-flow.png)
 
-Use `/mobbanner give <player> <mob>` to give one ward banner to an online player,
-for example `/mobbanner give Alex bat` or
-`/mobbanner give Alex enderman` or `/mobbanner give Alex wither_skeleton`.
-Tab completion lists players and supported
-mob types. Mob names are case-insensitive and multiword types use underscores.
-This is the plugin's give subcommand, not Minecraft's vanilla `/give`.
+1. Kill supported mobs; the server tracks your kills separately for every mob type.
+2. Reach a banner milestone, or ask an administrator for a banner.
+3. Place the marked banner in the chunk you want to affect. A regular ward suppresses natural spawns of its exact mob type in that 16x16 chunk at every height.
+4. To attract instead, put a **standing** banner over the complete 5x5 / 3x3 / 1x1 valuable-block pyramid shown below. The matching mob can then trigger one extra nearby spawn attempt.
 
-Requires `mobbanner.give` (operators by default); console is also supported.
-The recipient is notified that an administrator gave them a banner. This does
-not change their kill counts or claim they earned a milestone. If their inventory
-is full, the banner drops at their feet, just like earned rewards.
+## Kill rewards
+
+Kills are counted separately **per player and per mob type**. The plugin awards banners at:
+
+| Total credited kills of one type | Reward |
+| ---: | --- |
+| 100, 200, 300 | One matching ward banner at each milestone |
+| 500, 1,000, 1,500, 2,000 | One matching ward banner at each 500-kill milestone |
+| 3,000, 4,000, 5,000, and every further 1,000 | One matching ward banner each time |
+
+There is no reward at other counts such as 400, 800, or 2,500. Progress begins when the plugin is installed; old Minecraft statistics are not imported. The server must credit the player as the killer; credited projectile kills count, while environmental deaths without a player killer do not. Kills from spawners, raids, or command-spawned mobs still count toward rewards. There is no operator or game-mode bypass.
+
+Counters are stored in the killer's persistent data and saved with normal player data. Reaching a milestone sends a message. The banner enters the killer's inventory; if it is full, the item drops at the killer's feet.
+
+## Get a banner
+
+The only player-earned route is a kill milestone. Administrators can also issue one to an online player:
+
+```text
+/mobbanner give Alex enderman
+/mobbanner give Alex wither_skeleton
+```
+
+This is the plugin's `/mobbanner` subcommand, not vanilla `/give`. Mob IDs are case-insensitive and multiword names use underscores. Tab completion suggests online players and supported mob IDs. An admin-given item does not increment or alter kill progress, and the recipient is told it came from an administrator.
+
+There is **no crafting recipe** for ward banners. Crafting with a ward banner is blocked, including banner cloning and banner-to-shield recipes, to prevent copying the special marker. Ordinary banners remain usable in vanilla crafting.
 
 ## Supported mobs
 
-Bat, Blaze, Bogged, Breeze, Cave Spider, Creaking, Creeper, Drowned, Elder Guardian,
-Ender Dragon, Enderman, Endermite, Evoker, Ghast, Guardian, Hoglin, Husk, Magma Cube, Parched,
-Phantom, Piglin Brute, Pillager, Ravager, Shulker, Silverfish, Skeleton, Slime,
-Spider, Stray, Vex, Vindicator, Warden, Witch, Wither, Wither Skeleton, Zoglin,
-Zombie, and Zombie Villager.
+A ward applies only to its exact entity type; for example, a Zombie banner does not block Husk, Drowned, or Zombie Villager spawns.
 
-Spiders and cave spiders are included as normally hostile nighttime mobs.
-Endermen are included as an explicit exception to the hostile-only list.
-Other neutral/provoked mobs such as Piglin, Zombified Piglin, Bee, Wolf, and
-Polar Bear are excluded. Variants are separate types: a Zombie ward does not
-block Husks, Drowned, or Zombie Villagers.
+| Supported mob types |
+| --- |
+| Bat, Blaze, Bogged, Breeze, Cave Spider, Creaking, Creeper, Drowned, Elder Guardian, Ender Dragon, Enderman, Endermite, Evoker, Ghast, Guardian, Hoglin, Husk, Magma Cube, Parched |
+| Phantom, Piglin Brute, Pillager, Ravager, Shulker, Silverfish, Skeleton, Slime, Spider, Stray, Vex, Vindicator, Warden, Witch, Wither, Wither Skeleton, Zoglin, Zombie, Zombie Villager |
 
-## Pyramid attraction mode
+Spiders and cave spiders are included; Enderman is an explicit exception to the generally hostile-mob set. Neutral/passive types such as Piglin, Zombified Piglin, Bee, Wolf, and Cow are not supported. Some supported types rarely or never use the affected natural spawn reasons, so those banners may chiefly be collectibles.
 
-Place a **standing** ward banner centered on a solid, three-tier pyramid:
+## Place and use wards
 
-```text
-          banner
-          1 x 1       directly below the banner
-          3 x 3       middle layer
-          5 x 5       bottom layer
-```
+Marked floor and wall banners work. The plugin identifies them with persistent item/block data; a regular banner that merely has the same name or appearance is not a ward. Identity and kill progress survive restarts. Breaking and re-placing a ward preserves its mob type. Removing the last matching ward in a chunk immediately ends its effect. Renaming the item does not change which mob it targets.
 
-All **35 blocks** must be iron, gold, emerald, diamond, or netherite blocks;
-mixing those materials is allowed. Copper, ores, raw-metal blocks, and hollow
-pyramids do not qualify. Wall banners remain suppressors.
+A normal, unpowered matching banner **suppresses** the eligible spawn reasons for its exact mob in that chunk. It does not remove mobs already present or stop them entering from another chunk. Different mob types can have separate wards in the same chunk. Only the matching chunk matters; there is no radius across neighboring chunks.
 
-With a complete pyramid, the banner **attracts instead of suppressing** its mob:
-each successful eligible spawn triggers **one extra nearby spawn attempt** on
-the next tick, in that same chunk, at the same height, up to three blocks away.
-This is a **2x attempt rate**, not a guaranteed 2x population or a change to the
-server's native spawn-rate setting. Duplicate attractors do not stack. A normal
-banner of the same type in that chunk takes precedence and suppresses spawning.
+## Pyramid attraction
 
-The extra attempt checks the world border, space for the original mob's full
-bounding box (including Enderman headroom), ground/water as appropriate, light
-no brighter than the original spawn, collisions with living entities, and at
-least 24 blocks from non-spectator players. It can fail; no retries occur.
-Extra entities use the `CUSTOM` spawn reason and cannot recursively trigger
-more attempts. Protection plugins can cancel that reason. These are plugin
-spawn attempts, not the full vanilla spawning algorithm: they do not rerun all
-biome, structure, mob-cap, or mob-specific placement rules. Original spawns
-still obey vanilla rules. Spawners, raids, eggs, and commands never trigger boosts.
+![Side view of the valuable-block pyramid](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/mobbanner/docs/images/pyramid.png)
 
-Pyramid completeness is checked live, so adding/removing a block switches mode
-without re-placing the banner. Pyramid blocks can cross chunk boundaries but all
-participating chunks must be loaded; the plugin never force-loads them. An
-unloaded or incomplete pyramid behaves as an ordinary suppressing ward.
-Existing 0.1.0 banners work unchanged, even if their old lore only mentions
-suppression. Kill counts are preserved; Enderman counts start when 0.2.0 is installed.
+A **standing** ward banner directly above a complete pyramid changes that matching mob's mode from suppression to attraction:
 
-## Ward behavior
+| Layer under the banner | Required footprint | Blocks |
+| --- | ---: | ---: |
+| Top | 1 × 1 | 1 |
+| Middle | 3 × 3 | 9 |
+| Base | 5 × 5 | 25 |
+| **Total** |  | **35** |
 
-- Without a complete pyramid, blocks only `NATURAL`, `CHUNK_GEN`,
-  `REINFORCEMENTS`, and `PATROL` spawn reasons. With a complete pyramid, those
-  same reasons can trigger attraction instead.
-- Does **not** block spawners, raids, eggs, commands, breeding, conversions,
-  summoned mobs, boss construction/respawn, or other spawn reasons. Some mobs
-  only spawn through those mechanisms, so their banners are chiefly trophies.
-- Does not remove existing mobs or stop mobs entering from another chunk.
-- Supports floor and wall banners, multiple wards, and different mob wards in
-  the same chunk. Only that chunk is affected, not neighboring chunks.
-- Uses persistent markers on items and banner blocks, surviving restarts and
-  chunk unload/reload. Ordinary banners with the same patterns/names are not wards.
-- Breaking and re-placing a ward preserves its identity. Removing the last ward
-  for a type immediately stops protection. Support loss and flowing fluids drop
-  the marked banner.
-  Explosion drops preserve identity when the explosion's drop chance allows it.
-  Pistons that would directly hit wards are blocked to avoid unmarked drops.
-- Crafting with ward banners is disabled (including cloning them or putting
-  them on shields). This prevents copying the reward via vanilla banner recipes.
-- Renaming does not change the target mob; the identity is independent of lore.
+Every block must be an iron, gold, emerald, diamond, or netherite block. Materials can be mixed. Copper, ores, raw-metal blocks, and hollow or incomplete layers do not qualify. Wall banners cannot activate attraction. Completeness is checked live, so changing any block changes the mode without replacing the banner. The structure can cross chunk boundaries, but every relevant chunk must already be loaded; the plugin does not force-load chunks. An incomplete or unloaded pyramid behaves as an ordinary suppressing ward.
 
-Every applicable spawn checks only banner tile entities in the spawn's chunk;
-there is no global scan, ticking task, or persisted coordinate cache to become
-stale. Protection plugins' cancelled placement/spawn/drop events are respected.
-World-editing tools that erase block persistent data erase ward identity too.
+A successful eligible spawn in an attraction chunk causes **one extra spawn attempt** on the next tick, at the same height and within three blocks on each horizontal axis, within that same chunk. It is an additional attempt—not a guaranteed second mob, a change to Minecraft's spawn-rate setting, or a guaranteed doubling of population. Duplicate matching attractors do not stack. If a matching unpowered banner is also present, suppression takes precedence regardless of banner order.
+
+The extra attempt checks the world border, room for the original mob's full bounding box (including Enderman headroom), suitable ground or water, light no brighter than the original spawn, living-entity collisions, and a distance of at least 24 blocks from non-spectator players. It can fail and is not retried. Extra entities use the `CUSTOM` spawn reason, so they cannot recursively trigger more attraction; protection plugins may also veto that reason. This is not the full vanilla spawning algorithm: the extra attempt does not rerun every biome, structure, mob-cap, or mob-specific placement rule.
+
+## Spawn behavior and limits
+
+Only these Bukkit spawn reasons are intercepted for supported types:
+
+| Spawn reason | Suppressed by ordinary ward | Can trigger pyramid attraction |
+| --- | :---: | :---: |
+| `NATURAL` | Yes | Yes |
+| `CHUNK_GEN` | Yes | Yes |
+| `REINFORCEMENTS` | Yes | Yes |
+| `PATROL` | Yes | Yes |
+
+Spawners, raids, eggs, commands, breeding, conversions, summoned mobs, boss construction/respawn, other spawn reasons, and existing entities are not blocked or boosted. Original eligible spawns still follow Minecraft's normal rules. Attraction attempts are limited to eligible natural spawn events; spawners, raids, eggs, and commands never trigger them.
+
+Ward blocks retain their identity when mined and dropped. Support loss and flowing fluids drop a marked banner; explosion drops preserve identity when the explosion drop chance allows it. Pistons that would directly hit a ward are blocked to prevent unmarked drops. Protection plugins' cancelled placement, spawn, and drop events are respected. World-editing tools that remove block persistent data can also erase ward identity.
+
+Every applicable spawn checks only banner tile entities in that spawn's chunk. There is no global scan, ticking task, or saved coordinate cache that can become stale.
 
 ## Appearance
 
-Vanilla skull/creeper face patterns, mob-themed colors, names, and enchantment
-glow require **no resource pack**. They are stylized faces, not exact mob textures;
-vanilla banners cannot display arbitrary mob artwork. The glow is cosmetic; no
-functional item enchantment is added.
+Banners use vanilla skull or creeper-face patterns, mob-themed colors, a mob name, and an enchantment glint. No resource pack is needed. These are stylized vanilla banner patterns, not exact mob textures; the glint is cosmetic and adds no functional enchantment.
 
-## Build and install
+## Upgrading from 0.2.0
 
-Download the compiled plugin from
-[Hangar](https://hangar.papermc.io/rewrite123/mobbanner/versions/0.2.0), or build it:
+Stop the server, remove the old `mobbanner-0.2.0.jar`, and install `mobbanner-0.3.0.jar` (do not keep both versions). Existing marked banners and player kill counters remain usable; no data migration or banner replacement is needed.
 
-```sh
-./gradlew build
-```
+## Commands and permissions
 
-Copy `build/libs/mobbanner-0.2.0.jar` into your Paper server's `plugins/` directory
-and restart using Java 25. Gradle runs on Java 17+ and provisions Java 25 when
-needed; Windows users can use `gradlew.bat`. No configuration is required.
+| Command | Who | What it does |
+| --- | --- | --- |
+| `/mobbanner give <player> <mob>` | `mobbanner.give` | Give one marked banner to an online player. |
+| `/help mobbanner` | Everyone | Open the in-game player guide and clickable links. |
 
-`./gradlew test` exercises milestones, persistent identities, rewards, and ward
-events. The available MockBukkit harness uses Paper 26.2 registry data; production
-compiles against 26.3. Smoke-test chunk boundaries, wall/floor banner drops,
-explosions, pyramid transitions, attraction safety checks, and your protection
-plugins on Paper 26.3 before production use. Remove the old plugin JAR when upgrading.
+| Permission | Default | Grants |
+| --- | --- | --- |
+| `mobbanner.give` | Operators | Give banners without earning kill milestones; view the admin help section. |
 
-### Upgrading from 0.1.0
+Console is supported for the give command. If the target is offline or a mob ID is unsupported, the command reports an error. The full list of types is available through tab completion.
 
-1. Stop the server.
-2. Remove the old `mobbanner-0.1.0.jar` from `plugins/` and replace it with
-   `mobbanner-0.2.0.jar`. Do not keep both versions installed.
-3. Start the server. Existing ward banners and saved player kill counts remain
-   usable; no data migration or banner replacement is required.
-4. Build a complete pyramid under an existing standing banner to enable attraction,
-   or leave it off a pyramid to retain suppression.
+## Install
 
-## Hangar
+1. Download `mobbanner` from [Hangar](https://hangar.papermc.io/rewrite123/mobbanner).
+2. Place `mobbanner-0.3.0.jar` in the server's `plugins/` directory and restart Paper.
+3. The server must run Java 25. Optional: grant `mobbanner.give` to trusted administrators. No configuration is required.
 
-Published project: [rewrite123/mobbanner](https://hangar.papermc.io/rewrite123/mobbanner).
-Version **0.2.0** is available on the **Release** channel for Paper **26.3**.
+## Links and support
 
-Publishing uses [HangarMC's official plugin](https://github.com/HangarMC/hangar-publish-plugin).
-For a future release, set a new, unique version in `gradle.properties`, set
-`HANGAR_API_TOKEN` to a key with `create_version` permission, and use:
+- **Source and full guide:** [GitHub repository](https://github.com/rewrite123/papermc-plugins/tree/main/mobbanner)
+- **Download:** [Hangar project](https://hangar.papermc.io/rewrite123/mobbanner)
+- **Report a bug or request a feature:** [GitHub issues](https://github.com/rewrite123/papermc-plugins/issues)
+
+<details>
+<summary>Build from source and publish</summary>
 
 ```sh
-./gradlew build publishPluginPublicationToHangar \
-  -PhangarChangelog="Describe the changes in this release."
+./gradlew build --console=plain
 ```
 
-Defaults: `Release` channel, Paper `26.3`. Set a unique version for each release
-in `gradle.properties`. Never commit API keys. Normal builds do not publish.
+Copy the resulting jar from `build/libs/`; Windows users can run `gradlew.bat`. Gradle runs on Java 17+ and provisions Java 25 for compilation if needed. MockBukkit tests use the available Paper 26.2 registry harness while production compiles against Paper 26.3. Smoke-test chunk boundaries, floor/wall banner drops, explosions, pyramid transitions, attraction safety checks, and your protection plugins on Paper 26.3 before production use. Remove the old JAR when upgrading.
 
-To update the Hangar project's main page from this README without publishing a
-new version, supply `HANGAR_API_TOKEN` with page-editing permission and run:
+Published as `rewrite123/mobbanner` on Hangar's **Release** channel for Paper **26.3**. Publishing uses [HangarMC's Gradle publishing plugin](https://github.com/HangarMC/hangar-publish-plugin). Set a unique `version` in `gradle.properties` and provide a Hangar key with `create_version` and `edit_page` permissions via `HANGAR_API_TOKEN`. Never commit API keys.
 
 ```sh
-./gradlew syncAllPluginPublicationPagesToHangar
+./gradlew build publishPluginPublicationToHangar syncAllPluginPublicationPagesToHangar \
+  -PhangarChangelog="Describe this release"
 ```
+
+This README is synced as the Hangar project page. Regenerate the original diagrams from the repository root with `python3 tools/docs/mobbanner.py`. A normal build does not publish anything.
+
+</details>

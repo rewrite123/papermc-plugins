@@ -1,34 +1,54 @@
-# enchantcap
+# EnchantCap
 
-An anvil cost-limit plugin for **Paper 26.3 / Java 25**. No runtime dependencies.
+**Keep valid anvil work possible without changing vanilla compatibility or charging rules.** EnchantCap removes the anvil's 40-level cutoff, caps valid operations at 39 levels, and can optionally allow extra enchantment levels from anvil merges.
 
-## Behavior
+Built for **Paper 26.3 / Java 25**. No runtime dependencies.
 
-- Removes the server's normal 40-level anvil cutoff before results are calculated.
-- Caps the displayed **and charged** cost of valid operations at **39 XP levels**,
-  so vanilla clients do not display "Too Expensive".
-- Scales material-repair prices by the fraction of an item's core crafting
-  materials actually consumed, after applying the 39-level cap (details below).
-- Keeps vanilla enchantment maximum levels by default, with an admin setting
-  for additional levels obtainable through anvil combinations.
-- Keeps item compatibility, enchantment conflicts, repair-material consumption
-  and prior-work penalties unchanged. Players must still have enough XP levels.
-- Applies to all players and all normal anvil operations, including repairs,
-  renaming, tools, armor, weapons and enchanted books.
-- Does not modify enchanting tables or bypass another plugin's rejected/empty
-  result. Extra enchantment levels are opt-in; only valid anvil results are
-  adjusted, never the original input items.
+![Features at a glance](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/enchantcap/docs/images/features.png)
 
-## Material repair pricing
+> **In game:** use `/help enchantcap` for the player guide. Operators and users with `enchantcap.admin` also see the setting and command. The guide provides clickable links to this page and the [issue tracker](https://github.com/rewrite123/papermc-plugins/issues).
 
-For a valid repair using raw materials, the XP charge is:
+## Contents
 
-`ceil(min(normal anvil cost, 39) * min(materials consumed, crafting count) / crafting count)`
+- [Quick start](#quick-start)
+- [Anvil costs](#anvil-costs)
+- [Material repair prices](#material-repair-prices)
+- [Extra enchantment levels](#extra-enchantment-levels)
+- [Commands](#commands)
+- [Permissions](#permissions)
+- [Configuration](#configuration)
+- [Compatibility and limits](#compatibility-and-limits)
+- [Install](#install)
+- [Links and support](#links-and-support)
 
-The crafting count is the number of core materials in that kind of item:
+## Quick start
 
-| Item | Crafting count | One material, with a normal cost of 39 or higher |
-|---|---:|---:|
+![How an anvil operation is handled](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/enchantcap/docs/images/anvil-flow.png)
+
+1. Install the plugin and open an anvil as usual.
+2. Repair, rename, or combine compatible items or books. Valid results whose vanilla cost is 40 or more can now appear.
+3. Pay the resulting level cost (at most 39) and provide the normal materials. Players still need enough XP levels.
+
+This applies to all players and normal anvil operations, including repairs, renaming, tools, armor, weapons, and enchanted books. It does not change the enchanting table.
+
+## Anvil costs
+
+Paper's server-side maximum repair cost is raised before anvil results are calculated, so an expensive valid result is not discarded first. A valid operation's displayed and charged cost is capped at **39 XP levels**. This avoids the vanilla client's hard-coded "Too Expensive" display at 40 or more. Positive costs remain positive.
+
+Vanilla item compatibility, enchantment conflicts, ingredient consumption, repair amounts, and prior-work penalties are preserved. EnchantCap does not create a result when vanilla or another plugin rejects the operation, and it does not modify the input items.
+
+Combining tools, enchanting without material repair, and renaming without material repair keep their ordinary vanilla prices, capped at 39. If a material repair also renames the item, the material fraction scales the entire operation's capped cost.
+
+## Material repair prices
+
+For a valid repair using raw materials, EnchantCap scales the capped cost by the amount of repair material actually consumed:
+
+```text
+charge = ceil(min(normal anvil cost, 39) × min(materials consumed, crafting count) / crafting count)
+```
+
+| Item category | Crafting count | One material at a capped cost of 39 |
+| --- | ---: | ---: |
 | Pickaxe or axe | 3 | 13 levels |
 | Sword or hoe | 2 | 20 levels |
 | Shovel | 1 | 39 levels |
@@ -37,24 +57,44 @@ The crafting count is the number of core materials in that kind of item:
 | Leggings | 7 | 6 levels |
 | Boots | 4 | 10 levels |
 
-This covers wooden, stone, copper, iron, gold, diamond and netherite tools,
-and material-repairable armor. The count comes from the item category, including
-upgraded netherite gear. The ingredient must be a valid repair material for the
-item. Stone and wooden tools retain vanilla's accepted repair-material choices.
+![Repair cost by number of materials](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/enchantcap/docs/images/repair-pricing.png)
 
-A diamond pickaxe repaired with two diamonds costs two-thirds (26 levels at
-the cap); three or more cost the full amount. Only ingredients **actually
-consumed** count, not the size of the stack placed in the right slot. Fractions
-round up, and positive charges never become free.
+This covers wooden, stone, copper, iron, gold, diamond, and netherite tools, plus material-repairable armor. The crafting count comes from the item category, including upgraded netherite gear. The ingredient must be valid for that item; stone and wooden tools retain vanilla's accepted repair-material choices. Only ingredients actually consumed count, not the stack size in the anvil. Fractions round up, and positive charges never become free. Categories outside these tool/armor cases (for example, elytra and maces) keep their usual capped prices.
 
-The amount of durability repaired and the number of ingredients consumed stay
-vanilla. Combining two tools, enchanting without material repair, and renaming
-without material repair keep their usual prices, capped at 39. If a material
-repair also renames the item, the fraction applies to the entire operation's
-cost. Items outside these tool/armor categories (such as elytra and maces) keep
-their usual capped prices.
+## Extra enchantment levels
 
-## Admin configuration
+By default (`max-additional-enchantment-levels: 0`), vanilla maximum levels remain in force. An administrator can opt into higher levels produced by **normal anvil merging**:
+
+| Setting | Resulting limit | Example |
+| ---: | --- | --- |
+| `0` | Vanilla maximum | Unbreaking III, Efficiency V |
+| `1` | Vanilla maximum + 1 | Unbreaking IV, Efficiency VI |
+| `2` | Vanilla maximum + 2 | Up to two above the vanilla maximum |
+
+With the setting at `1`, equal-level Unbreaking III items or books can merge to IV. Unequal levels follow vanilla merging. Merely repairing or renaming does not grant levels. Compatibility/conflict checks remain vanilla, and only valid anvil results are adjusted. Enchanting tables, loot, and villager trades are unchanged. Some enchantments gain little or no gameplay benefit from extra levels.
+
+The setting accepts integer values from **0 through 254**, while resulting enchantment levels cannot exceed Minecraft's **255** limit. Lowering the setting does not remove higher enchantments already on the left-hand item, but prevents increasing them beyond the configured limit; an over-level right-hand item or book cannot transfer a level above that limit.
+
+## Commands
+
+| Command | Who | What it does |
+| --- | --- | --- |
+| `/enchantcap max-additional-enchantment-levels` | Admins | Show the active setting. |
+| `/enchantcap max-additional-enchantment-levels <0-254>` | Admins | Save and apply the setting immediately; no restart required. |
+| `/help enchantcap` | Everyone | Open the in-game guide and links. |
+
+The admin command is available to operators, the server console, and players granted `enchantcap.admin`. Invalid values and unauthorized users cannot change the setting. If saving fails, the active value stays unchanged and an error is sent to the command sender and server log. A changed value closes currently open anvils and tells players to reopen them; setting the same value does not close menus. Existing items are not altered.
+
+Tab completion suggests the setting name and values `0`, `1`, and `2`.
+
+## Permissions
+
+| Permission | Default | Grants |
+| --- | --- | --- |
+| `enchantcap.admin` | Operators | View/change the extra-level setting and see admin-only help details. |
+| Anvil use | Everyone | EnchantCap changes; no permission is required. |
+
+## Configuration
 
 On first start, `plugins/enchantcap/config.yml` is created:
 
@@ -62,88 +102,42 @@ On first start, `plugins/enchantcap/config.yml` is created:
 max-additional-enchantment-levels: 0
 ```
 
-- **0:** vanilla maximums (Unbreaking III, Efficiency V, etc.).
-- **1:** up to vanilla maximum + 1 (Unbreaking IV, Efficiency VI, etc.).
-- **2:** up to vanilla maximum + 2, and so on.
+| Setting | Default | Allowed values | Meaning |
+| --- | ---: | ---: | --- |
+| `max-additional-enchantment-levels` | `0` | Integer `0`-`254` | Extra levels beyond each enchantment's vanilla maximum for anvil combinations. |
 
-Restart the server after editing. The setting must be an integer from **0 to
-254**; final enchantment levels cannot exceed Minecraft's **255** limit.
-Invalid settings prevent the plugin from starting rather than silently
-substituting a value.
+After editing the file manually, restart the server. Invalid or missing values outside the supported range prevent startup rather than silently falling back. Use the admin command for an immediate, saved change.
 
-Higher levels are earned through normal anvil merging: with the setting at 1,
-Unbreaking III + Unbreaking III can produce IV, including enchanted-book
-combinations. Unequal levels still follow vanilla merging; merely repairing or
-renaming an item does not grant levels. Compatibility and conflict checks stay
-vanilla. Single-level enchantments also use the configured extra allowance;
-some enchantments do not gain a gameplay benefit from extra levels.
+## Compatibility and limits
 
-Lowering the setting does **not** strip existing higher enchantments from the
-left-hand item, but it prevents further increases above the configured limit.
-An over-level right-hand book/item cannot transfer a level above that limit.
-Enchanting tables, loot and villager trades are unchanged.
+- The maximum server threshold is `Integer.MAX_VALUE`; operations reaching that representational limit are not supported. Prior-work costs still grow, so this is not an infinite-integer repair system.
+- Another anvil plugin can conflict if it replaces results, thresholds, or costs after EnchantCap runs.
+- Restart the server after installing or removing plugins. Do not use plugin hot-reload.
+- Vanilla clients hard-code the "Too Expensive" message at 40 levels. The 39-level cap is intentional; uncapped charging would require accepting a misleading client display or requiring a client modification.
 
-The discount to 39 levels is intentional: vanilla clients hard-code the
-"Too Expensive" display for costs of 40 or more. Full uncapped XP charging would
-require accepting that misleading display or using a client modification.
+## Install
 
-The maximum server threshold is Java's `Integer.MAX_VALUE`; operations that
-reach that representational limit are not supported. Prior-work costs still grow,
-so this is not an infinite-integer repair system.
+1. Download the latest jar from [Hangar](https://hangar.papermc.io/rewrite123/enchantcap).
+2. Put `enchantcap-0.3.0.jar` in the server's `plugins/` folder and restart Paper 26.3 on Java 25.
+3. Optional: set additional enchantment levels with `/enchantcap max-additional-enchantment-levels 1`.
 
-There are no commands or permissions. Other anvil plugins
-can conflict if they replace results, thresholds or costs after enchantcap runs.
-Restart the server when installing/removing; do not use plugin hot-reload.
+To build locally, run `./gradlew build --console=plain` in the plugin folder. Gradle runs on Java 17+ and provisions a Java 25 toolchain if needed; the server itself must run Java 25. Tests use Mockito/MockBukkit and do not simulate the full native anvil menu. Test real anvil behavior on Paper before using it with valuable items. A normal build does not deploy or publish.
 
-## Build and install
+<details>
+<summary>Build from source and publish</summary>
+
+The Hangar publication targets `rewrite123/enchantcap`, channel `Release`, and Paper `26.3`. Create the Hangar project and provide `HANGAR_API_TOKEN` with `create_version` permission. Never store credentials in build files.
 
 ```sh
-./gradlew build --console=plain
+./gradlew build publishPluginPublicationToHangar syncAllPluginPublicationPagesToHangar --console=plain
 ```
 
-On Windows use `gradlew.bat`. Gradle runs on Java 17+ and downloads a Java 25
-toolchain if needed. The server itself must run Java 25.
+For later releases, choose a unique version in `gradle.properties` and supply release notes with `-PhangarChangelog="..."`. This README is synced as the Hangar resource page. Regenerate original diagrams from the repository root with `python3 tools/docs/enchantcap.py`. Images use absolute raw GitHub URLs to render on Hangar and GitHub.
 
-Copy `build/libs/enchantcap-0.2.0.jar` to the server's `plugins/` directory and
-restart. To uninstall, stop the server, remove the JAR and restart.
-No server deployment or Hangar publication happens during a build.
+</details>
 
-## Publish to Hangar
+## Links and support
 
-The publication targets [rewrite123/enchantcap](https://hangar.papermc.io/rewrite123/enchantcap),
-the `Release` channel, and Paper `26.3`. Create the Hangar project first and
-provide a token with `create_version` permission through `HANGAR_API_TOKEN`.
-Never store credentials in build files.
-
-```sh
-./gradlew build publishPluginPublicationToHangar \
-  syncAllPluginPublicationPagesToHangar --console=plain
-```
-
-For subsequent releases, choose an unused version in `gradle.properties` and
-provide release notes with `-PhangarChangelog="..."`. Normal `build` and `test`
-tasks do not publish.
-
-## Verification
-
-`./gradlew test` covers early threshold setup, cost boundaries, cancelled opens,
-non-anvil inventories, invalid results, material-cost fractions/rounding,
-consumed-count handling, optional level bypass, stored-book limits and
-preservation of existing higher levels. Tests use Mockito/MockBukkit; the native
-repair-material predicate is mocked because MockBukkit does not implement its
-delegate. They do not simulate Minecraft's full anvil menu.
-
-Before using on valuable items, test on a Paper 26.3 server:
-
-1. In survival, combine compatible items whose prior-work cost would exceed 39:
-   verify a valid output appears for 39 levels.
-2. With fewer than 39 levels, verify taking that output is refused; with enough
-   levels, verify the correct XP and input materials are consumed once.
-3. Verify a 39-level material repair of a diamond pickaxe costs 13 with one
-   diamond, 26 with two and 39 with three; verify the actual ingredients consumed.
-4. Verify one-material armor repairs use the table above, and repairing with a
-   second tool keeps the usual capped price.
-5. At the default setting, verify Efficiency V + V stays V. With the setting at
-   1 after a restart, verify it produces VI and Unbreaking III + III produces IV.
-6. Verify incompatible enchantments, rejected combinations and unrelated menus
-   are unchanged. Verify existing over-level items survive a lower setting.
+- **Source and full guide:** [github.com/rewrite123/papermc-plugins/tree/main/enchantcap](https://github.com/rewrite123/papermc-plugins/tree/main/enchantcap)
+- **Download:** [hangar.papermc.io/rewrite123/enchantcap](https://hangar.papermc.io/rewrite123/enchantcap)
+- **Report a bug or request a feature:** [GitHub issues](https://github.com/rewrite123/papermc-plugins/issues)

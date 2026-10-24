@@ -62,6 +62,7 @@ public class MinecartTravelPlugin extends JavaPlugin implements TabExecutor {
         var command = Objects.requireNonNull(getCommand("minecarttravel"));
         command.setExecutor(this);
         command.setTabCompleter(this);
+        HelpGuide.register(this, "minecarttravel");
     }
 
     @Override

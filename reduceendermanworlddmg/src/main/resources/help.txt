@@ -1,0 +1,54 @@
+&6&lReduce Enderman World Damage&r &7- return stolen blocks
+
+&6What it does
+&7Endermen still pick up blocks normally. After a delay,
+&7the plugin has them return each block they picked up.
+&7No player commands, setup, or extra plugin is needed.
+
+&6How returns work
+&e1. &7An Enderman picks up a block as usual.
+&e2. &7The plugin saves the block state, position, and
+&7a random return deadline of 10 to 45 seconds.
+&e3. &7After that delay, it walks to the original spot.
+&7It restores the block only if that space is empty,
+&7within reach, and visible from the Enderman.
+&e4. &7If the original spot cannot be reached for
+&f10 seconds&7, a nearby fallback may be used.
+
+&6Nearby fallback
+&7The Enderman may place the block within 2 blocks
+&7horizontally, from 1 below to 2 above its feet.
+&7The plugin tries spots nearest the original position.
+&7A spot must be empty, supported, visible, reachable,
+&7placeable, and clear of entities.
+&7It never overwrites a block or liquid. If no spot
+&7works, the Enderman keeps carrying the block and tries
+&7again. It can still return to the original spot later.
+
+&6Timing and limits
+&7The random delay is wall-clock time, checked every
+&f5 server ticks&7; unloaded time counts toward it.
+&7The 10-second window starts when return attempts begin.
+&7Combat and disabled AI pause attempts. Endermen are
+&7never teleported and chunks are never force-loaded.
+&7Returns require mobGriefing in that world. Protection
+&7plugins may cancel each placement attempt.
+&7Killing the Enderman cancels restoration; normal drops
+&7are unchanged. Changed carried blocks are not restored.
+
+&6Persistence
+&7The origin and deadline are saved on each Enderman.
+&7They survive normal unloads, reloads, and restarts.
+&7Endermen already carrying blocks before installation
+&7are not tracked because their origin is unknown.
+&7If the plugin is disabled, saved data remains on mobs.
+
+&6Commands, permissions & config
+&7There are no plugin commands, permissions, or config.
+&7Read this guide with &f/help reduceendermanworlddmg&7.
+&7Requires Paper 26.3 and Java 25.
+
+&6Upgrade note
+&7For 0.2.0, remove the old
+&freduceendermanblockdmg&7 JAR before installing this one.
+&7Tracked Endermen keep their saved return records.

@@ -1,0 +1,89 @@
+&6&lVotersRights&r &7- let eligible players vote on server actions
+&7One server-wide proposal at a time. A passing vote applies the chosen action.
+
+&6How to vote
+&e1. &f/vote &7lists enabled actions or shows the active vote.
+&e2. &f/vote <action> [arguments] &7starts a proposal.
+&e3. &7The proposer votes &ayes&7 automatically. Others use &f/vote yes&7 or
+&f   /vote no&7, or click the buttons in chat.
+&7Each eligible player gets one ballot; it cannot be changed.
+
+&6Built-in actions
+&f/vote restart &7- restart after a 2-minute warning
+&f/vote lowerViewDistance &7- lower view distance by 2 chunks
+&f/vote increaseViewDistance &7- raise view distance by 2 chunks
+&f/vote lowerSimulationDistance &7- lower simulation distance by 2
+&f/vote increaseSimulationDistance &7- raise simulation distance by 2
+&f/vote timeout <online-player> &7- warn, then disconnect a player
+&f/vote difficulty <difficulty> &7- set difficulty in every world
+&f/vote setTimeDay &7- set time to 1000 in every world
+&f/vote setTimeNight &7- set time to 13000 in every world
+&7Action names ignore case. Custom actions have no player arguments.
+
+&6Vote rules
+&7Votes last &f60 seconds&7. Default pass threshold: &f50%&7, rounded up.
+&7The eligible online players are snapshotted when a vote starts.
+&7At least &f3&7 eligible players must be online by default.
+&7Joining later does not add a voter; leaving does not remove a ballot.
+&7Restart and timeout actions have a warning period that blocks new votes.
+&7Distance changes apply to all worlds, in steps of 2, within server limits.
+&7Only the four distance actions and the actions listed above are built in.
+
+&6Permissions
+&f votersrights.vote &7(default: everyone) - propose and cast ballots
+&f votersrights.admin &7(default: operators) - manage voting settings
+
+&6Tips and limits
+&7Blacklist always excludes a player. If whitelist mode is on, players must
+&7also be on the whitelist. The vote permission is still required.
+&7Restart depends on your host's Paper restart setup; test it first.
+&7Timeouts use saved UUID state, not the server ban list.
+&7Need details? Use &f/help votersrights&7 and see the guide links.
+
+[admin:votersrights.admin]
+&6Admin controls &7(permission: votersrights.admin)
+&f/votersrights &7or &f/votersrights show &7- display full settings
+&f/votersrights set <setting> <value> &7- change and save a setting
+&f/votersrights allow <action> <true|false> &7- enable/disable an action
+&f/votersrights difficulties <easy|normal|hard|peaceful...>
+&7  Replaces the complete list of difficulties players may propose.
+&f/votersrights whitelist &7- list allowed UUIDs
+&f/votersrights whitelist add|remove <player|UUID>
+&f/votersrights blacklist &7- list blocked UUIDs
+&f/votersrights blacklist add|remove <player|UUID>
+&f/votersrights action add <name> <console command...>
+&f/votersrights action remove <name> &7- remove a custom action
+&f/votersrights reload &7- reload config.yml; cancels an active vote
+&7Successful edits apply now, save to config.yml, and cancel the current vote.
+
+&6Numeric and boolean settings &7(defaults)
+&f pass-percentage &7(50) - whole number 1-100; yes votes needed, rounded up
+&f minimum-online-players &7(3) - at least 1 eligible player
+&f restart-cooldown-minutes &7(20) - 0-525600 minutes after execution
+&f timeout-duration-minutes &7(3) - 1-525600 minutes disconnected
+&f timeout-protection-minutes &7(30) - 0-525600 after a timeout ends
+&f minimum-view-distance &7(6) - 2-32 chunks
+&f maximum-view-distance &7(18) - minimum through 32 chunks
+&f minimum-simulation-distance &7(4) - 2-32 chunks
+&f maximum-simulation-distance &7(12) - minimum through 32 chunks
+&f whitelist-enabled &7(false) - require UUID whitelist membership
+&7Minimum distance cannot exceed its maximum. View and simulation limits
+&7clamp vote results. Edits to config.yml require /votersrights reload.
+
+&6Built-in action toggles &7(default: all true)
+&f actions.restart, lowerViewDistance, increaseViewDistance
+&f actions.lowerSimulationDistance, increaseSimulationDistance
+&f actions.timeout, difficulty, setTimeDay, setTimeNight
+&7Use &f/votersrights allow <action> <true|false>&7 to toggle one.
+&f allowed-difficulties &7(default: EASY, NORMAL, HARD)
+
+&6Custom vote actions
+&7Each custom action runs its fixed console commands, in order, after a pass.
+&7Name: lowercase letter first, then letters/digits/_/-, max 32 characters.
+&7Names cannot collide with built-ins or yes/no. A command has no leading /
+&7and cannot contain braces, line breaks, or player placeholders. Players
+&7cannot add arguments. Repeating action add appends another console command.
+&cOnly register trusted commands: they run with console privileges.
+&7An unhandled command stops the sequence; earlier commands are not rolled back.
+&7Config paths: custom-actions.<name>.enabled and .commands.
+[/admin]

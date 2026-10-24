@@ -1,0 +1,30 @@
+&6&lIHatePowderedSnow&r &7- replace generated powder snow with snow blocks
+
+&6What it does
+&7During new chunk generation, every powder snow block becomes a
+&7solid snow block. The terrain shape is kept; snow traps are gone.
+
+&6How to use
+&e1. &7Install on Paper and restart before exploring new terrain.
+&e2. &7Explore or generate chunks after the plugin is enabled.
+&7No player interaction or setup is needed.
+
+&6Mechanics and scope
+&7Runs after vanilla terrain/features in a world-generation
+&7populator. It checks all 256 columns from min to max build height.
+&7Only POWDER_SNOW becomes SNOW_BLOCK; thin snow and other blocks
+&7are unchanged. New worlds are covered too.
+&7Already-generated chunks are not scanned on load. Player-placed
+&7powder snow, buckets and cauldrons are unchanged.
+&7Generation plugins that add powder snow after this populator may
+&7still place it. The plugin doesn't replace the world generator.
+
+&6Commands, permissions and settings
+&7This plugin has no commands, permissions, or config.yml.
+&f/help ihatepowderedsnow &7- show this guide and GitHub links
+
+&6Tips and limits
+&7A standard -64 to 320 chunk requires 98,304 block checks.
+&7There is no recurring scan or chunk-load processing.
+&7Converted blocks remain ordinary snow blocks if you uninstall.
+&7Back up worlds before adding world-generation changes.

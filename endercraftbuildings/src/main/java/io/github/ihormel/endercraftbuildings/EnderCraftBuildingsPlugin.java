@@ -34,6 +34,7 @@ public class EnderCraftBuildingsPlugin extends JavaPlugin implements Listener {
         for (var world : getServer().getWorlds()) {
             for (var chunk : world.getLoadedChunks()) tapers.blocks(chunk).forEach(BuildingListener::quiet);
         }
+        HelpGuide.register(this, "endercraftbuildings");
     }
 
     private double chance(String path) { return Math.clamp(getConfig().getDouble(path, 0.05), 0.0, 1.0); }

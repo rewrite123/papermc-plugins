@@ -1,0 +1,43 @@
+&6&lTpCost&r &7- teleport to friends for XP levels
+&7A teleport only happens after the other player accepts. You pay when it happens, not when you ask.
+
+&6How to teleport
+&e1. &f/tpa <player>&7 sends a request that lasts 60 seconds.
+&e2. &7They click &a[Accept]&7 or &c[Deny]&7 in chat, or type /tpaccept or /tpdeny.
+&e3. &7The price is recalculated from where you both stand when they accept. You are teleported and the levels are taken. If anything fails, nothing is charged.
+
+&6Price (server defaults)
+&7Every 1,000 blocks costs &f3 levels&7, rounded up.
+&7Minimum &f3&7, distance price stops at &f25&7.
+&7Different worlds add &f+3&7 on top.
+&f  500 blocks = 3   1,000 = 3   3,000 = 9
+&f  3,330 = 10   5,000 = 15   over 8,000 = 25
+&7You need enough levels when you ask and when they accept.
+
+&6Commands
+&f/tpa <player> &7- request to teleport to a player
+&f/tpaccept [player] &7- accept a request
+&f/tpdeny [player] &7- deny a request
+&f/tpcancel &7- cancel your own outgoing request
+&f/tpclose &7- refuse all incoming requests
+&f/tpopen &7- accept incoming requests again
+&f/tpcost <player> &7- price check (only if the server allows it)
+&7Name the player in /tpaccept or /tpdeny if you have several requests.
+
+&6Privacy
+&7/tpclose is saved across restarts. Pending requests to you are cancelled and new ones are refused.
+&7/tpcost is off by default because exact prices can reveal how far away someone is. When it is off, requests also hide the price until the teleport happens.
+[admin:tpcost.admin]
+
+&6Admin settings &7(permission tpcost.admin)
+&f/tpcostadmin &7- show every setting
+&f/tpcostadmin <setting> &7- show one setting
+&f/tpcostadmin <setting> <value> &7- change and save it
+&7Changes apply immediately and are written to config.yml.
+&f minimum-cost &7(3) - lowest price
+&f levels-per-1000-blocks &7(3) - price per 1,000 blocks
+&f maximum-cost &7(25) - cap before world surcharge
+&f cross-world-surcharge &7(3) - added between worlds
+&f cost-command-enabled &7(false) - allow /tpcost quotes
+&7Prices are whole numbers 0 or more; minimum cannot exceed maximum. After editing config.yml by hand, restart the server.
+[/admin]

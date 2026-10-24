@@ -2,6 +2,10 @@
 
 Standalone plugins for PaperMC. Each plugin has its own Gradle build and wrapper.
 
+Every plugin has an in-game guide: run `/help <plugin>` (for example `/help tpcost`).
+Admins also see admin settings. Each guide ends with clickable links to the plugin's
+folder here and to the [issue tracker](https://github.com/rewrite123/papermc-plugins/issues).
+
 - [tpcost](tpcost/README.md): player-approved teleports paid for with experience levels.
 - [inventorysorter](inventorysorter/README.md): shift-double-click an empty slot to
   sort storage by alphabetical item group, then alphabetical item type.
@@ -54,5 +58,18 @@ python3 tools/generate-project-icons.py
 ```
 
 To regenerate only one icon, pass `--project reduceendermanworlddmg`.
+
+## README diagrams
+
+Each plugin README (also its Hangar description) uses diagrams in
+`<plugin>/docs/images/`. They are drawn from scratch by `tools/docs/<plugin>.py`
+with the shared helpers in `tools/docs/diagrams.py` (Python 3 + Pillow):
+
+```sh
+python3 tools/docs/tpcost.py
+```
+
+READMEs link images by absolute `raw.githubusercontent.com` URL so they render on
+Hangar too. Push the images to `main` before publishing a page that uses them.
 
 Regenerating images does not upload them to Hangar or publish a plugin release.

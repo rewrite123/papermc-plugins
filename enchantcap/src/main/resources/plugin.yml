@@ -3,3 +3,12 @@ version: '${version}'
 main: io.github.ihormel.enchantcap.EnchantCapPlugin
 api-version: '26.3'
 description: Cap anvil charges at 39 levels, scale material-repair prices and configure extra enchantment levels.
+commands:
+  enchantcap:
+    description: View or set the additional anvil enchantment levels.
+    usage: /enchantcap max-additional-enchantment-levels [0-254]
+    permission: enchantcap.admin
+permissions:
+  enchantcap.admin:
+    description: Manage EnchantCap settings.
+    default: op

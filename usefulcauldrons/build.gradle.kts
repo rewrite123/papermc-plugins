@@ -48,7 +48,7 @@ hangarPublish {
         channel.set("Release")
         apiKey.set(providers.environmentVariable("HANGAR_API_TOKEN"))
         changelog.set(providers.gradleProperty("hangarChangelog").orElse(
-            "Initial release: automatic cauldron cooking, custom stews, warm milk, candy, dyeing and charcoal."))
+            "Adds an in-game /help guide and expanded README/Hangar documentation."))
         pages { resourcePage(project.file("README.md").readText()) }
         platforms {
             paper {

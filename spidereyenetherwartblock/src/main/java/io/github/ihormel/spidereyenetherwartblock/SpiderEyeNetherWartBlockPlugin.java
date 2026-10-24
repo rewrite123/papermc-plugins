@@ -23,6 +23,7 @@ public class SpiderEyeNetherWartBlockPlugin extends JavaPlugin implements Listen
         }
         getServer().getPluginManager().registerEvents(this, this);
         for (var player : getServer().getOnlinePlayers()) player.discoverRecipe(recipeKey);
+        HelpGuide.register(this, "spidereyenetherwartblock");
     }
 
     @EventHandler

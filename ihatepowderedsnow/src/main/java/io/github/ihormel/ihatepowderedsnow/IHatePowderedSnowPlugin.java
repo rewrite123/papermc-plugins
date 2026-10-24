@@ -14,6 +14,7 @@ public class IHatePowderedSnowPlugin extends JavaPlugin implements Listener {
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getWorlds().forEach(this::register);
+        HelpGuide.register(this, "ihatepowderedsnow");
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

@@ -1,0 +1,99 @@
+&6&lUsefulCauldrons&r &7- cook, dye and recycle with cauldrons
+&7Drop ordinary items into a cauldron; matching recipes happen automatically.
+
+&6Getting started
+&e1. &7Use a vanilla cauldron. Drop ingredients inside it.
+&e2. &7Water cooks stews; heat cooks milk, candy and wax.
+&e3. &7Collect food, or sneak-right-click empty-handed to clear it.
+&7Only ordinary, unmodified ingredients are accepted.
+&7Items with names, lore or enchantments are left alone.
+&7One food batch is stored at a time; collect it before cooking again.
+&7Ingredients float inside as visuals and persist across restarts.
+
+&6Heat and water
+&7Heat: fire, soul fire, lava, or a lit campfire below.
+&7Stews need water, heat and an open top; each batch uses 1 water level.
+&7Milk, candy and wax need heat, no water, and an open top.
+&7An opaque block over a heated, dry pot makes charcoal.
+&7Right-click with a water bucket to add water normally.
+
+&6Stews &7(each gives 2 servings; collect with bowls)
+&fMushroom: &71 red mushroom + 1 brown mushroom.
+&fBeetroot: &76 beetroot.
+&fRabbit: &71 cooked rabbit + 1 carrot + 1 baked potato +
+&71 red or brown mushroom.
+&7Vanilla stews use water and heat, but no blaze powder.
+&fGolden Flavor: &7golden apple + golden carrot +
+&7glow berries or cocoa beans + 1 blaze powder.
+&fSpeedy: &7raw rabbit or raw fish + nether wart + carrot +
+&7sweet berries + 1 blaze powder.
+&7Fish can be cod, salmon, tropical fish or pufferfish.
+&fCarrota: &74 golden carrots + short grass + spider eye +
+&7nether wart + 1 blaze powder.
+&fSpicy Chilli: &7raw beef + beetroot + dried kelp + gunpowder +
+&7magma cream + nether wart + 1 blaze powder.
+&fHearty: &7raw beef + porkchop + mutton + pumpkin + potato +
+&7nether wart + 2 blaze powder.
+&fFish Soup: &7cod + salmon + carrot + short grass + vine +
+&7nether wart + 1 blaze powder.
+&7Golden Flavor: Regen I 8s, +2.5 hearts for 30s.
+&7Speedy: Speed I 30s; Carrota: Night Vision I 30s.
+&7Chilli: Fire Resist I 30s; Fish Soup: Water Breath I 10s.
+&7Hearty: Strength I 10s, full hunger, +0.5 heart 30s.
+&7Special stews use water and heat; effects are level I.
+&7Stews restore 6 hunger / 7.2 saturation; rabbit 10 / 12.
+&7Suspicious: red + brown mushroom + 1 vanilla stew flower.
+&7Flowers keep their vanilla effect and duration.
+&7Supported: dandelion, blue orchid, poppy, torchflower,
+&7allium, azure bluet, tulips, oxeye daisy, cornflower,
+&7lily of the valley, wither rose, open/closed eyeblossom.
+
+&6Other heated recipes &7(dry, open cauldron)
+&fWarm milk: &71 milk bucket + 4 bowls + blaze powder -> 4.
+&7Returns a bucket. Clears effects; blocks new effects 6s.
+&fHot chocolate: &7while all 4 milk servings remain, add
+&76 cocoa beans + 2 sugar. Upgrades them to 4 servings.
+&7Clears effects and blocks new effects for 8s; grants 1
+&7absorption heart for 30s. Restores 8 hunger points.
+&fCandy: &71 supported food + 26 sugar -> 1 candy.
+&7Or use 12 honey bottles; returns 12 glass bottles.
+&7Honey is used first if both sweeteners are available.
+&7Supported: apple, berries, carrot, melon, golden apple,
+&7glistering melon, golden carrot, pumpkin, chorus fruit.
+&7All candy restores 12 hunger and gives Speed I.
+&7Sugar lasts 10s; honey 20s; three golden foods add 5s.
+&7Candied golden apple adds Regen II 5s and 2 hearts 30s.
+&fWax: &71 raw beef or porkchop + gunpowder -> 1 wax.
+&fHoney: &71 ordinary honeycomb + glass bottle -> wax + honey.
+&7Wax looks like white dye; use it for vanilla wax recipes.
+
+&6Dye and concrete
+&7Drop dye into water for 64 uses. Drop dyeable items in,
+&7or right-click holding one; costs 1 use per item.
+&7One uncolored water level processes a dropped stack.
+&7Dyed water turns 4 sand + 4 gravel into 8 concrete;
+&7it costs 8 dye uses and needs no heat.
+&7Water color lasts until its uses run out. Same dye wastes none.
+&7Sneak-right-click empty-handed retrieves stored contents.
+&7Collect stew with an empty bowl; collect milk/chocolate
+&7with an empty hand. Their bowls were paid up front.
+&7Eating bowl-based foods returns the bowl (not in creative).
+
+&6Charcoal
+&7Use a dry, heated pot with a solid opaque block above it.
+&7Leave eligible fuel for 60 seconds to make charcoal.
+&7Heat or lid removal resets progress; chunks pause when unloaded.
+&7Logs make 2 charcoal each. Other fuels use groups of 2, 4 or 8.
+
+&6Commands and permissions
+&7There are no plugin commands or extra permissions.
+&7Open this guide with /help UsefulCauldrons.
+&7The plugin exposes CauldronProcessEvent for protection
+&7plugins to cancel automatic deposit, cooking, dye and fuel work.
+
+&6Limits and safety
+&7Capacity is 4,096 ingredients per cauldron.
+&7Retrieve contents before breaking the cauldron or changing
+&7its fluid. Stored pots cannot be pushed by pistons.
+&7Visuals are display entities, not extra collectible items.
+&7Back up plugins/UsefulCauldrons/contents.yml with your world.

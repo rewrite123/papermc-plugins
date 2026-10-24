@@ -1,0 +1,68 @@
+&6&lEnderCraftBuildings&r &7- remember, pay for, and recall buildings
+
+&6What it does
+&7Scan a structure into a memory crystal, then craft paid copies.
+&7A storage crystal marks a site and recalls the building from the End.
+&7Scanning leaves the original structure untouched.
+
+&6First building, step by step
+&e1. &7Craft a memory crystal, empty storage crystal and taper.
+&e2. &7Hold memory crystal; right-click two opposite corners.
+&7Aim at open air to pick a point 3 blocks in front of you.
+&7Sneak + right-click cancels. Type a name in chat when prompted.
+&e3. &7At a taper, right-click with a named memory or storage crystal.
+&7It consumes an empty crystal and the building materials.
+&e4. &7Place the resulting storage crystal where the front-left
+&7bottom corner belongs. Face the way the building should face.
+&e5. &7Clear any red outline; hold right-click on the amethyst
+&7cluster until charged. The building appears and crystal breaks.
+
+&6Crafting recipes
+&7Memory storage crystal (shown as a soul lantern):
+&f top: amethyst shard   middle: ender pearl   bottom: soul lantern
+&7Empty storage crystal (shown as amethyst shard; any diagonal):
+&f amethyst shard + eye of ender, diagonally in a 2x2 grid
+&7Ender Biconical Taper (a placeable vault):
+&f top: ender pearl . diamond
+&f mid: obsidian . obsidian
+&f bot: obsidian obsidian obsidian
+&7All recipes are added to the recipe book. Custom crystals cannot
+&7be used in crafting, smithing, crafters or given to allays.
+
+&6Scanning and limits
+&7Each selection is at most &f32 x 32 x 32&7. A purple outline
+&7shows the corners; oversized selections turn red. Blocks are
+&7remembered relative to the direction you face at corner two.
+&7Naming takes 1-32 characters; chat is private and times out
+&7after 60 seconds. `cancel` discards the scan.
+&7Air, fluids and unobtainable blocks are not copied. Containers'
+&7contents, sign text and banner patterns are not stored.
+&7Waterlogging is removed, filled cauldrons become empty, and
+&7pistons are copied retracted. Scanning again replaces the design.
+
+&6Imprinting and placement
+&7Survival needs plain, unrenamed building materials plus an empty
+&7crystal. Missing items are listed; nothing is spent. Creative
+&7still needs the empty crystal but skips material costs.
+&7The placed cluster shows a teal outline for &f30 seconds&7;
+&7right-click it to refresh. Red means something blocks placement.
+&7Required spaces must be air or dry replaceable plants/snow.
+&7Holding right-click charges for &f2s + 0.05s per block&7,
+&7capped at 30s. Letting go cancels without spending the crystal.
+&7Protection plugins can deny a recall; then the crystal remains.
+
+&6Endermites and settings
+&7Default endermite chance: &f5%&7 at imprinting and &f5%&7 at recall.
+&7Server owners: set either chance in config.yml (0.0 to 1.0),
+&7then restart. Values outside that range are clamped.
+
+&6Commands and permissions
+&7This plugin has no commands or permissions.
+&f/help endercraftbuildings &7- show this guide and GitHub links
+
+&6Tips and limits
+&7The memory crystal is kept when imprinting, so copies can be made
+&7again with more materials. A storage crystal is also a valid source.
+&7Breaking a placed crystal returns it outside creative. Explosions,
+&7pistons and mobs cannot move or destroy placed crystals/tapers.
+&7A free hand or plain block in the other hand helps hold-to-charge.

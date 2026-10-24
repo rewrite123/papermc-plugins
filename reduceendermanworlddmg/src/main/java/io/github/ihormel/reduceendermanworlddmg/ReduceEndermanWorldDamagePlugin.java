@@ -29,6 +29,7 @@ public final class ReduceEndermanWorldDamagePlugin extends JavaPlugin implements
             for (Enderman entity : world.getEntitiesByClass(Enderman.class)) returns.load(entity);
         }
         getServer().getScheduler().runTaskTimer(this, returns::tick, 5L, 5L);
+        HelpGuide.register(this, "reduceendermanworlddmg");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

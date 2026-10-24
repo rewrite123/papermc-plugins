@@ -1,72 +1,91 @@
-# ihatepowderedsnow
+# IHatePowderedSnow
 
-Make snowy-biome travel less annoying: **powder snow in newly generated chunks
-becomes solid snow blocks**, preserving the shape of the terrain without the
-snow traps.
+**Make snowy-biome travel less annoying: powder snow generated in new chunks becomes solid snow blocks, preserving the terrain shape without the snow traps.** For **Paper 26.3 / Java 25**, with no runtime dependencies.
 
-For **Paper 26.3 / Java 25**, with no runtime dependencies.
+![Features at a glance](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/ihatepowderedsnow/docs/images/features.png)
 
-## How it works
+> **In game:** `/help ihatepowderedsnow` explains what changes and links to the source and issue tracker. There are no commands or permissions.
 
-- Runs as a world-generation block populator after vanilla terrain/features.
-- Replaces `POWDER_SNOW` with `SNOW_BLOCK`, not a thin snow layer.
-- Checks the complete height of the chunk, including buried powder-snow pockets.
-- Applies to all worlds, including worlds created after the plugin starts.
-- **Existing chunks are not scanned or converted**, even when loaded again.
-- Player-placed powder snow, powder-snow buckets, and powder snow collected in
-  cauldrons are unchanged. This is not a general ban on powder snow.
-- No commands, permissions, or configuration are needed.
+## Contents
 
-The populator uses Paper's generation-safe `LimitedRegion` API and touches only
-the chunk being populated, without loading adjacent chunks. It does not replace
-your world generator or alter other block types. Other plugins that generate
-powder snow **after** this populator runs may still introduce it.
+- [Quick start](#quick-start)
+- [What changes during generation](#what-changes-during-generation)
+- [Scope and limits](#scope-and-limits)
+- [Commands, permissions and configuration](#commands-permissions-and-configuration)
+- [Install](#install)
+- [Build from source and publish](#build-from-source-and-publish)
+- [Links and support](#links-and-support)
 
-There is a bounded scan of 256 columns across the world's build height per new
-chunk (98,304 block checks for a standard -64 to 320 world). There is no recurring
-scan or chunk-load processing. Already-generated/pre-generated terrain stays as
-it is; explore beyond its boundaries to see the change.
+## Quick start
+
+![Generation flow](https://raw.githubusercontent.com/rewrite123/papermc-plugins/main/ihatepowderedsnow/docs/images/generation-flow.png)
+
+1. Install the plugin on Paper 26.3 with Java 25.
+2. Restart the server before exploring new terrain.
+3. Newly generated chunks have `POWDER_SNOW` replaced by `SNOW_BLOCK`. No player action or configuration is needed.
+
+## What changes during generation
+
+The plugin registers a world-generation block populator that runs after vanilla terrain and features. For the chunk being populated, it checks all 256 columns from the world's minimum to maximum build height. Only powder snow is changed, including buried pockets; other block types and the shape of the terrain remain in place.
+
+For a standard world from Y=-64 to Y=319, that is **256 × 384 = 98,304 block checks per generated chunk**. The scan uses Paper's generation-safe `LimitedRegion` API and touches only the chunk being populated; it does not load adjacent chunks.
+
+## Scope and limits
+
+| Situation | Result |
+| --- | --- |
+| Newly generated chunks in existing or future worlds | Powder snow becomes solid snow blocks |
+| Already-generated chunks, including on later load | Not scanned or converted |
+| Player-placed powder snow, buckets or powder snow in cauldrons | Unchanged |
+| Snow layers, snow blocks and all other materials | Unchanged |
+| Other plugins adding powder snow after this populator | May still add powder snow |
+| Plugin disabled or removed | Converted blocks remain ordinary snow blocks; no automatic reversal |
+
+The populator does not replace your world generator or run a recurring scan when chunks load. Explore beyond existing/pre-generated terrain to see the change. Back up your world before adding plugins that modify generation.
+
+## Commands, permissions and configuration
+
+| Entry | Availability |
+| --- | --- |
+| `/help ihatepowderedsnow` | In-game guide and clickable links |
+| Other commands | None |
+| Permissions | None |
+| `config.yml` | Not used |
 
 ## Install
 
-1. Use Paper 26.3 with Java 25.
-2. Place `ihatepowderedsnow-0.1.0.jar` in the server's `plugins/` directory.
-3. Restart the server before exploring new terrain.
+1. Download `ihatepowderedsnow-0.2.0.jar` from [Hangar](https://hangar.papermc.io/rewrite123/ihatepowderedsnow).
+2. Put it in the server's `plugins/` directory and restart on **Paper 26.3 / Java 25**.
+3. Explore chunks that have not already been generated. Existing terrain is never converted automatically.
 
-The plugin loads at startup so it can register before initial world generation.
-Converted snow remains ordinary snow if you uninstall the plugin; conversion
-is not reversible automatically. Back up your world before adding plugins
-that modify world generation.
+The plugin loads at startup so it can register before initial world generation. Converted snow remains ordinary snow if you uninstall; conversion is not reversible automatically.
 
-## Build and test
+<details id="build-from-source-and-publish">
+<summary>Build from source and publish</summary>
 
 ```sh
 ./gradlew build
 ```
 
-The JAR is written to `build/libs/ihatepowderedsnow-0.1.0.jar`. Gradle provisions
-the Java 25 build toolchain automatically. Tests cover exact block replacement,
-chunk/height boundaries, concurrent generation, and world registration; they do
-not replace a real-server terrain-generation smoke test.
+The jar is written to `build/libs/`. Gradle runs on Java 17+ and downloads the Java 25 toolchain if needed. Tests cover exact block replacement, chunk/height boundaries, concurrent generation and world registration; they do not replace a real-server terrain-generation smoke test.
 
-## Source and support
+Regenerate the original feature and generation diagrams from the repository root with `python3 tools/docs/ihatepowderedsnow.py`.
 
-- [GitHub repository](https://github.com/rewrite123/papermc-plugins)
-- [Report an issue](https://github.com/rewrite123/papermc-plugins/issues)
-
-When reporting a problem, include the plugin version, Paper version, world
-generator/other generation plugins, and whether the chunk was newly generated.
-
-## Publish
-
-Uses [Hangar's official Gradle publishing plugin](https://github.com/HangarMC/hangar-publish-plugin).
-With `HANGAR_API_TOKEN` set to a key with `create_version` and `edit_page`:
+Publishing uses [Hangar's Gradle plugin](https://github.com/HangarMC/hangar-publish-plugin). Set a unique version in `gradle.properties` and supply `HANGAR_API_TOKEN` with `create_version` and `edit_page` permissions. Never commit the token.
 
 ```sh
 ./gradlew build publishPluginPublicationToHangar syncAllPluginPublicationPagesToHangar \
   -PhangarChangelog="Replace generated powder snow with solid snow blocks."
 ```
 
-Use a unique version in `gradle.properties` for each release. The Hangar main
-page is synchronized from this README. A manual GitHub Actions publishing
-workflow uses the `HANGAR_API_TOKEN` repository secret.
+The Hangar main page is synchronized from this README. The diagrams use absolute raw GitHub URLs for display on GitHub and Hangar.
+
+</details>
+
+## Links and support
+
+- **Source and full guide:** [GitHub plugin folder](https://github.com/rewrite123/papermc-plugins/tree/main/ihatepowderedsnow)
+- **Download:** [Hangar](https://hangar.papermc.io/rewrite123/ihatepowderedsnow)
+- **Report a bug or request a feature:** [GitHub issues](https://github.com/rewrite123/papermc-plugins/issues)
+
+Include the plugin version, Paper version, world generator or other generation plugins, and whether the chunk was newly generated.

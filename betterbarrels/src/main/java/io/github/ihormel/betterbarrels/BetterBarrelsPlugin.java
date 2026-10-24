@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class BetterBarrelsPlugin extends JavaPlugin {
+public class BetterBarrelsPlugin extends JavaPlugin {
     private WorldScan scan;
     private ScanState state;
 
@@ -29,6 +29,7 @@ public final class BetterBarrelsPlugin extends JavaPlugin {
             getLogger().log(Level.SEVERE, "Cannot initialize BetterBarrels; do not remove its data or uninstall with stored items", error);
             getServer().getPluginManager().disablePlugin(this);
         }
+        HelpGuide.register(this, "betterbarrels");
     }
 
     @Override

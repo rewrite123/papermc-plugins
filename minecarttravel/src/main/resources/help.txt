@@ -1,0 +1,72 @@
+&6&lMinecartTravel&r &7- boosted rides and lodestone fast travel
+
+&6What it does
+&7Earn a speed boost and ride registered lines between lodestones.
+&7Both features are on by default; no items or fees are needed.
+&7Type &f/help minecarttravel&7 for this guide and links.
+
+&6How to ride
+&e1. &f/minecarttravel fast&7 turns both features on.
+&e2. &7Ride continuously above &f6 blocks/second&7.
+&e3. &7After &f15 seconds&7, safe straight track boosts toward
+&790 blocks/second. After &f30 seconds total&7, fast travel
+&7starts on a registered line in the direction you are moving.
+&7These are defaults; lag makes real time longer.
+&7Stopping, derailing, or losing qualifying speed resets time.
+
+&6Register a line
+&e1. &7Build a line with a real lodestone at each end.
+&7Each end must have flat, straight rail directly into it.
+&e2. &f/minecarttravel register&7 while in a cart, or run it
+&7before boarding (you have 60 seconds to get in).
+&e3. &7Start within &f16 rails&7 of an end; ride to the other.
+&7The action bar reports recorded rails and turns.
+&7The line registers at the far lodestone. Switches and
+&7branches are recorded as the cart actually travels them.
+&7You must keep riding; dismounting cancels registration.
+&f lodestone | rail = rail = ... = rail | lodestone
+
+&6Your options
+&f/minecarttravel boost [on|off] &7- toggle only the boost
+&f/minecarttravel fasttravel [on|off] &7- toggle travel
+&f/minecarttravel normal &7- turn both features off
+&f/minecarttravel fast &7- turn both features on
+&7Opt-outs persist. Fast travel can work with boost off.
+&7Only a single-player rideable cart teleports; cargo carts
+&7and carts with other passengers do not fast travel.
+
+&6Commands
+&f/minecarttravel [status] &7- choices, ride time, route status
+&f/minecarttravel register [cancel] &7- register or stop a line
+&f/minecarttravel settings &7- show timing and speed values
+&7Alias: &f/minecartfasttravel&7. Settings are public.
+
+&6Safety and limits
+&7Boosts need straight, level, supported and loaded track
+&7ahead, with passable headroom and no nearby entities.
+&7Curves, slopes, brakes, obstructions, gaps and unloaded
+&7track return the cart to normal speed. No chunks load for
+&7boosting. Normal powered-rail brakes are not overridden.
+&7A line is removed if rails change shape or either lodestone
+&7is removed. Re-register after fixing it.
+&7Registration limit: &f65,536 rails, 32 turns or slope
+&7changes. Line edits are rechecked when chunks load.
+&7Owners can use /minecarttravel rescan after offline edits.
+
+[admin:minecarttravel.admin]
+&6Owner commands &7(permission minecarttravel.admin)
+&f/minecarttravel set <setting> <value> &7- change live
+&f/minecarttravel rescan &7- recheck routes in loaded chunks
+&7Set delay values in seconds; speeds in blocks/second.
+&f boost-delay &7(15; 0.05-3600; below fast-travel-delay)
+&f fast-travel-delay &7(30; 0.05-7200; above boost-delay)
+&f min-speed &7(6; 0.1-8; no higher than boost-speed)
+&f boost-speed &7(90; min-speed to 120)
+&7Raising boost-speed also raises safety lookahead if needed.
+&7Config defaults: safety-lookahead-blocks 12,
+&7max-route-rails 65536, max-route-turns 32,
+&7verify-blocks-per-tick 4096, record-steps-per-tick 512,
+&7save-interval-ticks 600. Work budgets are global.
+&7Edit config.yml for these values and restart; invalid
+&7settings prevent startup. In-game changes save immediately.
+[/admin]
