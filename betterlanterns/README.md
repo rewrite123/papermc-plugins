@@ -21,12 +21,12 @@ Makes **1 lantern**. Uses an ordinary undyed candle, not a soul candle.
 ### Soul candle
 
 ```text
-               Soul sand
+               Candle
 Candle         Candle      Candle
                Soul sand
 ```
 
-Makes **1 soul candle**, from three ordinary undyed candles and two soul sand.
+Makes **4 soul candles**, from four ordinary undyed candles and one soul sand.
 Soul candles are tagged custom items backed by the vanilla candle item/model.
 They stack up to four on a block, but cannot mix with ordinary candles or be
 placed on cakes. Breaking them returns soul candles; they can also be used in

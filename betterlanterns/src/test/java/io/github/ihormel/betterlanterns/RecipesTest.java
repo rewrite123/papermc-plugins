@@ -51,15 +51,15 @@ class RecipesTest {
     }
 
     @Test
-    void soulCandleRecipeUsesThreePlainCandlesAndTwoSoulSandForOneResult() {
+    void soulCandleRecipeUsesFourPlainCandlesAndOneSoulSandForFourResults() {
         var recipe = recipe("soul_candle");
-        assertArrayEquals(new String[] {" S ", "CCC", " S "}, recipe.getShape());
+        assertArrayEquals(new String[] {" C ", "CCC", " S "}, recipe.getShape());
         assertTrue(recipe.getChoiceMap().get('S').test(new ItemStack(Material.SOUL_SAND)));
         assertFalse(recipe.getChoiceMap().get('S').test(new ItemStack(Material.SOUL_SOIL)));
         assertInstanceOf(RecipeChoice.ExactChoice.class, recipe.getChoiceMap().get('C'));
         assertFalse(recipe.getChoiceMap().get('C').test(items.candle(1)));
         assertTrue(items.isSoul(recipe.getResult()));
-        assertEquals(1, recipe.getResult().getAmount());
+        assertEquals(4, recipe.getResult().getAmount());
         assertFalse(items.isSoul(new ItemStack(Material.CANDLE)));
     }
 

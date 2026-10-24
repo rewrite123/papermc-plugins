@@ -26,8 +26,8 @@ final class LanternRecipes {
             if (original != null) originals.put(key, original);
             server.removeRecipe(key);
         }
-        var soulCandle = new ShapedRecipe(keys.get(1), items.candle(1));
-        soulCandle.shape(" S ", "CCC", " S ");
+        var soulCandle = new ShapedRecipe(keys.get(1), items.candle(4));
+        soulCandle.shape(" C ", "CCC", " S ");
         soulCandle.setIngredient('S', Material.SOUL_SAND);
         soulCandle.setIngredient('C', new RecipeChoice.ExactChoice(new ItemStack(Material.CANDLE)));
         add(soulCandle);
