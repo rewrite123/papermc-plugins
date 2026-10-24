@@ -506,12 +506,51 @@ def ihatepowderedsnow():
     return c
 
 
+def betterlanterns():
+    c = Canvas("#ffdc83", "BETTER LANTERNS")
+    c.poly([(12, 52), (24, 28), (53, 21), (82, 35), (87, 65),
+            (68, 87), (37, 91), (15, 74)], "#24364a")
+    c.poly([(18, 53), (29, 34), (52, 28), (74, 39), (79, 63),
+            (63, 81), (39, 84), (22, 71)], "#39434d")
+    c.rect(36, 19, 50, 23, INK)
+    c.rect(33, 22, 37, 31, "#b88743")
+    c.rect(49, 22, 53, 31, "#ffd47c")
+    c.poly([(27, 31), (59, 31), (64, 39), (64, 75), (58, 83),
+            (28, 83), (22, 75), (22, 39)], INK)
+    c.rect(27, 38, 59, 75, "#f5bc56")
+    c.rect(31, 42, 55, 72, "#ffdd83")
+    c.rect(36, 46, 50, 68, "#fff5bc")
+    c.rect(38, 51, 47, 65, "#ffffff")
+    c.rect(25, 34, 61, 39, "#e3ab53")
+    c.rect(25, 74, 61, 79, "#b88240")
+    c.rect(28, 40, 32, 73, "#b17c3b")
+    c.rect(54, 40, 58, 73, "#fff0a3")
+    c.rect(32, 80, 55, 83, "#e9ba66")
+    c.rect(81, 34, 93, 38, "#71b7d7")
+    c.rect(78, 38, 82, 45, "#40728d")
+    c.rect(92, 38, 96, 45, "#8ae6f4")
+    c.poly([(74, 46), (99, 46), (104, 52), (104, 85), (98, 91),
+            (74, 91), (68, 85), (68, 52)], INK)
+    c.rect(73, 52, 99, 83, "#2c7a9f")
+    c.rect(77, 55, 95, 81, "#58c6e0")
+    c.rect(81, 59, 91, 77, "#c0fbff")
+    c.rect(83, 64, 88, 74, "#efffff")
+    c.rect(71, 48, 101, 52, "#6f9cae")
+    c.rect(71, 83, 101, 87, "#4c768d")
+    c.rect(74, 53, 77, 82, "#527c91")
+    c.rect(96, 53, 99, 82, "#91dbe7")
+    c.spark(19, 43, "#ffe9a7")
+    c.spark(59, 92, "#ffe9a7")
+    c.spark(108, 61, "#9fefff")
+    return c
+
+
 def main():
     factories = (
         tpcost, inventorysorter, enchantcap, sleepy,
         craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
         reduceendermanworlddmg, flipdisc, phantommenace, spidereyenetherwartblock,
-        usefulcauldrons, votersrights, ihatepowderedsnow,
+        usefulcauldrons, votersrights, ihatepowderedsnow, betterlanterns,
     )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", choices=[factory.__name__ for factory in factories])

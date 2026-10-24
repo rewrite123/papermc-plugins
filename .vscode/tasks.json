@@ -135,6 +135,21 @@
 				"$javac"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Build betterlanterns",
+			"type": "shell",
+			"command": "./betterlanterns/gradlew",
+			"args": [
+				"-p",
+				"betterlanterns",
+				"build",
+				"--console=plain"
+			],
+			"problemMatcher": [
+				"$javac"
+			],
+			"group": "build"
 		}
 	]
 }

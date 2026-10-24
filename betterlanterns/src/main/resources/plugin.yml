@@ -1,0 +1,5 @@
+name: betterlanterns
+version: '${version}'
+main: io.github.ihormel.betterlanterns.BetterLanternsPlugin
+api-version: '26.3'
+description: Brighter lanterns, unobstructed monster wards, and blue soul candles.
