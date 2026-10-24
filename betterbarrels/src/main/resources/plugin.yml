@@ -1,0 +1,14 @@
+name: betterbarrels
+version: '${version}'
+main: io.github.ihormel.betterbarrels.BetterBarrelsPlugin
+api-version: '26.3'
+description: UI-free single-item barrels with 2048-item capacity and safe migration tools.
+commands:
+  betterbarrels:
+    description: Check migration progress or prepare to uninstall BetterBarrels.
+    usage: /betterbarrels <status|uninstall confirm|rescan>
+    permission: betterbarrels.admin
+permissions:
+  betterbarrels.admin:
+    description: Manage world scans and uninstall conversion.
+    default: op

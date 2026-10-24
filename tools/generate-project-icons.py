@@ -545,12 +545,38 @@ def betterlanterns():
     return c
 
 
+def betterbarrels():
+    c = Canvas("#e6bb72", "BETTER BARRELS")
+    c.poly([(26, 83), (68, 72), (106, 88), (63, 101)], "#0b1326")
+    c.poly([(31, 30), (72, 20), (98, 34), (98, 84),
+            (58, 97), (31, 80)], INK)
+    c.poly([(35, 32), (72, 24), (94, 35), (58, 46)], "#e5b568")
+    c.poly([(35, 34), (58, 46), (58, 91), (35, 78)], "#976035")
+    c.poly([(58, 46), (94, 35), (94, 81), (58, 92)], "#be8349")
+    for x, y in [(42, 39), (50, 43)]:
+        c.poly([(x, y), (x + 2, y + 1), (x + 2, y + 40), (x, y + 39)], "#70452d")
+    for x, y in [(67, 45), (79, 41), (88, 38)]:
+        c.poly([(x, y), (x + 2, y - 1), (x + 2, y + 39), (x, y + 40)], "#996134")
+    for y in (41, 70):
+        c.poly([(34, y), (58, y + 12), (95, y + 1),
+                (95, y + 7), (58, y + 18), (34, y + 6)], "#566377")
+        c.poly([(58, y + 12), (95, y + 1), (95, y + 3), (58, y + 14)], "#91a1ad")
+    c.rect(63, 56, 88, 73, INK)
+    c.rect(65, 58, 86, 71, "#dfb571")
+    c.draw.extend(["-font", "DejaVu-Sans-Mono-Bold", "-pointsize", "8",
+                   "-fill", INK, "-draw", "text 66,68 '2048'"])
+    c.poly([(17, 59), (24, 52), (31, 59), (24, 68)], "#74e5db")
+    c.poly([(20, 59), (24, 55), (28, 59), (24, 64)], "#d3fff4")
+    c.spark(105, 58, "#ffe6a6")
+    return c
+
+
 def main():
     factories = (
         tpcost, inventorysorter, enchantcap, sleepy,
         craftablebottleofenchanting, mobbanner, soulgem, minecarttravel,
         reduceendermanworlddmg, flipdisc, phantommenace, spidereyenetherwartblock,
-        usefulcauldrons, votersrights, ihatepowderedsnow, betterlanterns,
+        usefulcauldrons, votersrights, ihatepowderedsnow, betterlanterns, betterbarrels,
     )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", choices=[factory.__name__ for factory in factories])
