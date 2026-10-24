@@ -113,9 +113,12 @@ final class Buildings {
         return anchor.getY() >= world.getMinHeight() && anchor.getY() + blueprint.height() <= world.getMaxHeight();
     }
 
-    static int obstructions(List<Target> targets) {
+    /** Number of target positions that are not free, ignoring {@code ignore} (the placed crystal itself). */
+    static int obstructions(List<Target> targets, Block ignore) {
         int blocked = 0;
-        for (Target target : targets) if (!Materials.free(target.block())) blocked++;
+        for (Target target : targets) {
+            if (!target.block().equals(ignore) && !Materials.free(target.block())) blocked++;
+        }
         return blocked;
     }
 

@@ -1,11 +1,8 @@
 package io.github.ihormel.endercraftbuildings;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.Consumable;
-import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
 import java.util.ArrayList;
 import java.util.List;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -65,9 +62,10 @@ final class CrystalItems {
     ItemStack storageCrystal(byte[] data, String building, int count) {
         var item = base(Material.AMETHYST_SHARD, STORAGE, "Storage Crystal: " + building, List.of(
                 count + " blocks waiting in the End",
-                "Hold right-click on a block to recall it.",
-                "The building's front-left corner goes there",
-                "and it faces the way you look. Breaks on use."));
+                "Place it where the building's front-left",
+                "corner should go; the building faces the",
+                "way you look. Hold right-click on the placed",
+                "crystal to recall the building. Breaks on use."));
         item.editMeta(meta -> {
             var pdc = meta.getPersistentDataContainer();
             pdc.set(blueprint, PersistentDataType.BYTE_ARRAY, data);
@@ -75,13 +73,6 @@ final class CrystalItems {
             pdc.set(blocks, PersistentDataType.INTEGER, count);
             meta.setEnchantmentGlintOverride(true);
         });
-        item.setData(DataComponentTypes.CONSUMABLE, Consumable.consumable()
-                .consumeSeconds((float) holdSeconds(count))
-                .animation(ItemUseAnimation.BOW)
-                .sound(Key.key("minecraft:block.amethyst_block.chime"))
-                .hasConsumeParticles(false)
-                .effects(List.of())
-                .build());
         return item;
     }
 

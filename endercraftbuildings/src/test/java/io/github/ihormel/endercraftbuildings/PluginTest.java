@@ -43,6 +43,7 @@ class PluginTest {
     private CrystalItems items;
     private BuildingListener listener;
     private double roll;
+    private BuildingListener.Aim aimAt;
 
     @BeforeEach
     void setup() {
@@ -52,6 +53,8 @@ class PluginTest {
         EnderCraftBuildingsPlugin.blockRules = new TestRules();
         roll = 0.99;
         EnderCraftBuildingsPlugin.random = () -> roll;
+        aimAt = null;
+        EnderCraftBuildingsPlugin.aim = ignored -> aimAt != null ? aimAt : new BuildingListener.Aim(world.getBlockAt(0, 64, -2), true);
         plugin = MockBukkit.load(EnderCraftBuildingsPlugin.class);
         items = plugin.items();
         listener = plugin.listener();
@@ -65,6 +68,7 @@ class PluginTest {
     void cleanup() {
         MockBukkit.unmock();
         EnderCraftBuildingsPlugin.blockRules = BlockRules.PAPER;
+        EnderCraftBuildingsPlugin.aim = BuildingListener::aim;
     }
 
     private Block at(int x, int y, int z) { return world.getBlockAt(x, y, z); }
@@ -195,9 +199,6 @@ class PluginTest {
                 .filter(stack -> CrystalItems.STORAGE.equals(items.kind(stack))).findFirst().orElseThrow();
         assertEquals("Hut", items.buildingName(storage));
         assertEquals(items.blueprint(memory), items.blueprint(storage));
-        // MockBukkit inventories drop data components, so check the consumable timing on the produced item itself.
-        assertEquals((float) CrystalItems.holdSeconds(3),
-                items.copyFrom(storage).getData(DataComponentTypes.CONSUMABLE).consumeSeconds());
         assertTrue(world.getEntities().stream().noneMatch(entity -> entity.getType() == EntityType.ENDERMITE));
     }
 
@@ -238,46 +239,94 @@ class PluginTest {
         assertEquals(1, world.getEntities().stream().filter(entity -> entity.getType() == EntityType.ENDERMITE).count());
     }
 
-    @Test
-    void storageCrystalPlacesTheBuildingAndBreaks() {
-        var memory = scannedMemoryCrystal();
-        var storage = items.copyFrom(memory);
-        player.getInventory().setItemInMainHand(storage);
+    private Block placeStorageCrystal() {
+        var storage = items.copyFrom(scannedMemoryCrystal());
         at(0, 64, 0).setType(Material.AIR);
         at(1, 64, 0).setType(Material.AIR);
         at(0, 65, 0).setType(Material.AIR);
-        Block ground = at(10, 63, 10);
-        ground.setType(Material.DIRT);
-        var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, storage, ground, BlockFace.UP,
-                EquipmentSlot.HAND);
-        listener.interact(event);
-        assertEquals(Event.Result.ALLOW, event.useItemInHand());
-        assertEquals(Event.Result.DENY, event.useInteractedBlock());
-        var session = listener.placement(player);
-        assertNotNull(session);
-        assertEquals(at(10, 64, 10), session.anchor);
-        var consume = new PlayerItemConsumeEvent(player, storage, EquipmentSlot.HAND);
-        listener.consume(consume);
-        assertTrue(consume.isCancelled());
-        assertEquals(Material.STONE, at(10, 64, 10).getType());
-        assertEquals(Material.STONE, at(11, 64, 10).getType());
-        assertEquals(Material.OAK_PLANKS, at(10, 65, 10).getType());
-        assertTrue(player.getInventory().getItemInMainHand().isEmpty());
-        assertNull(listener.placement(player));
-    }
-
-    @Test
-    void obstructedOrProtectedPlacementKeepsTheCrystal() {
-        var storage = items.copyFrom(scannedMemoryCrystal());
         player.getInventory().setItemInMainHand(storage);
         Block ground = at(10, 63, 10);
         ground.setType(Material.DIRT);
-        at(11, 64, 10).setType(Material.COBBLESTONE);
         var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, storage, ground, BlockFace.UP,
                 EquipmentSlot.HAND);
         listener.interact(event);
         assertEquals(Event.Result.DENY, event.useItemInHand());
-        assertNull(listener.placement(player));
+        assertEquals(Event.Result.DENY, event.useInteractedBlock());
+        listener.tick();
+        listener.tick();
+        return at(10, 64, 10);
+    }
+
+    private void click(Block block) {
+        listener.interact(new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, null, block, BlockFace.UP,
+                EquipmentSlot.HAND));
+    }
+
+    /** Simulates a held right-click: the client repeats the block click every 4 ticks. */
+    private void hold(Block block, int ticks) {
+        for (int i = 0; i < ticks; i++) {
+            if (i % 4 == 0) click(block);
+            listener.tick();
+        }
+    }
+
+    @Test
+    void storageCrystalIsPlacedAsAnAmethystClusterWithATimedOutline() {
+        Block crystal = placeStorageCrystal();
+        assertEquals(Material.AMETHYST_CLUSTER, crystal.getType());
+        assertEquals(BlockFace.UP, ((org.bukkit.block.data.Directional) crystal.getBlockData()).getFacing());
+        assertTrue(player.getInventory().getItemInMainHand().isEmpty());
+        var outline = listener.shown(crystal);
+        assertNotNull(outline);
+        assertEquals(0, outline.blocked);
+        assertEquals(at(10, 64, 10), outline.corners[0]);
+        assertEquals(at(11, 65, 10), outline.corners[1]);
+        // placeStorageCrystal already advanced two ticks past placement.
+        for (int i = 0; i < BuildingListener.OUTLINE_TICKS - 3; i++) listener.tick();
+        assertNotNull(listener.shown(crystal));
+        listener.tick();
+        assertNull(listener.shown(crystal));
+        click(crystal);
+        assertNotNull(listener.shown(crystal));
+        assertEquals(Material.AMETHYST_CLUSTER, crystal.getType());
+    }
+
+    @Test
+    void holdingRightClickOnThePlacedCrystalRecallsTheBuilding() {
+        Block crystal = placeStorageCrystal();
+        int holdTicks = (int) Math.round(CrystalItems.holdSeconds(3) * 20);
+        hold(crystal, holdTicks - 2);
+        assertNotNull(listener.charge(player));
+        assertEquals(Material.AMETHYST_CLUSTER, crystal.getType());
+        hold(crystal, 4);
+        assertNull(listener.charge(player));
+        assertEquals(Material.STONE, at(10, 64, 10).getType());
+        assertEquals(Material.STONE, at(11, 64, 10).getType());
+        assertEquals(Material.OAK_PLANKS, at(10, 65, 10).getType());
+        assertNull(listener.shown(crystal));
+        assertTrue(world.getEntities().stream().noneMatch(entity -> entity instanceof org.bukkit.entity.Item));
+    }
+
+    @Test
+    void releasingRightClickCancelsTheRecall() {
+        Block crystal = placeStorageCrystal();
+        hold(crystal, 12);
+        assertNotNull(listener.charge(player));
+        for (int i = 0; i <= BuildingListener.CHARGE_GAP_TICKS; i++) listener.tick();
+        assertNull(listener.charge(player));
+        assertEquals(Material.AMETHYST_CLUSTER, crystal.getType());
+        assertTrue(at(11, 64, 10).isEmpty());
+    }
+
+    @Test
+    void obstructedOrProtectedRecallKeepsTheCrystal() {
+        Block crystal = placeStorageCrystal();
+        at(11, 64, 10).setType(Material.COBBLESTONE);
+        listener.tick();
+        listener.tick();
+        click(crystal);
+        assertNull(listener.charge(player));
+        assertEquals(1, listener.shown(crystal).blocked);
 
         at(11, 64, 10).setType(Material.AIR);
         server.getPluginManager().registerEvents(new Listener() {
@@ -286,17 +335,49 @@ class PluginTest {
                 if (place.getBlock().getX() == 11) place.setCancelled(true);
             }
         }, plugin);
-        listener.interact(new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, storage, ground, BlockFace.UP,
-                EquipmentSlot.HAND));
-        listener.consume(new PlayerItemConsumeEvent(player, storage, EquipmentSlot.HAND));
-        assertTrue(at(10, 64, 10).isEmpty());
-        assertEquals(1, player.getInventory().getItemInMainHand().getAmount());
+        hold(crystal, (int) Math.round(CrystalItems.holdSeconds(3) * 20) + 4);
+        assertEquals(Material.AMETHYST_CLUSTER, crystal.getType());
+        assertTrue(at(11, 64, 10).isEmpty());
     }
 
     @Test
-    void airClicksAndUnsessionedConsumptionNeverStartPlacement() {
-        var storage = items.copyFrom(scannedMemoryCrystal());
+    void breakingOrDislodgingThePlacedCrystalReturnsIt() {
+        Block crystal = placeStorageCrystal();
+        var breaking = new BlockBreakEvent(crystal, player);
+        listener.breakBlock(breaking);
+        assertFalse(breaking.isDropItems());
+        assertTrue(world.getEntities().stream().anyMatch(entity -> entity instanceof org.bukkit.entity.Item item
+                && CrystalItems.STORAGE.equals(items.kind(item.getItemStack()))
+                && "Hut".equals(items.buildingName(item.getItemStack()))));
+        assertNull(listener.shown(crystal));
+        click(crystal);
+        assertNull(listener.charge(player));
+
+        world.getEntities().stream().filter(entity -> entity instanceof org.bukkit.entity.Item)
+                .forEach(org.bukkit.entity.Entity::remove);
+        crystal.setType(Material.AIR);
+        listener.tick();
+        listener.tick();
+        Block second = placeStorageCrystal();
+        var destroy = new com.destroystokyo.paper.event.block.BlockDestroyEvent(second, server.createBlockData(
+                Material.AIR), second.getBlockData(), 0, true);
+        listener.destroy(destroy);
+        assertFalse(destroy.willDrop());
+        assertEquals(1, world.getEntities().stream().filter(entity -> entity instanceof org.bukkit.entity.Item item
+                && CrystalItems.STORAGE.equals(items.kind(item.getItemStack()))).count());
+    }
+
+    @Test
+    void placedCrystalsSurviveExplosionsAndRefuseAirClicks() {
+        Block crystal = placeStorageCrystal();
+        var explosion = new EntityExplodeEvent(player, crystal.getLocation(), new java.util.ArrayList<>(List.of(crystal,
+                at(12, 64, 10))), 1f, org.bukkit.ExplosionResult.DESTROY);
+        listener.entityExplode(explosion);
+        assertEquals(List.of(at(12, 64, 10)), explosion.blockList());
+        var storage = items.copyFrom(items.storageCrystal(new byte[0], "x", 0));
         player.getInventory().setItemInMainHand(storage);
+        listener.tick();
+        listener.tick();
         var air = new PlayerInteractEvent(player, Action.RIGHT_CLICK_AIR, storage, null, BlockFace.SELF,
                 EquipmentSlot.HAND);
         listener.interact(air);
@@ -304,20 +385,39 @@ class PluginTest {
         var consume = new PlayerItemConsumeEvent(player, storage, EquipmentSlot.HAND);
         listener.consume(consume);
         assertTrue(consume.isCancelled());
-        assertEquals(1, player.getInventory().getItemInMainHand().getAmount());
     }
 
     @Test
-    void sessionIsDroppedWhenThePlayerNeverStartsHolding() {
-        var storage = items.copyFrom(scannedMemoryCrystal());
-        player.getInventory().setItemInMainHand(storage);
-        Block ground = at(10, 63, 10);
-        ground.setType(Material.DIRT);
-        listener.interact(new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, storage, ground, BlockFace.UP,
+    void airClicksScanTheBlockThreeAheadWhenNothingIsHovered() {
+        at(0, 64, 0).setType(Material.STONE);
+        at(2, 66, 2).setType(Material.OAK_PLANKS);
+        player.getInventory().setItemInMainHand(items.memoryCrystal());
+        aimAt = new BuildingListener.Aim(at(0, 64, 0), true);
+        listener.interact(new PlayerInteractEvent(player, Action.RIGHT_CLICK_AIR, player.getInventory()
+                .getItemInMainHand(), null, BlockFace.SELF, EquipmentSlot.HAND));
+        assertEquals(at(0, 64, 0), listener.scan(player).first());
+        listener.tick();
+        listener.tick();
+        aimAt = new BuildingListener.Aim(at(2, 66, 2), true);
+        listener.interact(new PlayerInteractEvent(player, Action.RIGHT_CLICK_AIR, player.getInventory()
+                .getItemInMainHand(), null, BlockFace.SELF, EquipmentSlot.HAND));
+        assertNull(listener.scan(player));
+        assertEquals(2, listener.pendingName(player).blueprint().blockCount());
+    }
+
+    @Test
+    void duplicateClickPacketsInTheSameMomentCountOnce() {
+        at(0, 64, 0).setType(Material.STONE);
+        player.getInventory().setItemInMainHand(items.memoryCrystal());
+        var item = player.getInventory().getItemInMainHand();
+        aimAt = new BuildingListener.Aim(at(3, 64, 0), true);
+        listener.interact(new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, item, at(0, 64, 0), BlockFace.UP,
                 EquipmentSlot.HAND));
-        assertNotNull(listener.placement(player));
-        for (int i = 0; i < 7; i++) listener.tick();
-        assertNull(listener.placement(player));
+        listener.tick();
+        listener.interact(new PlayerInteractEvent(player, Action.RIGHT_CLICK_AIR, item, null, BlockFace.SELF,
+                EquipmentSlot.HAND));
+        assertNotNull(listener.scan(player));
+        assertEquals(at(0, 64, 0), listener.scan(player).first());
     }
 
     @Test
@@ -328,7 +428,7 @@ class PluginTest {
         listener.entityExplode(explosion);
         assertEquals(List.of(at(6, 64, 5)), explosion.blockList());
         var breaking = new BlockBreakEvent(taper, player);
-        listener.breakTaper(breaking);
+        listener.breakBlock(breaking);
         assertFalse(breaking.isDropItems());
         assertTrue(world.getEntities().stream().anyMatch(entity -> entity instanceof org.bukkit.entity.Item item
                 && CrystalItems.TAPER.equals(items.kind(item.getItemStack()))));

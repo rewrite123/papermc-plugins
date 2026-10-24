@@ -42,6 +42,15 @@ final class TaperRecords {
         write(block, next);
     }
 
+    /** Every recorded taper block in a chunk. */
+    java.util.List<Block> blocks(org.bukkit.Chunk chunk) {
+        int[] values = chunk.getPersistentDataContainer().getOrDefault(key, PersistentDataType.INTEGER_ARRAY,
+                new int[0]);
+        var result = new java.util.ArrayList<Block>(values.length);
+        for (int value : values) result.add(chunk.getBlock(value & 15, value >> 8, value >> 4 & 15));
+        return result;
+    }
+
     void remove(Block block) {
         int packed = pack(block);
         write(block, Arrays.stream(read(block)).filter(value -> value != packed).toArray());

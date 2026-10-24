@@ -10,7 +10,8 @@ of the End, and recall the finished building anywhere. For
 Memory storage crystal -> scan a building -> name it
 Memory (or storage) crystal + empty storage crystal + materials
     -> right-click an Ender Biconical Taper -> storage crystal
-Storage crystal -> hold right-click on a block -> building appears, crystal shatters
+Storage crystal -> place it as an amethyst cluster -> check the outline
+    -> hold right-click on the cluster -> building appears, crystal shatters
 ```
 
 ## Lore
@@ -72,9 +73,11 @@ Obsidian                   Obsidian
 Obsidian      Obsidian     Obsidian
 ```
 
-A placeable block that looks like a vault. Vault behavior is disabled: trial
-keys do nothing. Breaking it returns the taper (nothing in creative), and
-explosions cannot destroy it.
+A placeable block that looks like a vault. Vault behavior is disabled: it
+always shows a floating eye of ender, never opens or reacts when players come
+near, never cycles items, and trial keys do nothing. Like any vault showing an
+item, it still gives off faint flames and an occasional ambient hum. Breaking
+it returns the taper (nothing in creative), and explosions cannot destroy it.
 
 ## Scanning a building
 
@@ -83,6 +86,11 @@ explosions cannot destroy it.
    selection is larger than **32 x 32 x 32**.
 3. Right-click the opposite corner. Sneak + right-click (or switching away from
    the crystal) cancels.
+
+Corners don't need a block. If you aren't looking at a block within reach, the
+corner is the empty spot **3 blocks in front of you**, marked with a small
+purple box, so you can select open space above or beside a building without
+placing marker blocks.
 4. Type the building's name in chat (1-32 characters), or `cancel`. The prompt
    expires after 60 seconds; the chat message is not broadcast.
 
@@ -116,22 +124,29 @@ eggs and snow layers cost one item per piece. Farmland and dirt paths cost dirt.
 
 ## Placing a building
 
-Hold a storage crystal and hold right-click on a block:
+1. Right-click a block with a storage crystal to set it down as an **amethyst
+   cluster**. The cluster marks the building's **front-left bottom corner**
+   (it replaces grass, flowers or a snow layer, otherwise it sits on the face
+   you clicked), and the building is rotated to face the way you were looking.
+2. A teal particle box shows exactly where the building will go for
+   **30 seconds**. Right-click the cluster at any time to show it for another
+   30 seconds. The box turns red while something is in the way.
+3. Every position the building needs must be air or a dry replaceable plant or
+   snow layer. Water, lava and waterlogged blocks block placement, and the
+   action bar says how many blocks are in the way.
+4. Hold right-click on the cluster to recall the building. Charging takes
+   **2 seconds + 0.05 seconds per block**, up to 30 seconds, and shows progress
+   in the action bar. Letting go cancels.
 
-- the building's **front-left bottom corner** goes on the face you clicked
-  (or replaces the clicked grass/flowers/snow layer), and it is rotated to face
-  the way you are looking;
-- a teal particle box shows where it will go;
-- every position the building needs must be air or a dry replaceable plant or
-  snow layer. Water, lava and waterlogged blocks block placement. If anything
-  is in the way, a red box flashes and the action bar says how many blocks are
-  blocking it;
-- holding takes **2 seconds + 0.05 seconds per block**, up to 30 seconds.
-  Releasing, moving, or looking at another block cancels.
+When the charge finishes, the whole building appears at once and the crystal
+shatters. Each block is checked with a normal block-place event first, so
+protection plugins can deny it (nothing is placed and the crystal is kept).
 
-When the hold finishes, the whole building appears at once and the storage
-crystal shatters. Each block is checked with a normal block-place event first,
-so protection plugins can deny it (nothing is placed and the crystal is kept).
+A placed crystal stays until it is used or broken. Breaking it, or knocking it
+loose by removing the block it sits on, returns the storage crystal (nothing is
+returned when broken in creative). Explosions, pistons and mobs can't move or
+destroy it. Sneak + right-click a cluster while holding a block to build
+against it normally.
 
 ## Endermites
 
@@ -149,6 +164,9 @@ endermite-chance:
 
 - Crystals cannot be used as amethyst shards in crafting, crafters or smithing,
   and cannot be given to allays.
+- Holding right-click with a usable item (food, a bow, a shield) in the other
+  hand can stop the client from repeating the click; use an empty hand or a
+  plain block if charging keeps cancelling.
 - Blocks are placed without physics updates so multi-block pieces such as doors
   and beds arrive intact. Gravity blocks may fall once something updates them.
 

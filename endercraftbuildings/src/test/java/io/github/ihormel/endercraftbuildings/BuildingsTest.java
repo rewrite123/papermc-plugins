@@ -173,13 +173,13 @@ class BuildingsTest {
     void placementNeedsDryAirOrReplaceableSpaceInsideTheWorld() {
         at(0, 64, 0).setType(Material.STONE);
         var scan = buildings.scan(at(0, 64, 0), at(0, 64, 0), Facing.NORTH);
-        assertEquals(0, Buildings.obstructions(buildings.plan(scan.blueprint(), at(5, 64, 5), Facing.NORTH)));
+        assertEquals(0, Buildings.obstructions(buildings.plan(scan.blueprint(), at(5, 64, 5), Facing.NORTH), null));
         at(5, 64, 5).setType(Material.SHORT_GRASS);
-        assertEquals(0, Buildings.obstructions(buildings.plan(scan.blueprint(), at(5, 64, 5), Facing.NORTH)));
+        assertEquals(0, Buildings.obstructions(buildings.plan(scan.blueprint(), at(5, 64, 5), Facing.NORTH), null));
         at(5, 64, 5).setType(Material.WATER);
-        assertEquals(1, Buildings.obstructions(buildings.plan(scan.blueprint(), at(5, 64, 5), Facing.NORTH)));
+        assertEquals(1, Buildings.obstructions(buildings.plan(scan.blueprint(), at(5, 64, 5), Facing.NORTH), null));
         at(5, 64, 5).setType(Material.DIRT);
-        assertEquals(1, Buildings.obstructions(buildings.plan(scan.blueprint(), at(5, 64, 5), Facing.NORTH)));
+        assertEquals(1, Buildings.obstructions(buildings.plan(scan.blueprint(), at(5, 64, 5), Facing.NORTH), null));
         assertTrue(Buildings.inWorld(scan.blueprint(), at(5, world.getMaxHeight() - 1, 5)));
         at(0, 65, 0).setType(Material.STONE);
         var tall = buildings.scan(at(0, 64, 0), at(0, 65, 0), Facing.NORTH);
