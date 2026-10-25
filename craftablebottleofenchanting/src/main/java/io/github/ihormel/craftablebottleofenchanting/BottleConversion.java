@@ -13,7 +13,7 @@ final class BottleConversion {
         ItemStack[] storage = player.getInventory().getStorageContents();
         ItemStack source = storage[bottleSlot];
         if (source == null || source.getType() != Material.GLASS_BOTTLE || source.getAmount() < 1) {
-            player.sendMessage("Keep glass bottles in the hotbar slot used to open this menu.");
+            player.sendMessage("Hold glass bottles in your main hand to bottle experience.");
             return false;
         }
         int experience = player.calculateTotalExperiencePoints();

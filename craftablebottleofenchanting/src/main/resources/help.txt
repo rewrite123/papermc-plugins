@@ -3,11 +3,12 @@
 &7No player commands or configuration are needed; use the table steps below.
 
 &6How to bottle experience
-&e1. &7Hold glass bottles in your main hand (hotbar).
-&e2. &7Right-click an enchanting table to open the menu.
-&e3. &7Click &fBottle Experience&7; each click bottles one item.
-&7Keep bottles in the same hotbar slot used to open the menu.
-&7Lapis and bookshelves are not required; other table use is unchanged.
+&e1. &7Hold glass bottles in your main hand.
+&e2. &7Sneak (shift) and right-click an enchanting table.
+&e3. &7One bottle is filled instantly; no menu opens.
+&7Shift-right-click again for each additional bottle.
+&7A normal right-click still opens the vanilla table.
+&7Lapis and bookshelves are not required.
 
 &6Cost and output
 &7Each bottle costs &f11 raw XP points&7, not 11 levels.
@@ -23,8 +24,7 @@
 
 &6Permission and limits
 &7&fcraftablebottleofenchanting.use &7(default: everyone) allows bottling.
-&7Dead or spectator players cannot use the menu; all other game modes pay.
-&7The menu blocks dragging, shift-click, number keys, and taking its display.
-&7Stay within six blocks of the same intact table while clicking.
-&7An empty cursor is required. Dispenser-thrown bottles also return glass.
+&7Dead or spectator players cannot bottle; all other game modes pay.
+&7Only main-hand bottles count; protected tables are respected.
+&7Dispenser-thrown bottles also return glass.
 &7Use &f/help craftablebottleofenchanting &7for project links.
