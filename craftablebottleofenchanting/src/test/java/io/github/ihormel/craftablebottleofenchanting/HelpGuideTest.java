@@ -52,7 +52,7 @@ class HelpGuideTest {
         assertTrue(text.contains(GUIDE_URL));
         assertTrue(text.contains("https://github.com/rewrite123/papermc-plugins/issues"));
         assertTrue(text.contains("11 raw XP points"));
-        assertTrue(text.contains("Right-click an enchanting table"));
+        assertTrue(text.contains("Sneak (shift) and right-click an enchanting table"));
         try (var reader = new InputStreamReader(plugin.getResource("plugin.yml"), StandardCharsets.UTF_8)) {
             var commands = YamlConfiguration.loadConfiguration(reader).getConfigurationSection("commands");
             if (commands != null) {
